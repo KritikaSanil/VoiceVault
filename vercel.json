@@ -1,0 +1,7 @@
+{
+  "functions": {
+    "api/transcribe.js": { "maxDuration": 60 },
+    "api/extract-url.js": { "maxDuration": 30 },
+    "api/ask.js": { "maxDuration": 30 }
+  }
+}
