@@ -514,7 +514,7 @@
         <div class="panel"></div>
       </div>
 
-      <div class="proto-note">Recording, storage, notes, collections, chapters, Key Moments and Knowledge Cards run entirely in your browser (localStorage + IndexedDB). Transcription and Ask VoiceVault call this deployment's own <code>/api/*</code> routes, backed by Groq's hosted open-source Whisper and Llama models &mdash; they need <code>GROQ_API_KEY</code> and a connected Blob store to work. You'll see a real error, never a fake result, if those aren't set up.</div>
+      <div class="proto-note">Recording, storage, notes, collections, chapters, Key Moments and Knowledge Cards run entirely in your browser (localStorage + IndexedDB). Transcription and Ask VoiceVault call this deployment's own <code>/api/*</code> routes, backed by Groq's hosted open-source Whisper and GPT-OSS models &mdash; they need <code>GROQ_API_KEY</code> and a connected Blob store to work. You'll see a real error, never a fake result, if those aren't set up.</div>
     </section>
 
     <!-- LIBRARY -->
@@ -606,10 +606,10 @@
 
       <div class="add-panel active" id="panel-upload">
         <div class="dropzone" id="dropzone" style="border:1.5px dashed var(--border); border-radius:var(--radius-l); padding:46px 22px; text-align:center; cursor:pointer; background:var(--surface);">
-          <input type="file" id="fileInput" accept="audio/*,video/*" style="display:none;" />
+          <input type="file" id="fileInput" accept="audio/*,video/*" multiple style="display:none;" />
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:28px;height:28px;color:var(--text-tertiary);margin-bottom:12px;"><path d="M12 16V4M12 4 7 9M12 4l5 5"/><path d="M4 16v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg>
-          <div style="font-size:14.5px;font-weight:700;margin-bottom:6px;">Drop your recording here</div>
-          <div style="font-size:12.5px;color:var(--text-tertiary);">or click to browse &middot; MP3, WAV, M4A, MP4, WebM, MOV</div>
+          <div style="font-size:14.5px;font-weight:700;margin-bottom:6px;">Drop one or more recordings here</div>
+          <div style="font-size:12.5px;color:var(--text-tertiary);">or click to browse (multiple files allowed) &middot; MP3, WAV, M4A, MP4, WebM, MOV</div>
         </div>
         <div id="pickedFileBox"></div>
         <button class="modal-submit" id="uploadSubmit" disabled style="margin-top:14px;">Add to library</button>
@@ -628,7 +628,8 @@
 
       <div class="add-panel" id="panel-link" style="display:none;">
         <label class="field-label">URL</label>
-        <input class="field-input" id="linkUrlInput" placeholder="https://example.com/article" />
+        <input class="field-input" id="linkUrlInput" placeholder="https://example.com/article or a YouTube link" />
+        <div class="empty-note" style="margin-bottom:14px;">YouTube links are imported using that video's existing captions (auto-generated or uploaded) &mdash; no audio is downloaded or transcribed. Videos without captions can't currently be imported this way.</div>
         <button class="modal-submit" id="linkExtractBtn">Extract</button>
         <div id="linkProcessArea"></div>
       </div>
@@ -1278,11 +1279,13 @@ async function openSource(id, startAt) {
   let content = '', segments = [];
   if (s.type === 'text' || s.type === 'web') { content = contentCache[s.id] ?? await idbGet('content', s.id) ?? ''; contentCache[s.id] = content; }
   let mediaUrl = null;
-  if (s.type === 'audio' || s.type === 'video') {
+  if ((s.type === 'audio' || s.type === 'video') && !s.noLocalMedia) {
     if (!blobUrlCache[s.id]) {
       try { const blob = await idbGet('blobs', s.id); if (blob) { blobUrlCache[s.id] = URL.createObjectURL(blob); mediaBlobCache[s.id] = blob; } } catch(e) {}
     }
     mediaUrl = blobUrlCache[s.id] || null;
+  }
+  if (s.type === 'audio' || s.type === 'video') {
     if (s.transcriptStatus === 'ready') {
       segments = transcriptCache[s.id] ?? await idbGet('transcripts', s.id) ?? [];
       transcriptCache[s.id] = segments;
@@ -1295,8 +1298,10 @@ async function openSource(id, startAt) {
   const relatedNotes = NOTES.filter(n => n.sourceId === s.id);
 
   let mediaBlock = '';
-  if (s.type === 'audio') mediaBlock = mediaUrl ? `<audio controls id="detailMedia" src="${mediaUrl}"></audio>` : `<div class="transcript-empty">Audio file not found in local storage.</div>`;
-  if (s.type === 'video') mediaBlock = mediaUrl ? `<video controls id="detailMedia" src="${mediaUrl}" style="max-height:320px;"></video>` : `<div class="transcript-empty">Video file not found in local storage.</div>`;
+  if (s.noLocalMedia) {
+    mediaBlock = `<a href="${escapeHtml(s.url)}" target="_blank" rel="noopener" class="open-source-btn" style="display:inline-flex;">${ICONS.external}<span>Open on YouTube</span></a><div class="empty-note" style="margin-top:12px;">This transcript came from YouTube's own captions for this video — there's no local audio file, so playback happens on YouTube itself. Clicking a transcript line opens the video at that timestamp.</div>`;
+  } else if (s.type === 'audio') mediaBlock = mediaUrl ? `<audio controls id="detailMedia" src="${mediaUrl}"></audio>` : `<div class="transcript-empty">Audio file not found in local storage.</div>`;
+  else if (s.type === 'video') mediaBlock = mediaUrl ? `<video controls id="detailMedia" src="${mediaUrl}" style="max-height:320px;"></video>` : `<div class="transcript-empty">Video file not found in local storage.</div>`;
 
   let transcriptBlock = '';
   if (s.type === 'audio' || s.type === 'video') {
@@ -1424,6 +1429,10 @@ async function openSource(id, startAt) {
     if (s.type === 'text' || s.type === 'web') setupTextSelectionAsk('contentView', s, content);
   }
 
+  if (s.noLocalMedia && startAt != null) {
+    const sep = s.url.includes('?') ? '&' : '?';
+    window.open(s.url + sep + 't=' + Math.floor(startAt) + 's', '_blank');
+  }
   if (s.type !== 'audio' && s.type !== 'video') return; // link/text sources stop here
 
   // ---- media + waveform + resume + position tracking ----
@@ -1485,7 +1494,14 @@ async function openSource(id, startAt) {
   // ---- transcript search / seek / key-moment star / multi-select ----
   if (segments.length) {
     document.querySelectorAll('#transcriptLines .transcript-line').forEach(line => {
-      line.addEventListener('click', (e) => { if (e.target.closest('.seg-check') || e.target.closest('.save-star')) return; media.currentTime = parseFloat(line.dataset.t); media.play(); });
+      line.addEventListener('click', (e) => {
+        if (e.target.closest('.seg-check') || e.target.closest('.save-star')) return;
+        const t = parseFloat(line.dataset.t);
+        if (s.noLocalMedia) {
+          const sep = s.url.includes('?') ? '&' : '?';
+          window.open(s.url + sep + 't=' + Math.floor(t) + 's', '_blank');
+        } else if (media) { media.currentTime = t; media.play(); }
+      });
     });
     document.querySelectorAll('#transcriptLines .save-star').forEach(btn => btn.addEventListener('click', (e) => { e.stopPropagation(); toggleKeyMoment(s, segments[+btn.dataset.i], btn); }));
     document.querySelectorAll('#transcriptLines .seg-check').forEach(cb => cb.addEventListener('change', () => { if (cb.checked) state.selectedSegIdx.add(+cb.dataset.i); else state.selectedSegIdx.delete(+cb.dataset.i); renderSegToolbar(s, segments); }));
@@ -1509,7 +1525,11 @@ async function openSource(id, startAt) {
   }
 
   // ---- chapters ----
-  document.querySelectorAll('#chaptersList .chapter-row').forEach(row => row.addEventListener('click', () => { media.currentTime = parseFloat(row.dataset.t); media.play(); }));
+  document.querySelectorAll('#chaptersList .chapter-row').forEach(row => row.addEventListener('click', () => {
+    const t = parseFloat(row.dataset.t);
+    if (s.noLocalMedia) { const sep = s.url.includes('?') ? '&' : '?'; window.open(s.url + sep + 't=' + Math.floor(t) + 's', '_blank'); }
+    else if (media) { media.currentTime = t; media.play(); }
+  }));
   const genBtn = document.getElementById('genChaptersBtn');
   if (genBtn) genBtn.addEventListener('click', () => generateChaptersAI(s, segments));
   const addChBtn = document.getElementById('addChapterBtn');
@@ -1646,7 +1666,16 @@ async function askAboutSource(source, content, query, explicitSegments, understa
       sourcesHtml = `<div class="ask-disclaimer" style="margin-top:10px;">Sources</div>` + data.sources.map(sr => `<span class="source-chip" data-t="${sr.timestamp}">${formatSeconds(sr.timestamp)} — "${escapeHtml((sr.text||'').slice(0,50))}"</span>`).join('');
     }
     box.innerHTML = `<div class="ask-answer-box reveal"><div class="ask-disclaimer" style="text-transform:uppercase;letter-spacing:.04em;font-weight:700;color:var(--accent-strong);background:none;padding:0;margin-bottom:8px;">Answer</div><p class="answer-text" style="font-size:13px;line-height:1.6;">${answerHtml}</p>${sourcesHtml}</div>`;
-    box.querySelectorAll('.seek-cite, .source-chip').forEach(el => el.addEventListener('click', () => { const t = parseFloat(el.dataset.t); const media = document.getElementById('detailMedia'); if (media) { media.currentTime = t; media.play(); } }));
+    box.querySelectorAll('.seek-cite, .source-chip').forEach(el => el.addEventListener('click', () => {
+      const t = parseFloat(el.dataset.t);
+      if (source.noLocalMedia) {
+        const sep = source.url.includes('?') ? '&' : '?';
+        window.open(source.url + sep + 't=' + Math.floor(t) + 's', '_blank');
+      } else {
+        const media = document.getElementById('detailMedia');
+        if (media) { media.currentTime = t; media.play(); }
+      }
+    }));
   } catch (err) {
     box.innerHTML = `<div class="ask-answer-box"><div class="ask-disclaimer" style="color:var(--danger);">AI request failed. Reason: ${escapeHtml(err.message)} <button class="rec-btn" id="askRetryBtn" style="margin-top:8px;">Retry</button></div></div>`;
     const retry = document.getElementById('askRetryBtn'); if (retry) retry.addEventListener('click', () => askAboutSource(source, content, query, explicitSegments, understandingLabel));
@@ -1823,7 +1852,7 @@ function openModalChooser() {
   modalBody.innerHTML = `<div class="choice-grid">
     <button class="choice-btn" data-choice="record"><div class="choice-icon">${ICONS.mic}</div><div><div class="choice-title">Record Audio</div><div class="choice-sub">Real browser microphone recording with a live waveform</div></div></button>
     <button class="choice-btn" data-choice="upload"><div class="choice-icon">${ICONS.upload}</div><div><div class="choice-title">Upload Audio / Video</div><div class="choice-sub">MP3, WAV, M4A, MP4, WebM, MOV</div></div></button>
-    <button class="choice-btn" data-choice="link"><div class="choice-icon">${ICONS.link}</div><div><div class="choice-title">Import URL</div><div class="choice-sub">Extracted server-side; fails honestly on paywalled/login pages</div></div></button>
+    <button class="choice-btn" data-choice="link"><div class="choice-icon">${ICONS.link}</div><div><div class="choice-title">Import URL</div><div class="choice-sub">Webpages extracted server-side. YouTube links use the video's existing captions &mdash; videos with no captions can't be imported yet.</div></div></button>
   </div>`;
   modalBody.querySelectorAll('[data-choice]').forEach(btn => btn.addEventListener('click', () => { closeModal(); enterAddTab(btn.dataset.choice); }));
   openModal();
@@ -2142,54 +2171,81 @@ const dropzone = document.getElementById('dropzone'); const fileInput = document
 dropzone.addEventListener('click', () => fileInput.click());
 dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.style.borderColor='var(--accent)'; });
 dropzone.addEventListener('dragleave', () => dropzone.style.borderColor='var(--border)');
-dropzone.addEventListener('drop', e => { e.preventDefault(); dropzone.style.borderColor='var(--border)'; if (e.dataTransfer.files.length) handleUploadFile(e.dataTransfer.files[0]); });
-fileInput.addEventListener('change', e => { if (e.target.files.length) handleUploadFile(e.target.files[0]); });
+dropzone.addEventListener('drop', e => { e.preventDefault(); dropzone.style.borderColor='var(--border)'; if (e.dataTransfer.files.length) handleUploadFiles(e.dataTransfer.files); });
+fileInput.addEventListener('change', e => { if (e.target.files.length) handleUploadFiles(e.target.files); });
 function formatBytes(n) { if (n<1024) return n+' B'; if (n<1024*1024) return (n/1024).toFixed(1)+' KB'; return (n/1024/1024).toFixed(1)+' MB'; }
-let pickedFile = null;
-async function handleUploadFile(file) {
-  pickedFile = file;
-  const isVideo = file.type.startsWith('video') || /\.(mp4|mov|mkv|webm)$/i.test(file.name);
-  const url = URL.createObjectURL(file);
-  const duration = await getMediaDuration(url).catch(() => null);
-  document.getElementById('pickedFileBox').innerHTML = `<div style="display:flex;align-items:center;gap:12px;margin-top:14px;padding:11px 13px;border:1px solid var(--border);border-radius:var(--radius-m);background:var(--surface);">${isVideo?ICONS.video:ICONS.audio}<div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(file.name)}</div><div style="font-size:11.5px;color:var(--text-tertiary);">${formatBytes(file.size)}${duration?' · '+formatSeconds(duration):''}</div></div><button type="button" id="removeFile" style="background:none;border:none;color:var(--text-tertiary);font-size:12px;">Remove</button></div>
-  <label class="field-label" style="margin-top:14px;">Title</label>
-  <input class="field-input" id="uploadTitleInput" value="${escapeHtml(file.name.replace(/\.[a-z0-9]+$/i,''))}" />
-  <div class="empty-note">This file will be uploaded and sent to Groq's Whisper endpoint for real transcription after saving.</div>`;
-  document.getElementById('uploadSubmit').disabled = false;
-  document.getElementById('removeFile').addEventListener('click', () => { pickedFile=null; document.getElementById('pickedFileBox').innerHTML=''; document.getElementById('uploadSubmit').disabled=true; fileInput.value=''; });
+
+let pickedFiles = [];
+async function handleUploadFiles(fileList) {
+  pickedFiles = pickedFiles.concat(Array.from(fileList));
+  await renderPickedFiles();
 }
+async function renderPickedFiles() {
+  const box = document.getElementById('pickedFileBox');
+  if (!pickedFiles.length) { box.innerHTML = ''; document.getElementById('uploadSubmit').disabled = true; return; }
+  const rows = await Promise.all(pickedFiles.map(async (file, i) => {
+    const isVideo = file.type.startsWith('video') || /\.(mp4|mov|mkv|webm)$/i.test(file.name);
+    const duration = await getMediaDuration(URL.createObjectURL(file)).catch(() => null);
+    return `<div class="picked-file-row" style="display:flex;align-items:center;gap:12px;margin-top:10px;padding:11px 13px;border:1px solid var(--border);border-radius:var(--radius-m);background:var(--surface);">${isVideo?ICONS.video:ICONS.audio}<div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(file.name)}</div><div style="font-size:11.5px;color:var(--text-tertiary);">${formatBytes(file.size)}${duration?' · '+formatSeconds(duration):''}</div></div><button type="button" class="remove-picked" data-i="${i}" style="background:none;border:none;color:var(--text-tertiary);font-size:12px;">Remove</button></div>`;
+  }));
+  box.innerHTML = rows.join('') +
+    (pickedFiles.length === 1
+      ? `<label class="field-label" style="margin-top:14px;">Title</label><input class="field-input" id="uploadTitleInput" value="${escapeHtml(pickedFiles[0].name.replace(/\.[a-z0-9]+$/i,''))}" />`
+      : `<div class="empty-note" style="margin-top:12px;">${pickedFiles.length} files selected — each becomes its own source, titled from its filename, uploaded and transcribed one at a time.</div>`) +
+    `<div class="empty-note" style="margin-top:10px;">Files are uploaded and sent to Groq's Whisper endpoint for real transcription after saving. A failure on one file won't stop the rest.</div>`;
+  box.querySelectorAll('.remove-picked').forEach(btn => btn.addEventListener('click', () => { pickedFiles.splice(+btn.dataset.i, 1); renderPickedFiles(); }));
+  document.getElementById('uploadSubmit').disabled = false;
+}
+
 document.getElementById('uploadSubmit').addEventListener('click', async () => {
-  if (!pickedFile) return;
-  const file = pickedFile;
-  const isVideo = file.type.startsWith('video') || /\.(mp4|mov|mkv|webm)$/i.test(file.name);
-  const duration = await getMediaDuration(URL.createObjectURL(file)).catch(()=>0);
-  const title = (document.getElementById('uploadTitleInput')?.value.trim()) || file.name;
-  const id = uid();
-  try { await idbPut('blobs', id, file); } catch (e) { alert('Could not store this file: ' + e.message); return; }
-  SOURCES.unshift({ id, type: isVideo ? 'video' : 'audio', title, dateAdded: new Date().toISOString(), durationSec: duration || 0, transcriptStatus: 'uploading', tags: [], collectionIds: [], favorite: false, lastPositionSec: 0, chapters: [] });
-  saveSources(); pickedFile=null; document.getElementById('pickedFileBox').innerHTML=''; document.getElementById('uploadSubmit').disabled=true; fileInput.value='';
-  renderDashboard(); state.libMode='sources'; showScreen('library');
-  transcribeSource(id, file, file.name, baseContentType(file.type || 'audio/webm'));
+  if (!pickedFiles.length) return;
+  const filesToProcess = pickedFiles.slice();
+  const singleTitleOverride = filesToProcess.length === 1 ? (document.getElementById('uploadTitleInput')?.value.trim()) : null;
+  pickedFiles = []; document.getElementById('pickedFileBox').innerHTML = ''; document.getElementById('uploadSubmit').disabled = true; fileInput.value = '';
+  renderDashboard(); state.libMode = 'sources'; showScreen('library');
+
+  // Controlled sequential processing: one file at a time, so we never
+  // overload the server with concurrent uploads/transcriptions. Each file
+  // is fully independent — transcribeSource() catches its own errors and
+  // always resolves, so one failed file never blocks the rest of the batch.
+  for (const file of filesToProcess) {
+    const isVideo = file.type.startsWith('video') || /\.(mp4|mov|mkv|webm)$/i.test(file.name);
+    const duration = await getMediaDuration(URL.createObjectURL(file)).catch(() => 0);
+    const title = singleTitleOverride || file.name.replace(/\.[a-z0-9]+$/i, '');
+    const id = uid();
+    try { await idbPut('blobs', id, file); } catch (e) { toast('Could not store ' + file.name + ': ' + e.message); continue; }
+    SOURCES.unshift({ id, type: isVideo ? 'video' : 'audio', title, dateAdded: new Date().toISOString(), durationSec: duration || 0, transcriptStatus: 'uploading', tags: [], collectionIds: [], favorite: false, lastPositionSec: 0, chapters: [] });
+    saveSources();
+    if (state.screen === 'library') renderLibrary();
+    await transcribeSource(id, file, file.name, baseContentType(file.type || 'audio/webm'));
+  }
 });
 
 /* ---- URL import (real server-side extraction) ---- */
 document.getElementById('linkExtractBtn').addEventListener('click', () => attemptExtraction(document.getElementById('linkUrlInput').value.trim()));
-function linkStepsHtml(activeIdx, doneUpTo) {
-  const steps = ['Fetching webpage…','Extracting readable text…','Cleaning content…','Creating source…'];
+function isYouTubeUrl(url) {
+  return /(?:youtube\.com\/(?:watch\?v=|shorts\/|embed\/)|youtu\.be\/)[a-zA-Z0-9_-]{6,}/.test(url || '');
+}
+function linkStepsHtml(activeIdx, doneUpTo, youtube) {
+  const steps = youtube
+    ? ['YouTube source detected', 'Fetching captions…', 'Processing captions…', 'Creating source…']
+    : ['Fetching webpage…','Extracting readable text…','Cleaning content…','Creating source…'];
   return `<div class="link-steps">${steps.map((s,i) => `<div class="link-step ${i===activeIdx?'active':''} ${i<doneUpTo?'done':''}"><span class="dot">${ICONS.check}</span>${s}</div>`).join('')}</div>`;
 }
 async function attemptExtraction(url) {
   const area = document.getElementById('linkProcessArea');
   if (!url) { area.innerHTML = `<div class="empty-note">Enter a URL first.</div>`; return; }
   try { new URL(url); } catch(e) { area.innerHTML = `<div class="empty-note">That doesn't look like a valid URL.</div>`; return; }
-  area.innerHTML = linkStepsHtml(0, 0);
+  const youtube = isYouTubeUrl(url);
+  area.innerHTML = linkStepsHtml(0, 0, youtube);
   try {
     const res = await fetch(apiBase() + '/api/extract-url', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ url }) });
-    area.innerHTML = linkStepsHtml(2, 2);
+    area.innerHTML = linkStepsHtml(2, 2, youtube);
     const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data.error || ('Server responded with ' + res.status));
-    area.innerHTML = linkStepsHtml(3, 3);
-    finishExtraction(url, data.title || url, data.text || '', area);
+    area.innerHTML = linkStepsHtml(3, 3, youtube);
+    if (data.kind === 'youtube') finishYouTubeExtraction(data, area);
+    else finishExtraction(url, data.title || url, data.text || '', area);
   } catch (err) { showExtractionFailure(url, err.message); }
 }
 function finishExtraction(url, title, text, area) {
@@ -2206,9 +2262,36 @@ function finishExtraction(url, title, text, area) {
     renderDashboard(); state.libMode='sources'; showScreen('library');
   });
 }
+// YouTube sources are created with a real transcript immediately — the
+// captions ARE the transcript (fetched server-side from YouTube itself),
+// so there's no separate /api/transcribe step and no Groq call involved.
+function finishYouTubeExtraction(data, area) {
+  const preview = (data.text||'').slice(0,600);
+  area.innerHTML += `<div class="link-extract-preview">${escapeHtml(preview)}${(data.text||'').length>600?'…':''}</div>
+    <label class="field-label">Title</label><input class="field-input" id="linkTitleInput" value="${escapeHtml(data.title)}" />
+    <div class="empty-note">Real transcript from this video's own YouTube captions &mdash; ${data.segments.length} timestamped lines. Not generated by Whisper/Groq.</div>
+    <button class="modal-submit" id="linkSaveBtn">Create Source</button>`;
+  document.getElementById('linkSaveBtn').addEventListener('click', async () => {
+    const finalTitle = document.getElementById('linkTitleInput').value.trim() || data.title;
+    const id = uid();
+    try { await idbPut('transcripts', id, data.segments); await idbPut('content', id, data.text); }
+    catch(e) { alert('Could not save this source: ' + e.message); return; }
+    transcriptCache[id] = data.segments; contentCache[id] = data.text;
+    const lastEnd = data.segments.length ? data.segments[data.segments.length-1].end : 0;
+    SOURCES.unshift({
+      id, type:'video', title: finalTitle, url: data.url, dateAdded: new Date().toISOString(),
+      durationSec: lastEnd, transcriptStatus: 'ready', transcriptReadyAt: new Date().toISOString(),
+      transcriptWordCount: wordCount(data.text), noLocalMedia: true,
+      tags: [], collectionIds: [], favorite: false, lastPositionSec: 0, chapters: []
+    });
+    saveSources(); document.getElementById('linkUrlInput').value=''; area.innerHTML='';
+    renderDashboard(); state.libMode='sources'; showScreen('library');
+  });
+}
 function showExtractionFailure(url, reason) {
   const area = document.getElementById('linkProcessArea');
-  area.innerHTML = `<div class="link-fail-box"><p><strong>Couldn't extract this webpage.</strong> ${escapeHtml(reason)}</p>
+  const youtube = isYouTubeUrl(url);
+  area.innerHTML = `<div class="link-fail-box"><p><strong>${youtube ? "Couldn't get a transcript for this video." : "Couldn't extract this webpage."}</strong> ${escapeHtml(reason)}</p>
     <div class="link-fail-actions"><button class="rec-btn" id="failRetry">Try Again</button><button class="rec-btn primary" id="failOpen">Open Link</button></div></div>`;
   document.getElementById('failRetry').addEventListener('click', () => attemptExtraction(url));
   document.getElementById('failOpen').addEventListener('click', () => window.open(url, '_blank'));

@@ -36,7 +36,7 @@ Whisper needs a PyTorch (or CTranslate2) runtime, gigabytes of model
 weights in memory, and real CPU/GPU time per request — none of which fits
 inside a Vercel Function's size and execution-time limits. Groq instead
 hosts the actual open-source Whisper (`whisper-large-v3` /
-`whisper-large-v3-turbo`) and Llama (`llama-3.3-70b-versatile`) model
+`whisper-large-v3-turbo`) and Llama (`openai/gpt-oss-120b`) model
 weights on their own inference hardware, exposed through a plain HTTP API.
 Calling that from a Vercel Function is just a `fetch()` — genuinely
 practical regardless of how large the model behind it is. That's the
@@ -109,7 +109,7 @@ Project → **Settings** → **Environment Variables**:
 |---|---|---|
 | `GROQ_API_KEY` | Yes | Used by `/api/transcribe` and `/api/ask`. Never exposed to the browser — only read inside the serverless functions. Confidential: treat it like a password, never commit it, never put it in frontend code. |
 | `GROQ_WHISPER_MODEL` | No | Defaults to `whisper-large-v3-turbo`. |
-| `GROQ_CHAT_MODEL` | No | Defaults to `llama-3.3-70b-versatile`. |
+| `GROQ_CHAT_MODEL` | No | Defaults to `openai/gpt-oss-120b`. |
 | `BLOB_READ_WRITE_TOKEN` | Auto-added | Added automatically when you connect a Blob store (step 1). |
 | `ALLOWED_ORIGIN` | Optional | Leave unset (defaults to `*`) since frontend + API share one domain here. |
 

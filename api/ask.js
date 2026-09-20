@@ -19,7 +19,7 @@
 import { jsonResponse, preflight } from '../lib/cors.js';
 
 const GROQ_CHAT_URL = 'https://api.groq.com/openai/v1/chat/completions';
-const CHAT_MODEL = process.env.GROQ_CHAT_MODEL || 'llama-3.3-70b-versatile';
+const CHAT_MODEL = process.env.GROQ_CHAT_MODEL || 'openai/gpt-oss-120b';
 
 export async function OPTIONS() {
   return preflight();
