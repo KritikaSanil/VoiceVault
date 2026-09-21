@@ -9,12 +9,8 @@
 // never through this (or any) Vercel Function, so there's no payload-size
 // limit on the recording itself.
 //
-// Requires a Blob read-write token. When only one store is connected,
-// Vercel names it BLOB_READ_WRITE_TOKEN. When a project has more than one
-// store connected, Vercel auto-namespaces additional ones (e.g.
-// BLOB_1_READ_WRITE_TOKEN) to avoid collisions — this checks both so it
-// works either way without you needing to rename anything.
-const BLOB_TOKEN = process.env.BLOB_1_READ_WRITE_TOKEN || process.env.BLOB_READ_WRITE_TOKEN;
+// Requires BLOB_READ_WRITE_TOKEN, which Vercel injects automatically once
+// you create a Blob store and connect it to this project (Storage tab).
 
 import { handleUpload } from '@vercel/blob/client';
 import { jsonResponse, preflight } from '../lib/cors.js';
@@ -35,7 +31,6 @@ export async function POST(request) {
     const result = await handleUpload({
       body,
       request,
-      token: BLOB_TOKEN,
       onBeforeGenerateToken: async () => {
         // No auth gate here since this is a single-user local-storage
         // prototype. If you add real user accounts, verify the caller

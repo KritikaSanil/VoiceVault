@@ -3,30 +3,26 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>VoiceVault</title>
+<title>VoiceVault: your voice, turned into knowledge</title>
+<meta name="description" content="Turn recordings into searchable knowledge." />
+<meta name="theme-color" content="#211A16" />
+<meta name="color-scheme" content="dark" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #140F0B; --sidebar-bg: #1A130E; --surface: #211811; --surface-2: #261C14; --surface-hover: #2B2017;
-    --border: #3D2C1D; --border-soft: #2E2116;
-    --text-primary: #F5EBDD; --text-secondary: #C8B9A7; --text-tertiary: #8F7D6B;
-    --accent: #E2B04B; --accent-strong: #F0C66B; --accent2: #D6A13A;
-    --accent-soft: rgba(226,176,75,0.20);
-    --grad: linear-gradient(135deg, var(--accent2), var(--accent), var(--accent-strong));
-    --danger: #E8615B; --danger-soft: rgba(232,97,91,0.16);
-    --good: #8FBF6F;
+    --bg: #211A16; --sidebar-bg: #261E19; --surface: #28201A; --surface-2: #30251E; --surface-hover: #362A22;
+    --border: #46392F; --border-soft: #382D25;
+    --text-primary: #F2ECE3; --text-secondary: #B9AC9C; --text-tertiary: #928575;
+    --accent: #C99A32; --accent-strong: #D3AA4C; --accent2: #B88A2B;
+    --accent-soft: rgba(201,154,50,0.16);
+    --grad: linear-gradient(135deg, var(--accent2), var(--accent-strong));
+    --danger: #C96A54; --danger-soft: rgba(201,106,84,0.16);
+    --good: #8FA876;
     --radius-s: 8px; --radius-m: 14px; --radius-l: 20px;
-    --shadow: 0 24px 60px -22px rgba(0,0,0,0.55);
+    --shadow: 0 24px 60px -26px rgba(20,14,10,0.5);
+    --serif: 'Fraunces', Georgia, serif;
   }
-  @keyframes morph {
-    0%,100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; transform: rotate(0deg) scale(1); }
-    33% { border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%; transform: rotate(8deg) scale(1.05); }
-    66% { border-radius: 50% 50% 40% 60% / 40% 60% 40% 60%; transform: rotate(-6deg) scale(0.97); }
-  }
-  @keyframes gradientShift { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
-  @keyframes floaty2 { 0%,100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-14px) rotate(3deg); } }
-  .morph-blob { position: absolute; background: var(--grad); background-size: 200% 200%; filter: blur(60px); opacity: .35; animation: morph 9s ease-in-out infinite, gradientShift 7s ease infinite; z-index: -1; pointer-events: none; }
   @keyframes ambientWave { 0%,100% { transform: scaleY(0.25); } 50% { transform: scaleY(1); } }
   .ambient-wave { display: flex; align-items: center; gap: 3px; }
   .ambient-wave .bar { flex: 1; background: linear-gradient(180deg, var(--accent-strong), var(--accent2)); border-radius: 3px; animation-name: ambientWave; animation-timing-function: ease-in-out; animation-iteration-count: infinite; transition: transform .15s ease; transform-origin: center; }
@@ -43,33 +39,215 @@
   button:focus-visible, input:focus-visible, a:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
   @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; } }
 
-  /* ================= LANDING ================= */
-  #stage-landing { display: block; }
-  .land-nav { position: sticky; top: 0; z-index: 50; display: flex; align-items: center; justify-content: space-between; padding: 18px 5vw; background: rgba(23,22,28,0.85); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border-soft); }
+  /* ---- shared brand + button classes (used by the app shell, dashboard and modals) ---- */
   .brand { display: flex; align-items: center; gap: 10px; }
-  .brand-mark { width: 28px; height: 28px; background: var(--grad); background-size: 200% 200%; animation: gradientShift 4s ease infinite, morph 6s ease-in-out infinite; display: flex; align-items: center; justify-content: center; }
+  .brand-mark { width: 28px; height: 28px; border-radius: 8px; background: var(--accent); display: flex; align-items: center; justify-content: center; }
   .brand-mark svg { width: 15px; height: 15px; }
   .brand-name { font-weight: 700; font-size: 16.5px; }
-  .cta-primary { background: var(--grad); background-size: 200% 200%; animation: gradientShift 5s ease infinite; color: #100E17; border: none; padding: 11px 20px; border-radius: 100px; font-size: 13.5px; font-weight: 700; transition: border-radius .35s ease, transform .2s ease; }
-  .cta-primary:hover { border-radius: 40% 60% 55% 45% / 50% 40% 60% 50%; transform: scale(1.04); }
-  .cta-primary:hover { background: var(--accent-strong); }
+  .cta-primary { background: var(--accent); color: #211A16; border: none; padding: 11px 20px; border-radius: 100px; font-size: 13.5px; font-weight: 700; transition: background .2s ease, transform .15s ease; }
+  .cta-primary:hover { background: var(--accent-strong); transform: translateY(-1px); }
   .cta-ghost { background: none; border: 1px solid var(--border); color: var(--text-secondary); padding: 10px 18px; border-radius: 100px; font-size: 13.5px; font-weight: 600; }
   .cta-ghost:hover { color: var(--text-primary); border-color: var(--text-tertiary); }
-  .hero-wrap { max-width: 720px; margin: 0 auto; padding: 90px 6vw 60px; text-align: center; }
-  .hero-wrap h1 { font-size: clamp(32px,6vw,52px); font-weight: 800; line-height: 1.1; letter-spacing: -0.02em; margin: 0 0 20px; }
-  .hero-wrap p.sub { font-size: 16px; color: var(--text-secondary); line-height: 1.65; margin: 0 auto 32px; max-width: 480px; }
-  .hero-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
-  .steps-strip { display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; margin-top: 60px; color: var(--text-tertiary); font-size: 13px; }
-  .steps-strip .step { padding: 8px 14px; border: 1px solid var(--border); border-radius: 100px; background: var(--surface); }
-  .land-footer { text-align: center; padding: 40px 5vw 60px; color: var(--text-tertiary); font-size: 12px; border-top: 1px solid var(--border-soft); margin-top: 40px; }
+  .cta-tertiary { border: none; background: none; color: var(--text-tertiary); padding: 10px 6px; }
+  .cta-tertiary:hover { color: var(--accent-strong); }
+
+  /* ================= LANDING + LOGIN (minimal) ================= */
+  #stage-landing, #stage-auth {
+    --lp-bg: #211A16; --lp-s1: #28201A; --lp-s2: #30251E;
+    --lp-text: #F2ECE3; --lp-muted: #B9AC9C; --lp-faint: #928575;
+    --lp-mustard: #C99A32; --lp-mustard-hi: #D0A13A;
+    --lp-line: rgba(242,236,227,.10); --lp-line-2: rgba(242,236,227,.2);
+    --lp-serif: 'Fraunces', Georgia, 'Times New Roman', serif;
+    --lp-gutter: clamp(24px, 6vw, 96px);
+    --lp-nav-h: 72px;
+    background: var(--lp-bg); color: var(--lp-text);
+  }
+  #stage-landing { display: block; position: relative; overflow-x: clip; }
+  .lp-wrap { max-width: 1240px; margin-inline: auto; padding-inline: var(--lp-gutter); }
+
+  /* ---- nav: flat wordmark, two quiet links ---- */
+  .lp-nav { position: sticky; top: 0; z-index: 50; height: var(--lp-nav-h); display: flex; align-items: center; justify-content: space-between; padding-inline: max(var(--lp-gutter), calc((100% - 1240px) / 2 + var(--lp-gutter))); background: rgba(33,26,22,.86); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
+  .lp-word, .av-word { font-family: var(--lp-serif); font-weight: 500; font-size: 1.3rem; letter-spacing: -.01em; color: var(--lp-text); background: none; border: 0; padding: 0; cursor: pointer; }
+  .lp-word-sm { font-size: 1.05rem; color: var(--lp-muted); cursor: default; }
+  .lp-nav-end { display: flex; align-items: center; }
+  #stage-landing .nav-auth-actions { gap: 4px; }
+  .lp-link { background: none; border: 0; padding: 10px 14px; border-radius: 999px; color: var(--lp-muted); font: 500 14px 'Inter', sans-serif; cursor: pointer; transition: color .25s; }
+  .lp-link:hover { color: var(--lp-text); }
+  .lp-link-strong { color: var(--lp-text); }
+  .lp-link-strong:hover { color: var(--lp-mustard); }
+
+  /* ---- buttons ---- */
+  .lp-btn { display: inline-flex; align-items: center; justify-content: center; font: 500 15px/1 'Inter', sans-serif; padding: 16px 28px; border-radius: 999px; border: 1px solid transparent; cursor: pointer; transition: background .25s, border-color .25s, color .25s; white-space: nowrap; }
+  .lp-btn-primary { background: var(--lp-mustard); color: #211A16; }
+  .lp-btn-primary:hover { background: var(--lp-mustard-hi); }
+  .lp-btn-line { background: transparent; color: var(--lp-text); border-color: var(--lp-line-2); }
+  .lp-btn-line:hover { border-color: var(--lp-mustard); color: var(--lp-mustard); }
+  .lp-btn-lg { padding: 20px 36px; font-size: 16px; }
+
+  /* ---- type ---- */
+  .lp-h1 { font-family: var(--lp-serif); font-weight: 400; font-size: clamp(3.1rem, 8vw, 7.8rem); line-height: 1.02; letter-spacing: -.035em; margin: 0; }
+  .lp-h1 > span { display: block; }
+  .lp-h2 { font-family: var(--lp-serif); font-weight: 400; font-size: clamp(2rem, 3.6vw, 3.4rem); line-height: 1.1; letter-spacing: -.025em; margin: 0; text-wrap: balance; }
+  .lp-sub { font-size: clamp(1.05rem, 1.5vw, 1.3rem); line-height: 1.5; color: var(--lp-muted); margin: clamp(24px, 3vw, 40px) 0 0; }
+  .lp-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: clamp(36px, 5vw, 56px); }
+
+  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+  /* ---- 1. hero: type, then a waveform that plays ---- */
+  .lp-hero { min-height: calc(100svh - var(--lp-nav-h)); display: flex; flex-direction: column; justify-content: space-between; gap: clamp(56px, 10vh, 120px); padding-block: clamp(48px, 9vh, 110px) clamp(32px, 5vh, 56px); }
+  .lp-hero > .lp-wrap { width: 100%; }
+  #lpHeroWave { display: block; width: 100%; height: clamp(72px, 9vw, 112px); cursor: ew-resize; touch-action: pan-y; }
+  .lp-caption { display: flex; gap: 16px; align-items: baseline; margin: 18px 0 0; min-height: 3.2em; font-size: 14px; line-height: 1.6; color: var(--lp-muted); transition: opacity .4s ease; }
+  .lp-caption time { color: var(--lp-mustard); font-variant-numeric: tabular-nums; flex-shrink: 0; }
+  .lp-caption.is-out { opacity: 0; }
+
+  /* ---- floating text: float in, settle, stay ----
+     Reveal uses the individual `translate` / `scale` / `filter` / `opacity` properties.
+     Scroll parallax (4-10px, written by the ticker as --py) uses `transform`, so the two never fight. */
+  .fl { transform: translate3d(0, var(--py, 0px), 0); }
+  .lp-js .fl:not(.fl-h) { opacity: 0; translate: 0 30px; scale: .992;
+    transition: opacity 1.4s cubic-bezier(.22,.61,.36,1) var(--d, 0ms), translate 1.8s cubic-bezier(.16,1,.3,1) var(--d, 0ms), scale 1.8s cubic-bezier(.16,1,.3,1) var(--d, 0ms), filter 1.3s ease var(--d, 0ms); }
+  .lp-js .fl-b:not(.fl-h) { filter: blur(4px); }
+  .lp-js .fl.in:not(.fl-h) { opacity: 1; translate: 0 0; scale: 1; filter: none; }
+  /* headings: each word floats up a hair after the last, so the line settles like a wave */
+  .lp-js .fl-h .w { display: inline-block; opacity: 0; translate: 0 calc(24px + var(--k, 0) * 2px); filter: blur(4px);
+    transition: opacity 1.4s cubic-bezier(.22,.61,.36,1) calc(var(--d, 0ms) + var(--i, 0) * 75ms), translate 1.9s cubic-bezier(.16,1,.3,1) calc(var(--d, 0ms) + var(--i, 0) * 75ms), filter 1.3s ease calc(var(--d, 0ms) + var(--i, 0) * 75ms); }
+  .lp-js .fl-h.in .w { opacity: 1; translate: 0 0; filter: none; }
+  /* elements that also have their own hover transitions keep them */
+  .lp-js .lp-search.fl { transition: opacity 1.4s cubic-bezier(.22,.61,.36,1) var(--d, 0ms), translate 1.8s cubic-bezier(.16,1,.3,1) var(--d, 0ms), scale 1.8s cubic-bezier(.16,1,.3,1) var(--d, 0ms), filter 1.3s ease var(--d, 0ms), border-color .25s; }
+  .lp-js .lp-libs li.fl { transition: opacity 1.4s cubic-bezier(.22,.61,.36,1) var(--d, 0ms), translate 1.8s cubic-bezier(.16,1,.3,1) var(--d, 0ms), scale 1.8s cubic-bezier(.16,1,.3,1) var(--d, 0ms), filter 1.3s ease var(--d, 0ms), color .3s; }
+
+  .lp-demo, .lp-moments, .lp-ask, .lp-lib, .lp-final { padding-block: clamp(88px, 14vw, 190px); }
+
+  /* ---- 2. transcript ---- */
+  .lp-head-row { display: flex; justify-content: space-between; align-items: flex-end; gap: 24px 48px; flex-wrap: wrap; }
+  .lp-search { display: flex; align-items: baseline; gap: 12px; width: min(100%, 260px); border-bottom: 1px solid var(--lp-line-2); transition: border-color .25s; }
+  .lp-search:focus-within { border-bottom-color: var(--lp-mustard); }
+  .lp-search input { flex: 1; min-width: 0; background: none; border: 0; outline: 0; color: var(--lp-text); font: 400 16px 'Inter', sans-serif; padding: 8px 0; }
+  .lp-search input::placeholder { color: var(--lp-faint); }
+  .lp-count { font-size: 12.5px; color: var(--lp-mustard); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .lp-player { margin-top: clamp(36px, 5vw, 64px); }
+  .lp-time { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 16px; font-size: 13px; }
+  #lpNow { font-variant-numeric: tabular-nums; color: var(--lp-mustard); font-weight: 500; letter-spacing: .02em; }
+  .lp-cap { color: var(--lp-faint); }
+  #lpWave { display: block; width: 100%; height: clamp(84px, 11vw, 120px); cursor: ew-resize; touch-action: pan-y; }
+  .lp-tbox { position: relative; height: clamp(250px, 32vw, 330px); margin-top: clamp(24px, 3vw, 40px); overflow: hidden; max-width: 46rem; -webkit-mask-image: linear-gradient(180deg, transparent, #000 18%, #000 82%, transparent); mask-image: linear-gradient(180deg, transparent, #000 18%, #000 82%, transparent); }
+  .lp-lines { list-style: none; margin: 0; padding: 90px 0; display: grid; gap: 2px; }
+  .lp-line { display: grid; grid-template-columns: 56px 1fr; gap: 16px; width: 100%; text-align: left; background: none; border: 0; padding: 12px 0; color: var(--lp-faint); font: 400 clamp(1.05rem, 1.5vw, 1.3rem)/1.5 'Inter', sans-serif; cursor: pointer; transition: color .5s; }
+  .lp-line time { font-size: 13px; font-variant-numeric: tabular-nums; padding-top: .45em; }
+  .lp-line:hover { color: var(--lp-muted); }
+  .lp-line.is-now { color: var(--lp-text); }
+  .lp-line.is-now time { color: var(--lp-mustard); }
+  .lp-line.is-dim { opacity: .35; }
+  .lp-line mark { background: none; color: inherit; box-shadow: inset 0 -.42em 0 rgba(201,154,50,.34); }
+  .lp-line .hl { box-shadow: inset 0 -.42em 0 rgba(201,154,50,.28); transition: box-shadow .5s; }
+  .lp-line:not(.is-now) .hl { box-shadow: inset 0 -.42em 0 rgba(201,154,50,0); }
+
+  /* ---- 3. key moments ---- */
+  .lp-tl { position: relative; height: 64px; margin-top: clamp(48px, 7vw, 88px); }
+  .lp-tl-line { position: absolute; left: 0; right: 0; top: 14px; height: 1px; background: var(--lp-line-2); }
+  .lp-dot { position: absolute; top: 0; width: 48px; height: 60px; margin-left: -24px; padding: 0; border: 0; background: none; cursor: pointer; color: var(--lp-faint); font: 400 12.5px 'Inter', sans-serif; border-radius: 10px; }
+  .lp-dot::before { content: ''; position: absolute; left: 50%; top: 9px; width: 12px; height: 12px; margin-left: -6px; border-radius: 50%; background: var(--lp-bg); border: 1px solid var(--lp-faint); transition: background .3s, border-color .3s, transform .3s; }
+  .lp-dot span { position: absolute; left: 50%; top: 36px; transform: translateX(-50%); font-variant-numeric: tabular-nums; white-space: nowrap; transition: color .3s; }
+  .lp-dot:hover::before { border-color: var(--lp-mustard); }
+  .lp-dot:hover span { color: var(--lp-muted); }
+  .lp-dot.is-active::before { background: var(--lp-mustard); border-color: var(--lp-mustard); transform: scale(1.25); }
+  .lp-dot.is-active span { color: var(--lp-mustard); }
+  .lp-moment { margin-top: clamp(40px, 6vw, 72px); min-height: clamp(200px, 22vw, 280px); max-width: 58rem; }
+  .lp-moment-t { margin: 0 0 20px; font-size: 14px; color: var(--lp-mustard); }
+  .lp-moment-q { margin: 0; font-family: var(--lp-serif); font-style: italic; font-weight: 400; font-size: clamp(1.7rem, 3.3vw, 3rem); line-height: 1.22; letter-spacing: -.015em; text-wrap: pretty; }
+  .lp-swap { animation: lpSwap .8s ease both; }
+  @keyframes lpSwap { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+  /* ---- 4. ask ---- */
+  .lp-ask-grid { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: clamp(32px, 6vw, 96px); align-items: start; }
+  .lp-q { font-family: var(--lp-serif); font-style: italic; font-weight: 400; font-size: clamp(1.3rem, 2vw, 1.8rem); line-height: 1.25; margin: 0 0 clamp(20px, 2.5vw, 32px); color: var(--lp-muted); }
+  .lp-card { background: var(--lp-s2); border-radius: 14px; padding: clamp(28px, 3.5vw, 48px); }
+  .lp-a { font-size: clamp(1.15rem, 1.7vw, 1.5rem); line-height: 1.6; margin: 0; color: var(--lp-text); }
+  .lp-cite { display: block; margin-top: 22px; font-size: 13px; font-variant-numeric: tabular-nums; color: var(--lp-mustard); }
+  .lp-js .lp-card .lp-s { opacity: 0; transition: opacity 1s ease; }
+  .lp-js .lp-card.in .lp-s { opacity: 1; }
+  .lp-js .lp-card.in .lp-s:nth-child(2) { transition-delay: .5s; }
+  .lp-js .lp-card.in .lp-cite { transition-delay: 1.1s; }
+
+  /* ---- 5. library ---- */
+  .lp-libs { list-style: none; margin: clamp(40px, 6vw, 72px) 0 0; padding: 0; max-width: 52rem; }
+  .lp-libs li { display: grid; grid-template-columns: minmax(0, 1fr) 96px 84px 120px; gap: 16px; align-items: center; padding: 20px 0; border-bottom: 1px solid var(--lp-line); color: var(--lp-muted); font-size: 14px; transition: color .3s; }
+  .lp-libs li:first-child { border-top: 1px solid var(--lp-line); }
+  .lp-libs li:hover { color: var(--lp-text); }
+  .lp-libs .n { font-family: var(--lp-serif); font-size: clamp(1.15rem, 1.7vw, 1.5rem); color: var(--lp-text); letter-spacing: -.01em; }
+  .lp-libs .d { font-variant-numeric: tabular-nums; text-align: right; }
+  .lp-libs .p { display: block; height: 2px; background: var(--lp-line-2); position: relative; }
+  .lp-libs .p::after { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: var(--p); background: var(--lp-mustard); }
+
+  /* ---- 6. final ---- */
+  .lp-final-h { font-family: var(--lp-serif); font-weight: 400; font-size: clamp(2.4rem, 6vw, 5.6rem); line-height: 1.04; letter-spacing: -.033em; margin: 0 0 clamp(36px, 5vw, 60px); max-width: 12em; text-wrap: balance; }
+  .lp-footer { padding-block: 24px 56px; }
+  .lp-footer-row { display: flex; justify-content: space-between; align-items: baseline; gap: 24px 48px; flex-wrap: wrap; }
+  .lp-footer p { margin: 0; font-size: 12.5px; line-height: 1.6; color: var(--lp-faint); max-width: 44em; }
+
+  @media (max-width: 800px) {
+    .lp-ask-grid { grid-template-columns: 1fr; }
+    .lp-h1 { font-size: clamp(2.8rem, 13vw, 4rem); }
+    .lp-line { grid-template-columns: 46px 1fr; gap: 12px; }
+    .lp-nav .lp-link { padding-inline: 10px; }
+    .lp-libs li { grid-template-columns: minmax(0, 1fr) auto; row-gap: 10px; }
+    .lp-libs .m { display: none; }
+    .lp-libs .p { grid-column: 1 / -1; }
+  }
+  @media (max-width: 420px) { #navSignInBtn { display: none !important; } }
+  @media (prefers-reduced-motion: reduce) {
+    /* reduced motion: a plain, slow fade. No travel, no scale, no blur, no parallax, no per-word stagger. */
+    .fl { transform: none; }
+    .lp-js .fl:not(.fl-h), .lp-js .fl-b:not(.fl-h) { translate: none; scale: 1; filter: none; transition: opacity 1s ease var(--d, 0ms); }
+    .lp-js .fl-h .w { translate: none; filter: none; transition: opacity 1s ease var(--d, 0ms); }
+    .lp-js .lp-search.fl { transition: opacity 1s ease var(--d, 0ms), border-color .25s; }
+    .lp-js .lp-libs li.fl { transition: opacity 1s ease var(--d, 0ms), color .3s; }
+    .lp-js .lp-card .lp-s { transition: opacity 1s ease; }
+    .lp-js .lp-card.in .lp-s:nth-child(2), .lp-js .lp-card.in .lp-cite { transition-delay: 0s; }
+    .lp-swap { animation: none; }
+    .lp-caption { transition: none; }
+  }
+
+  /* ================= LOGIN ================= */
+  #stage-auth { display: none; min-height: 100vh; align-items: center; justify-content: center; padding: 48px 24px; }
+  .av-wrap { width: 100%; max-width: 380px; }
+  .av-word { display: block; margin: 0 0 clamp(56px, 12vh, 104px); }
+  .auth-title { font-family: var(--lp-serif); font-weight: 400; font-size: clamp(2.3rem, 4vw, 3rem); line-height: 1.05; letter-spacing: -.03em; margin: 0 0 12px; }
+  .auth-sub { font-size: 15px; line-height: 1.55; color: var(--lp-muted); margin: 0; }
+  .auth-sub:empty { display: none; }
+  .av-wrap .auth-title { margin-bottom: 40px; }
+  .auth-sub:not(:empty) { margin: -22px 0 40px; }
+  .auth-guest { margin: -12px 0 32px; padding-bottom: 24px; border-bottom: 1px solid var(--lp-line); }
+  .auth-guest p { margin: 0 0 6px; font-size: 14px; line-height: 1.6; color: var(--lp-muted); }
+  .auth-guest .lp-link { padding-left: 0; }
+  .av-forms.is-off { opacity: .4; pointer-events: none; user-select: none; }
+  .auth-error, .auth-info { display: none; font-size: 13.5px; line-height: 1.5; margin: 0 0 24px; padding-left: 12px; border-left: 2px solid; }
+  .auth-error { color: #E29A86; border-color: #C96A54; } .auth-info { color: #B9CBA4; border-color: #8FA876; }
+  .auth-error.show, .auth-info.show { display: block; }
+  .av-field { display: block; margin-bottom: 26px; }
+  .av-field > span { display: block; font-size: 13px; color: var(--lp-muted); margin-bottom: 4px; }
+  #stage-auth .field-input { display: block; width: 100%; margin: 0; background: transparent; border: 0; border-bottom: 1px solid var(--lp-line-2); border-radius: 0; color: var(--lp-text); padding: 10px 0 12px; font: 400 16px 'Inter', sans-serif; outline: none; transition: border-color .25s; }
+  #stage-auth .field-input:focus { border-bottom-color: var(--lp-mustard); }
+  #stage-auth .field-input:-webkit-autofill { -webkit-text-fill-color: var(--lp-text); -webkit-box-shadow: 0 0 0 100px var(--lp-bg) inset; caret-color: var(--lp-text); }
+  .auth-submit { width: 100%; margin-top: 8px; background: var(--lp-mustard); color: #211A16; border: 0; padding: 16px; border-radius: 999px; font: 500 15px 'Inter', sans-serif; cursor: pointer; transition: background .25s; }
+  .auth-submit:hover { background: var(--lp-mustard-hi); }
+  .auth-submit:disabled { opacity: .5; cursor: not-allowed; }
+  .auth-forgot-row { margin-top: 22px; }
+  .auth-linkbtn, .auth-link { background: none; border: 0; padding: 0; color: var(--lp-muted); font: 400 14px 'Inter', sans-serif; cursor: pointer; transition: color .25s; }
+  .auth-linkbtn:hover { color: var(--lp-text); }
+  .auth-link { color: var(--lp-text); border-bottom: 1px solid var(--lp-line-2); margin-left: 4px; }
+  .auth-link:hover { color: var(--lp-mustard); border-color: var(--lp-mustard); text-decoration: none; }
+  .auth-foot { margin-top: 56px; font-size: 14px; color: var(--lp-muted); }
+  @media (max-width: 600px) { #stage-auth { align-items: flex-start; } }
+
 
   /* ================= APP SHELL ================= */
   #stage-app { display: none; }
   .shell { display: flex; min-height: 100vh; }
   .sidebar { width: 226px; flex-shrink: 0; background: var(--sidebar-bg); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 18px 14px; position: sticky; top: 0; height: 100vh; }
   .sidebar-logo { display: flex; align-items: center; gap: 10px; padding: 4px 6px 20px; cursor: pointer; }
-  .add-source-btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; background: var(--grad); background-size: 200% 200%; animation: gradientShift 5s ease infinite; color: #100E17; border: none; padding: 11px 14px; border-radius: var(--radius-m); font-size: 13.5px; font-weight: 700; margin-bottom: 18px; transition: border-radius .3s ease; }
-  .add-source-btn:hover { border-radius: 40% 60% 60% 40% / 50% 50% 50% 50%; }
+  .add-source-btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; background: var(--accent); color: #211A16; border: none; padding: 11px 14px; border-radius: var(--radius-m); font-size: 13.5px; font-weight: 700; margin-bottom: 18px; transition: background .2s ease; }
   .add-source-btn:hover { background: var(--accent-strong); }
   .add-source-btn svg { width: 14px; height: 14px; }
   .side-nav { display: flex; flex-direction: column; gap: 2px; flex: 1; }
@@ -88,12 +266,12 @@
   .status-dot.captured { background: var(--good); animation: breathe 1.4s ease-in-out 2; }
   @keyframes breathe { 0%,100% { opacity: .4; transform: scale(0.85); box-shadow: 0 0 0 0 transparent; } 50% { opacity: 1; transform: scale(1.15); box-shadow: 0 0 8px 1px currentColor; } }
 
-  .record-cta { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; width: 92px; height: 92px; border-radius: 100%; background: var(--grad); background-size: 200% 200%; animation: gradientShift 5s ease infinite; color: #1B1815; border: none; font-size: 11px; font-weight: 800; letter-spacing: .03em; text-transform: uppercase; box-shadow: 0 0 0 0 var(--accent-soft); transition: box-shadow .3s ease, transform .2s ease; flex-shrink: 0; }
+  .record-cta { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; width: 92px; height: 92px; border-radius: 100%; background: var(--grad); color: #211A16; border: none; font-size: 11px; font-weight: 800; letter-spacing: .03em; text-transform: uppercase; box-shadow: 0 0 0 0 var(--accent-soft); transition: box-shadow .3s ease, transform .2s ease; flex-shrink: 0; }
   .record-cta:hover { transform: scale(1.05); box-shadow: 0 0 0 10px var(--accent-soft); }
   .record-cta svg { width: 22px; height: 22px; }
   .qa-side-actions { display: flex; flex-direction: column; gap: 10px; justify-content: center; }
   .profile-row { display: flex; align-items: center; gap: 9px; }
-  .avatar { width: 28px; height: 28px; border-radius: 100px; background: var(--grad); background-size: 200% 200%; animation: gradientShift 6s ease infinite; display:flex; align-items:center; justify-content:center; font-size: 11px; font-weight: 700; color: #100E17; flex-shrink: 0; }
+  .avatar { width: 28px; height: 28px; border-radius: 100px; background: var(--accent); display:flex; align-items:center; justify-content:center; font-size: 11px; font-weight: 700; color: #211A16; flex-shrink: 0; }
   .profile-name { font-size: 12.5px; font-weight: 600; }
   .profile-plan { font-size: 11px; color: var(--text-tertiary); }
   .main-area { flex: 1; min-width: 0; }
@@ -113,7 +291,7 @@
   .screen.active { display: block; animation: fadeIn .25s ease; }
   @keyframes fadeIn { from { opacity: 0; transform: translateY(5px);} to { opacity:1; transform:translateY(0);} }
 
-  .dash-greeting { font-size: 24px; font-weight: 800; margin: 0 0 4px; }
+  .dash-greeting { font-family: var(--serif); font-size: 26px; font-weight: 500; color: var(--text-primary); margin: 0 0 4px; }
   .dash-sub { color: var(--text-secondary); font-size: 13.5px; margin: 0 0 24px; }
   .global-search-box { display: flex; align-items: center; gap: 12px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-l); padding: 15px 18px; box-shadow: var(--shadow); }
   .global-search-box:focus-within { border-color: var(--accent); }
@@ -122,10 +300,10 @@
 
   .stats-strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 16px 0 30px; }
   @media (max-width: 640px) { .stats-strip { grid-template-columns: repeat(2, 1fr); } }
-  .stat-cell { background: var(--surface); border: 1px solid var(--border); padding: 16px; border-radius: var(--radius-m); transition: transform .25s ease, border-radius .3s ease, border-color .2s ease; }
-  .stat-cell:hover { transform: translateY(-3px) scale(1.02); border-radius: 24px 6px 24px 6px; border-color: var(--accent); }
-  .stat-num { background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; display: inline-block; }
-  .stat-num { font-size: 23px; font-weight: 800; }
+  .stat-cell { background: var(--surface); border: 1px solid var(--border); padding: 16px; border-radius: var(--radius-m); transition: transform .2s ease, border-color .2s ease; }
+  .stat-cell:hover { transform: translateY(-2px); border-color: var(--accent); }
+  .stat-num { color: var(--accent-strong); display: inline-block; }
+  .stat-num { font-size: 23px; font-weight: 700; }
   .stat-label { font-size: 12px; color: var(--text-tertiary); margin-top: 4px; }
 
   .quick-actions { display: flex; gap: 9px; margin-bottom: 30px; flex-wrap: wrap; }
@@ -148,8 +326,8 @@
   .dash-wide { margin-bottom: 18px; }
   @media (max-width: 820px) { .dash-grid { grid-template-columns: 1fr; } }
 
-  .source-card { display: flex; gap: 12px; padding: 13px; border: 1px solid var(--border); border-radius: var(--radius-m); background: var(--surface); transition: border-color .2s ease, transform .25s ease, border-radius .3s ease; margin-bottom: 8px; }
-  .source-card:hover { border-color: var(--accent); transform: translateY(-2px); border-radius: 22px 10px 22px 10px; }
+  .source-card { display: flex; gap: 12px; padding: 13px; border: 1px solid var(--border); border-radius: var(--radius-m); background: var(--surface); transition: border-color .2s ease, transform .2s ease; margin-bottom: 8px; }
+  .source-card:hover { border-color: var(--accent); transform: translateY(-2px); }
   .source-card.selected { border-color: var(--accent); background: var(--accent-soft); }
   .src-check { width: 17px; height: 17px; margin-top: 2px; accent-color: var(--accent); flex-shrink: 0; cursor: pointer; }
   .type-dot { width: 32px; height: 32px; border-radius: 9px; flex-shrink: 0; display:flex; align-items:center; justify-content:center; background: var(--surface-2); color: var(--text-secondary); }
@@ -185,13 +363,13 @@
   /* Library */
   .mode-tabs { display: flex; gap: 8px; margin-bottom: 16px; }
   .mode-tab { border: 1px solid var(--border); background: var(--surface); color: var(--text-secondary); padding: 8px 16px; border-radius: 100px; font-size: 13px; }
-  .mode-tab.active { background: var(--grad); color: #100E17; border-color: transparent; font-weight: 600; }
+  .mode-tab.active { background: var(--grad); color: #211A16; border-color: transparent; font-weight: 600; }
   .lib-toolbar { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 14px; }
   .search-mini { display: flex; align-items: center; gap: 8px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-m); padding: 8px 12px; flex: 1; min-width: 180px; }
   .search-mini svg { width: 14px; height: 14px; color: var(--text-tertiary); flex-shrink: 0; }
   .search-mini input { border: none; outline: none; background: none; color: var(--text-primary); font-size: 13px; flex: 1; min-width: 0; }
   .filter-pill, .sort-select { border: 1px solid var(--border); background: var(--surface); color: var(--text-secondary); padding: 7px 13px; border-radius: 100px; font-size: 12.5px; }
-  .filter-pill.active { background: var(--grad); color: #100E17; border-color: transparent; font-weight: 600; }
+  .filter-pill.active { background: var(--grad); color: #211A16; border-color: transparent; font-weight: 600; }
   .select-all-btn { border: 1px solid var(--border); background: var(--surface); color: var(--text-secondary); padding: 7px 13px; border-radius: 100px; font-size: 12.5px; }
   .select-all-btn:hover { color: var(--text-primary); }
   .bulk-bar { position: sticky; top: 8px; z-index: 20; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; background: var(--surface-2); border: 1px solid var(--accent); border-radius: var(--radius-m); padding: 10px 14px; margin-bottom: 14px; }
@@ -204,7 +382,7 @@
   @media (max-width: 700px) { .lib-grid { grid-template-columns: 1fr; } }
 
   /* Modal */
-  .modal-overlay { position: fixed; inset: 0; background: rgba(10,9,13,0.6); backdrop-filter: blur(3px); z-index: 100; display: none; align-items: center; justify-content: center; padding: 20px; }
+  .modal-overlay { position: fixed; inset: 0; background: rgba(24,18,14,0.6); backdrop-filter: blur(3px); z-index: 100; display: none; align-items: center; justify-content: center; padding: 20px; }
   .modal-overlay.active { display: flex; }
   .modal-box { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-l); width: 100%; max-width: 480px; max-height: 88vh; overflow-y: auto; box-shadow: var(--shadow); }
   @media (max-width: 560px) { .modal-box { max-width: 100%; max-height: 92vh; } }
@@ -228,24 +406,24 @@
   .field-input:focus, .field-textarea:focus, .field-select:focus { border-color: var(--accent); }
   .field-textarea { resize: vertical; min-height: 130px; }
   .add-tab { border: 1px solid var(--border); background: var(--surface); color: var(--text-secondary); padding: 9px 16px; border-radius: 100px; font-size: 13px; }
-  .add-tab.active { background: var(--grad); color: #100E17; border-color: transparent; font-weight: 600; }
-  .modal-submit { width: 100%; background: var(--grad); background-size: 200% 200%; animation: gradientShift 5s ease infinite; color: #100E17; border: none; padding: 12px; border-radius: var(--radius-m); font-size: 13.5px; font-weight: 700; transition: border-radius .3s ease, transform .15s ease; }
-  .modal-submit:hover { border-radius: 40% 60% 55% 45% / 55% 45% 55% 45%; transform: scale(1.02); }
-  .modal-submit:hover { background: var(--accent-strong); }
+  .add-tab.active { background: var(--grad); color: #211A16; border-color: transparent; font-weight: 600; }
+  .modal-submit { width: 100%; background: var(--accent); color: #211A16; border: none; padding: 12px; border-radius: var(--radius-m); font-size: 13.5px; font-weight: 700; transition: background .2s ease, transform .15s ease; }
+  .modal-submit:hover { background: var(--accent-strong); transform: translateY(-1px); }
   .modal-submit:disabled { opacity: .4; cursor: not-allowed; }
 
   /* Recording */
-  .record-orb { width: 70px; height: 70px; background: var(--grad); background-size: 200% 200%; border: none; display: flex; align-items: center; justify-content: center; margin: 6px auto 16px; color: #100E17; animation: morph 6s ease-in-out infinite, gradientShift 5s ease infinite; }
+  .record-orb { width: 70px; height: 70px; border-radius: 100%; background: var(--grad); border: none; display: flex; align-items: center; justify-content: center; margin: 6px auto 16px; color: #211A16; }
   .record-orb svg { width: 24px; height: 24px; }
-  .record-orb.live { animation: morph 2.2s ease-in-out infinite, gradientShift 2s ease infinite, pulseRec 1.1s ease-in-out infinite; }
-  .record-orb.paused { animation: gradientShift 8s ease infinite; opacity: .7; }
+  .record-orb.live { animation: pulseRec 1.1s ease-in-out infinite; }
+  .record-orb.paused { opacity: .6; }
   @keyframes pulseRec { 0%,100% { box-shadow: 0 0 0 0 var(--danger-soft); } 50% { box-shadow: 0 0 0 16px transparent; } }
   .record-timer { text-align: center; font-size: 26px; font-weight: 700; margin-bottom: 12px; font-variant-numeric: tabular-nums; }
   .rec-wave-canvas { width: 100%; height: 56px; display: block; border-radius: var(--radius-s); background: var(--bg); margin-bottom: 16px; }
   .record-controls { display: flex; gap: 8px; justify-content: center; margin-bottom: 6px; flex-wrap: wrap; }
   .rec-btn { border: 1px solid var(--border); background: var(--surface-2); color: var(--text-primary); padding: 9px 16px; border-radius: 100px; font-size: 12.5px; font-weight: 600; }
   .rec-btn:hover { border-color: var(--accent); }
-  .rec-btn.primary { background: var(--grad); background-size: 200% 200%; animation: gradientShift 5s ease infinite; border-color: transparent; color: #100E17; }
+  .rec-btn.primary { background: var(--accent); border-color: transparent; color: #211A16; }
+  .rec-btn.primary:hover { background: var(--accent-strong); }
   .rec-btn.danger { color: var(--danger); }
   .rec-status-msg { text-align: center; font-size: 12.5px; color: var(--text-tertiary); margin-top: 12px; line-height: 1.5; }
   .rec-status-msg.error { color: var(--danger); }
@@ -281,7 +459,7 @@
   .content-view mark, mark { background: var(--accent-soft); color: var(--text-primary); border-radius: 3px; }
   .transcript-empty { font-size: 13px; color: var(--text-tertiary); line-height: 1.6; background: var(--surface-2); border-radius: var(--radius-m); padding: 14px; }
   .resume-banner { display: flex; align-items: center; justify-content: space-between; gap: 12px; background: var(--accent-soft); border: 1px solid var(--accent); border-radius: var(--radius-m); padding: 12px 16px; margin-bottom: 16px; font-size: 13px; }
-  .resume-banner button { border: none; background: var(--accent); color: #100E17; padding: 7px 14px; border-radius: 100px; font-size: 12.5px; font-weight: 700; }
+  .resume-banner button { border: none; background: var(--accent); color: #211A16; padding: 7px 14px; border-radius: 100px; font-size: 12.5px; font-weight: 700; }
   .player-card audio, .player-card video { width: 100%; border-radius: var(--radius-m); display: block; }
   .wave-canvas { width: 100%; height: 130px; display: block; margin-top: 14px; cursor: pointer; border-radius: var(--radius-m); background: var(--bg); }
   .wave-timestamp { display: flex; justify-content: space-between; font-size: 12.5px; color: var(--text-tertiary); margin-top: 8px; }
@@ -312,7 +490,7 @@
   .transcript-line { display: flex; gap: 10px; padding: 10px 8px; border-radius: var(--radius-s); cursor: pointer; align-items: baseline; }
   .transcript-line:hover { background: var(--surface-2); }
   .transcript-line.matched { background: var(--accent-soft); }
-  .transcript-line.playing { background: rgba(138,124,219,0.22); }
+  .transcript-line.playing { background: var(--accent-soft); }
   .t-time { font-size: 12px; color: var(--text-tertiary); flex-shrink: 0; width: 44px; }
   .transcript-line.playing .t-time, .transcript-line.matched .t-time { color: var(--accent-strong); }
   .t-text { font-size: 14px; line-height: 1.6; color: var(--text-secondary); flex: 1; }
@@ -335,7 +513,7 @@
   .article-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-l); padding: 26px; }
   .article-source-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; padding-bottom: 14px; border-bottom: 1px solid var(--border); }
   .article-source { font-size: 12.5px; color: var(--text-tertiary); }
-  .open-source-btn { display: inline-flex; align-items: center; gap: 7px; font-size: 13px; font-weight: 700; color: #100E17; background: var(--accent); border: none; padding: 9px 16px; border-radius: 100px; }
+  .open-source-btn { display: inline-flex; align-items: center; gap: 7px; font-size: 13px; font-weight: 700; color: #211A16; background: var(--accent); border: none; padding: 9px 16px; border-radius: 100px; }
   .article-para-row { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 15px; }
   .article-body p { font-size: 14px; line-height: 1.7; color: var(--text-secondary); margin: 0; flex: 1; }
   .article-body p.matched-para { color: var(--text-primary); background: var(--accent-soft); padding: 12px 14px; border-radius: var(--radius-s); border-left: 3px solid var(--accent); }
@@ -348,7 +526,8 @@
   .ask-input-row { display: flex; gap: 8px; margin-bottom: 12px; }
   .ask-input-row input { flex: 1; border: 1px solid var(--border); background: var(--bg); color: var(--text-primary); border-radius: var(--radius-m); padding: 10px 12px; font-size: 13px; font-family: inherit; outline: none; }
   .ask-input-row input:focus { border-color: var(--accent); }
-  .ask-send { border: none; background: var(--grad); background-size: 200% 200%; animation: gradientShift 5s ease infinite; color: #100E17; border-radius: var(--radius-m); padding: 0 14px; font-weight: 700; font-size: 13px; }
+  .ask-send { border: none; background: var(--accent); color: #211A16; border-radius: var(--radius-m); padding: 0 14px; font-weight: 700; font-size: 13px; transition: background .2s ease; }
+  .ask-send:hover { background: var(--accent-strong); }
   .ask-examples { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
   .ask-example { text-align: left; border: 1px solid var(--border); background: var(--bg); color: var(--text-secondary); padding: 8px 11px; border-radius: var(--radius-s); font-size: 12px; }
   .ask-example:hover { color: var(--text-primary); border-color: var(--accent); }
@@ -356,9 +535,9 @@
   .ask-disclaimer { font-size: 11px; color: var(--text-tertiary); background: var(--surface-2); border-radius: var(--radius-s); padding: 8px 10px; margin-bottom: 10px; line-height: 1.5; }
   .source-chip { display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--border); background: var(--bg); border-radius: 100px; padding: 6px 12px; font-size: 12px; margin: 0 6px 6px 0; cursor: pointer; }
   .source-chip:hover { border-color: var(--accent); }
-  .float-ask-btn { position: fixed; z-index: 60; background: var(--accent); color: #100E17; border: none; padding: 7px 12px; border-radius: 100px; font-size: 11.5px; font-weight: 700; box-shadow: var(--shadow); display: none; }
+  .float-ask-btn { position: fixed; z-index: 60; background: var(--accent); color: #211A16; border: none; padding: 7px 12px; border-radius: 100px; font-size: 11.5px; font-weight: 700; box-shadow: var(--shadow); display: none; }
   .float-btn-row { position: fixed; z-index: 60; display: none; gap: 6px; }
-  .float-btn-row button { background: var(--accent); color: #100E17; border: none; padding: 7px 12px; border-radius: 100px; font-size: 11.5px; font-weight: 700; box-shadow: var(--shadow); }
+  .float-btn-row button { background: var(--accent); color: #211A16; border: none; padding: 7px 12px; border-radius: 100px; font-size: 11.5px; font-weight: 700; box-shadow: var(--shadow); }
   .float-btn-row button.secondary { background: var(--surface-2); color: var(--text-primary); border: 1px solid var(--border); }
 
   /* Notes */
@@ -384,8 +563,8 @@
   .coll-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; margin-top: 16px; }
   @media (max-width: 820px) { .coll-grid { grid-template-columns: repeat(2,1fr); } }
   @media (max-width: 560px) { .coll-grid { grid-template-columns: 1fr; } }
-  .coll-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-m); padding: 16px; cursor: pointer; transition: border-color .2s ease, transform .25s ease, border-radius .3s ease; }
-  .coll-card:hover { border-color: var(--accent); transform: translateY(-3px); border-radius: 26px 8px 26px 8px; }
+  .coll-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-m); padding: 16px; cursor: pointer; transition: border-color .2s ease, transform .2s ease; }
+  .coll-card:hover { border-color: var(--accent); transform: translateY(-2px); }
   .coll-title { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
   .coll-count { font-size: 12px; color: var(--text-tertiary); }
   .new-coll-row { display: flex; gap: 8px; margin-top: 16px; max-width: 320px; }
@@ -413,50 +592,219 @@
   .proto-note { text-align: center; font-size: 11px; color: var(--text-tertiary); margin-top: 40px; padding-top: 18px; border-top: 1px solid var(--border-soft); line-height: 1.6; }
   .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: var(--surface-2); border: 1px solid var(--border); color: var(--text-primary); padding: 11px 18px; border-radius: 100px; font-size: 13px; box-shadow: var(--shadow); z-index: 300; opacity: 0; pointer-events: none; transition: opacity .25s ease; }
   .toast.show { opacity: 1; }
+
+  /* Nav auth state */
+  .nav-auth-actions { display: flex; align-items: center; gap: 10px; }
+  .profile-menu-wrap { position: relative; }
+  .profile-trigger { display: flex; align-items: center; gap: 8px; background: none; border: 1px solid transparent; padding: 5px 10px 5px 5px; border-radius: 100px; color: var(--text-primary); }
+  .profile-trigger:hover { border-color: var(--border); }
+  .profile-trigger .avatar { width: 26px; height: 26px; font-size: 10.5px; }
+  .profile-dropdown { position: absolute; top: calc(100% + 8px); right: 0; background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-m); padding: 6px; min-width: 170px; box-shadow: var(--shadow); z-index: 60; display: none; }
+  .profile-dropdown.open { display: block; }
+  .profile-dropdown button { display: block; width: 100%; text-align: left; background: none; border: none; color: var(--text-secondary); padding: 8px 11px; border-radius: var(--radius-s); font-size: 13px; }
+  .profile-dropdown button:hover { color: var(--text-primary); background: var(--surface-hover); }
+  .profile-dropdown button.danger:hover { color: var(--danger); }
+  .sidebar-profile { cursor: pointer; position: relative; }
+  .sidebar-profile:hover .profile-row { opacity: .85; }
+
+  /* Contextual auth-required prompt */
+  .auth-prompt-overlay { position: fixed; inset: 0; background: rgba(24,18,14,0.6); backdrop-filter: blur(3px); z-index: 110; display: none; align-items: center; justify-content: center; padding: 20px; }
+  .auth-prompt-overlay.active { display: flex; }
+  .auth-prompt-box { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-l); width: 100%; max-width: 380px; padding: 30px 28px; text-align: center; box-shadow: var(--shadow); }
+  .auth-prompt-box h3 { font-family: var(--serif); font-size: 20px; font-weight: 500; margin: 0 0 10px; color: var(--text-primary); }
+  .auth-prompt-box p { font-size: 13.5px; color: var(--text-secondary); line-height: 1.55; margin: 0 0 22px; }
+  .auth-prompt-actions { display: flex; flex-direction: column; gap: 10px; }
 </style>
 </head>
 <body>
 
 <!-- LANDING -->
-<div id="stage-landing">
-  <div class="land-nav">
-    <div class="brand"><div class="brand-mark"><svg viewBox="0 0 24 24" fill="none" stroke="#100E17" stroke-width="2" stroke-linecap="round"><path d="M4 12 L8 12 L10 6 L14 18 L16 12 L20 12"/></svg></div><span class="brand-name">VoiceVault</span></div>
-    <button class="cta-primary" id="navExploreBtn">Start Exploring →</button>
-  </div>
-  <div class="hero-wrap" style="position:relative;overflow:hidden;">
-    <div class="ambient-wave" id="heroAmbientWave" style="position:absolute;inset:auto 0 -10px 0;height:200px;opacity:.28;padding:0 4vw;"></div>
-    <h1 style="background:var(--grad);background-size:200% 200%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:gradientShift 6s ease infinite;position:relative;">Your voice.<br/>Your knowledge.<br/>Always searchable.</h1>
-    <p class="sub" style="position:relative;">Turn recordings, conversations, lectures and videos into searchable knowledge.</p>
-    <div class="hero-actions" style="position:relative;">
-      <button class="cta-primary" id="heroRecordBtn">Record</button>
-      <button class="cta-ghost" id="heroUploadBtn">Upload</button>
-      <button class="cta-ghost" id="heroUrlBtn">Import URL</button>
+<div id="stage-landing" class="lp-js">
+  <header class="lp-nav">
+    <a class="lp-word" href="#lpTop" data-lp-top aria-label="VoiceVault, back to top">VoiceVault</a>
+    <div class="lp-nav-end">
+      <div class="nav-auth-actions" id="navAuthActions">
+        <button class="lp-link" id="navSignInBtn" type="button">Log in</button>
+        <button class="lp-link lp-link-strong" id="navExploreBtn" type="button">Open VoiceVault</button>
+      </div>
+      <div class="nav-auth-actions profile-menu-wrap" id="navProfileWrap" style="display:none;">
+        <button class="profile-trigger" id="navProfileTrigger" type="button"><div class="avatar" id="navAvatar">Y</div><span id="navProfileName" style="font-size:12.5px;font-weight:600;"></span></button>
+        <div class="profile-dropdown" id="navProfileDropdown">
+          <button id="navOpenApp" type="button">Open VoiceVault</button>
+          <button id="navOpenLibrary" type="button">My Library</button>
+          <button id="navOpenSettings" type="button">Settings</button>
+          <button class="danger" id="navSignOutBtn" type="button">Log Out</button>
+        </div>
+      </div>
     </div>
-    <div class="steps-strip" style="position:relative;">
-      <span class="step">Capture</span><span>→</span><span class="step">Transcribe</span><span>→</span><span class="step">Organize</span><span>→</span><span class="step">Search</span><span>→</span><span class="step">Understand</span><span>→</span><span class="step">Verify</span>
-    </div>
+  </header>
+
+  <div class="lp-main">
+
+    <!-- 1. hero: typography + a waveform that plays -->
+    <section class="lp-hero" id="lpTop" aria-labelledby="lpH1">
+      <div class="lp-wrap lp-hero-top">
+        <h1 class="lp-h1 fl fl-h" id="lpH1" data-d="150" data-p="10"><span>Your voice,</span><span>turned into knowledge.</span></h1>
+        <p class="lp-sub fl fl-b" data-d="650" data-p="7">Turn recordings into searchable knowledge.</p>
+        <div class="lp-actions fl" data-d="850" data-p="5">
+          <button class="lp-btn lp-btn-primary" id="heroRecordBtn" type="button">Start recording</button>
+          <button class="lp-btn lp-btn-line" id="heroUploadBtn" type="button">Upload</button>
+        </div>
+      </div>
+      <div class="lp-wrap lp-hero-wave fl" data-d="1100" data-p="4">
+        <canvas id="lpHeroWave" role="img" aria-label="Waveform of a sample recording"></canvas>
+        <p class="lp-caption"><time id="lpHeroT">00:42</time><span id="lpHeroText"></span></p>
+      </div>
+    </section>
+
+    <!-- 2. the transcript: the product experience -->
+    <section class="lp-demo" id="lpDemo" aria-labelledby="lpDemoH">
+      <div class="lp-wrap">
+        <div class="lp-head-row">
+          <h2 class="lp-h2 fl fl-h" id="lpDemoH" data-p="10">Every word, searchable.</h2>
+          <label class="lp-search fl fl-b" data-d="400" data-p="6"><span class="sr-only">Search the sample transcript</span><input id="lpSearch" type="search" placeholder="Search" autocomplete="off" /><span class="lp-count" id="lpCount" aria-live="polite"></span></label>
+        </div>
+        <div class="lp-player">
+          <div class="lp-time fl fl-b" data-d="450" data-p="5"><span id="lpNow">00:42</span><span class="lp-cap">Sample recording</span></div>
+          <canvas id="lpWave" class="fl" data-d="640" data-p="4" role="img" aria-label="Waveform of a sample recording"></canvas>
+          <div class="lp-tbox fl" id="lpBox" data-d="830" data-p="4"><ol class="lp-lines" id="lpLines"></ol></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. key moments: one moment, shown large -->
+    <section class="lp-moments" id="lpMoments" aria-labelledby="lpMomH">
+      <div class="lp-wrap">
+        <h2 class="lp-h2 fl fl-h" id="lpMomH" data-p="10">Find what matters.</h2>
+        <div class="lp-tl fl" id="lpTl" data-d="400" data-p="5" role="tablist" aria-label="Key moments"><span class="lp-tl-line"></span></div>
+        <div class="lp-moment fl" id="lpMoment" data-d="650" data-p="6" role="tabpanel" aria-live="polite"></div>
+      </div>
+    </section>
+
+    <!-- 4. ask: one answer -->
+    <section class="lp-ask" id="lpAsk" aria-labelledby="lpAskH">
+      <div class="lp-wrap lp-ask-grid">
+        <h2 class="lp-h2 fl fl-h" id="lpAskH" data-p="10">Ask your recordings.</h2>
+        <div class="lp-qa">
+          <p class="lp-q fl fl-b" data-d="400" data-p="6">What did the speaker say about attention?</p>
+          <div class="lp-card fl" id="lpAnswer" data-d="650" data-p="4" aria-live="polite">
+            <p class="lp-a"><span class="lp-s">Attention, not information, is the scarce resource.</span> <span class="lp-s">Once information is abundant, focus is what runs out.</span></p>
+            <span class="lp-cite lp-s">02:41</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. library: a small preview -->
+    <section class="lp-lib" aria-labelledby="lpLibH">
+      <div class="lp-wrap">
+        <h2 class="lp-h2 fl fl-h" id="lpLibH" data-p="10">Everything, in one place.</h2>
+        <ol class="lp-libs">
+          <li class="fl" data-d="350" data-p="4"><span class="n">Economics Lecture</span><span class="m">Lecture</span><span class="d">14:20</span><span class="p" style="--p:100%" aria-label="Finished"></span></li>
+          <li class="fl" data-d="460" data-p="4"><span class="n">Research Interview</span><span class="m">Interview</span><span class="d">47:32</span><span class="p" style="--p:62%" aria-label="62% listened"></span></li>
+          <li class="fl" data-d="570" data-p="4"><span class="n">Project Meeting</span><span class="m">Meeting</span><span class="d">31:05</span><span class="p" style="--p:100%" aria-label="Finished"></span></li>
+          <li class="fl" data-d="680" data-p="4"><span class="n">Podcast</span><span class="m">Podcast</span><span class="d">1:12:40</span><span class="p" style="--p:18%" aria-label="18% listened"></span></li>
+          <li class="fl" data-d="790" data-p="4"><span class="n">Research Notes</span><span class="m">Notes</span><span class="d">2.3k words</span><span class="p" style="--p:40%" aria-label="40% read"></span></li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- 6. final call to action -->
+    <section class="lp-final" aria-labelledby="lpFinalH">
+      <div class="lp-wrap">
+        <h2 class="lp-final-h fl fl-h" id="lpFinalH" data-p="10">Make your recordings useful.</h2>
+        <div class="fl" data-d="550" data-p="5"><button class="lp-btn lp-btn-primary lp-btn-lg" id="lpFinalOpen" type="button">Start using VoiceVault</button></div>
+      </div>
+    </section>
   </div>
-  <div class="land-footer">VoiceVault &mdash; a personal knowledge system built around everything you hear, watch, read, and record. Transcription and Ask VoiceVault run on Groq's hosted open-source Whisper and Llama models.</div>
+
+  <footer class="lp-footer">
+    <div class="lp-wrap lp-footer-row">
+      <span class="lp-word lp-word-sm">VoiceVault</span>
+      <p>Audio you add is sent to Groq&rsquo;s Whisper to be transcribed. Your library stays in this browser.</p>
+    </div>
+  </footer>
+  <script>setTimeout(function(){ if (!window.__vvFloat) { var s = document.getElementById("stage-landing"); if (s) s.classList.remove("lp-js"); } }, 3000);</script>
+</div>
+
+<!-- AUTH -->
+<div id="stage-auth">
+  <div class="av-wrap">
+    <button class="av-word" id="authBackBtn" type="button" aria-label="Back to VoiceVault">VoiceVault</button>
+
+    <h1 class="auth-title" id="authTitle">Welcome back</h1>
+    <p class="auth-sub" id="authSub"></p>
+
+    <!-- only when Supabase isn't configured: honest, never a fake login -->
+    <div class="auth-guest" id="authGuestNote" style="display:none;">
+      <p>Accounts aren&rsquo;t switched on for this deployment, so VoiceVault runs without one.</p>
+      <button class="lp-link lp-link-strong" id="authGuestOpen" type="button">Open VoiceVault</button>
+    </div>
+
+    <!-- kept for the existing auth logic; sign-up is reached from the line at the bottom -->
+    <div class="auth-tabs" style="display:none;">
+      <button id="authTabSignin" data-authtab="signin" type="button">Log in</button>
+      <button id="authTabSignup" data-authtab="signup" type="button">Create account</button>
+    </div>
+
+    <div class="auth-error" id="authError" role="alert"></div>
+    <div class="auth-info" id="authInfo" role="status"></div>
+
+    <div class="av-forms" id="authForms">
+      <form id="authFormSignin" novalidate>
+        <label class="av-field"><span>Email</span><input class="field-input" type="email" id="signinEmail" autocomplete="email" required /></label>
+        <label class="av-field"><span>Password</span><input class="field-input" type="password" id="signinPassword" autocomplete="current-password" required /></label>
+        <button type="submit" class="auth-submit" id="signinSubmit">Log in</button>
+        <div class="auth-forgot-row"><button type="button" class="auth-linkbtn" id="authForgotLink">Forgot password?</button></div>
+      </form>
+
+      <form id="authFormSignup" style="display:none;" novalidate>
+        <label class="av-field"><span>Name</span><input class="field-input" type="text" id="signupName" autocomplete="name" /></label>
+        <label class="av-field"><span>Email</span><input class="field-input" type="email" id="signupEmail" autocomplete="email" required /></label>
+        <label class="av-field"><span>Password</span><input class="field-input" type="password" id="signupPassword" autocomplete="new-password" required /></label>
+        <label class="av-field"><span>Confirm password</span><input class="field-input" type="password" id="signupConfirm" autocomplete="new-password" required /></label>
+        <button type="submit" class="auth-submit" id="signupSubmit">Sign up</button>
+      </form>
+
+      <form id="authFormForgot" style="display:none;" novalidate>
+        <label class="av-field"><span>Email</span><input class="field-input" type="email" id="forgotEmail" autocomplete="email" required /></label>
+        <button type="submit" class="auth-submit" id="forgotSubmit">Send reset link</button>
+      </form>
+
+      <!-- Google sign-in is kept in the code but not shown, to keep this page to the essentials -->
+      <div style="display:none;">
+        <div class="auth-divider">or</div>
+        <button class="auth-oauth" id="authGoogleBtn" type="button">Continue with Google</button>
+      </div>
+    </div>
+
+    <div class="auth-foot" id="authFootRow">Don&rsquo;t have an account? <button type="button" class="auth-link" id="authFootSwitch">Sign up</button></div>
+  </div>
 </div>
 
 <!-- APP -->
 <div id="stage-app">
 <div class="shell">
   <aside class="sidebar">
-    <div class="sidebar-logo" id="sidebarLogo"><div class="brand-mark"><svg viewBox="0 0 24 24" fill="none" stroke="#100E17" stroke-width="2" stroke-linecap="round"><path d="M4 12 L8 12 L10 6 L14 18 L16 12 L20 12"/></svg></div><span class="brand-name">VoiceVault</span></div>
-    <button class="add-source-btn" id="openAddModalBtn"><span class="ic"></span>Add Source</button>
+    <div class="sidebar-logo" id="sidebarLogo"><div class="brand-mark"><svg viewBox="0 0 24 24" fill="none" stroke="#211A16" stroke-width="2" stroke-linecap="round"><path d="M4 12 L8 12 L10 6 L14 18 L16 12 L20 12"/></svg></div><span class="brand-name">VoiceVault</span></div>
+    <button class="add-source-btn" id="openAddModalBtn"><span class="ic"></span>+ Add Audio</button>
     <nav class="side-nav">
-      <button class="side-link" data-nav="dashboard"><span class="ic"></span><span class="lbl">Dashboard</span></button>
+      <button class="side-link" data-nav="dashboard"><span class="ic"></span><span class="lbl">Home</span></button>
       <button class="side-link" data-nav="library"><span class="ic"></span><span class="lbl">Library<span class="side-count" id="countLibrary"></span></span></button>
       <button class="side-link" data-nav="search"><span class="ic"></span><span class="lbl">Search</span></button>
       <button class="side-link" data-nav="notes"><span class="ic"></span><span class="lbl">Notes<span class="side-count" id="countNotes"></span></span></button>
       <button class="side-link" data-nav="collections"><span class="ic"></span><span class="lbl">Collections<span class="side-count" id="countCollections"></span></span></button>
-      <button class="side-link" data-nav="analytics"><span class="ic"></span><span class="lbl">Analytics</span></button>
+      <button class="side-link" data-nav="analytics"><span class="ic"></span><span class="lbl">Insights</span></button>
       <button class="side-link" data-nav="settings"><span class="ic"></span><span class="lbl">Settings</span></button>
     </nav>
     <div class="status-indicator" id="statusIndicator"><span class="status-dot" id="statusDot"></span><span id="statusText">VoiceVault is ready</span></div>
-    <div class="sidebar-profile">
-      <div class="profile-row"><div class="avatar" id="sidebarAvatar">Y</div><div><div class="profile-name" id="sidebarName">You</div><div class="profile-plan">Local storage</div></div></div>
+    <div class="sidebar-profile" id="sidebarProfileWrap">
+      <div class="profile-row" id="sidebarProfileTrigger"><div class="avatar" id="sidebarAvatar">Y</div><div><div class="profile-name" id="sidebarName">You</div><div class="profile-plan" id="sidebarPlan">Local storage</div></div></div>
+      <div class="profile-dropdown" id="sidebarProfileDropdown" style="bottom:calc(100% + 8px);top:auto;left:0;right:auto;">
+        <button id="sidebarOpenSettings">Settings</button>
+        <button class="danger" id="sidebarSignOutBtn" style="display:none;">Log Out</button>
+        <button id="sidebarSignInBtn">Sign In</button>
+      </div>
     </div>
   </aside>
 
@@ -465,7 +813,7 @@
     <!-- DASHBOARD -->
     <section class="screen" id="screen-dashboard" style="position:relative;">
       <div class="ambient-wave" id="dashAmbientWave" style="position:absolute;inset:-20px 0 auto 0;height:130px;opacity:.16;z-index:-1;"></div>
-      <h1 class="dash-greeting" id="greetingText" style="background:var(--grad);background-size:200% 200%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:gradientShift 7s ease infinite;">Your voice. Your knowledge. Always searchable.</h1>
+      <h1 class="dash-greeting" id="greetingText">Your voice, in motion.</h1>
       <p class="dash-sub">Turn recordings, conversations, lectures and videos into searchable knowledge.</p>
       <form class="global-search-box" id="dashSearchForm">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21 16.65 16.65"/></svg>
@@ -514,7 +862,7 @@
         <div class="panel"></div>
       </div>
 
-      <div class="proto-note">Recording, storage, notes, collections, chapters, Key Moments and Knowledge Cards run entirely in your browser (localStorage + IndexedDB). Transcription and Ask VoiceVault call this deployment's own <code>/api/*</code> routes, backed by Groq's hosted open-source Whisper and GPT-OSS models &mdash; they need <code>GROQ_API_KEY</code> and a connected Blob store to work. You'll see a real error, never a fake result, if those aren't set up.</div>
+      <div class="proto-note">Recording, storage, notes, collections, chapters, Key Moments and Knowledge Cards run entirely in your browser (localStorage + IndexedDB). Transcription and Ask VoiceVault call this deployment's own <code>/api/*</code> routes, backed by Groq's hosted open-source Whisper and Llama models &mdash; they need <code>GROQ_API_KEY</code> and a connected Blob store to work. You'll see a real error, never a fake result, if those aren't set up.</div>
     </section>
 
     <!-- LIBRARY -->
@@ -606,10 +954,10 @@
 
       <div class="add-panel active" id="panel-upload">
         <div class="dropzone" id="dropzone" style="border:1.5px dashed var(--border); border-radius:var(--radius-l); padding:46px 22px; text-align:center; cursor:pointer; background:var(--surface);">
-          <input type="file" id="fileInput" accept="audio/*,video/*" multiple style="display:none;" />
+          <input type="file" id="fileInput" accept="audio/*,video/*" style="display:none;" />
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:28px;height:28px;color:var(--text-tertiary);margin-bottom:12px;"><path d="M12 16V4M12 4 7 9M12 4l5 5"/><path d="M4 16v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg>
-          <div style="font-size:14.5px;font-weight:700;margin-bottom:6px;">Drop one or more recordings here</div>
-          <div style="font-size:12.5px;color:var(--text-tertiary);">or click to browse (multiple files allowed) &middot; MP3, WAV, M4A, MP4, WebM, MOV</div>
+          <div style="font-size:14.5px;font-weight:700;margin-bottom:6px;">Drop your recording here</div>
+          <div style="font-size:12.5px;color:var(--text-tertiary);">or click to browse &middot; MP3, WAV, M4A, MP4, WebM, MOV</div>
         </div>
         <div id="pickedFileBox"></div>
         <button class="modal-submit" id="uploadSubmit" disabled style="margin-top:14px;">Add to library</button>
@@ -628,8 +976,7 @@
 
       <div class="add-panel" id="panel-link" style="display:none;">
         <label class="field-label">URL</label>
-        <input class="field-input" id="linkUrlInput" placeholder="https://example.com/article or a YouTube link" />
-        <div class="empty-note" style="margin-bottom:14px;">YouTube links are imported using that video's existing captions (auto-generated or uploaded) &mdash; no audio is downloaded or transcribed. Videos without captions can't currently be imported this way.</div>
+        <input class="field-input" id="linkUrlInput" placeholder="https://example.com/article" />
         <button class="modal-submit" id="linkExtractBtn">Extract</button>
         <div id="linkProcessArea"></div>
       </div>
@@ -647,11 +994,26 @@
   </div>
 </div>
 
+<!-- AUTH-REQUIRED CONTEXTUAL PROMPT -->
+<div class="auth-prompt-overlay" id="authPromptOverlay">
+  <div class="auth-prompt-box">
+    <h3>Your knowledge deserves a place to live.</h3>
+    <p>Create a free VoiceVault account to save recordings, transcripts and insights.</p>
+    <div class="auth-prompt-actions">
+      <button class="cta-primary" id="authPromptSignup">Create Account</button>
+      <button class="ghost-btn" id="authPromptSignin">Sign In</button>
+      <button class="settings-btn" id="authPromptCancel" style="margin-top:2px;">Not now</button>
+    </div>
+  </div>
+</div>
+
 <div class="float-btn-row" id="floatBtnRow"></div>
 
 <script type="module">
   import { upload } from 'https://esm.sh/@vercel/blob@0.27.0/client';
   window.__vercelBlobUpload = upload;
+  import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+  window.__supabaseCreateClient = createClient;
 </script>
 <script>
 /* ======================= ICONS ======================= */
@@ -784,16 +1146,248 @@ function linkifyTimestamps(escapedText) {
   });
 }
 
+/* ======================= AUTH (Supabase, optional) ======================= */
+let authConfigured = false;
+let supabaseClient = null;
+let currentUser = null;
+
+async function initAuth() {
+  try {
+    const res = await fetch(apiBase() + '/api/config');
+    const cfg = await res.json().catch(() => ({}));
+    authConfigured = Boolean(cfg && cfg.authConfigured);
+    if (authConfigured && window.__supabaseCreateClient) {
+      supabaseClient = window.__supabaseCreateClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
+      const { data } = await supabaseClient.auth.getSession();
+      currentUser = data && data.session ? data.session.user : null;
+      supabaseClient.auth.onAuthStateChange((event, session) => {
+        currentUser = session ? session.user : null;
+        renderAuthUI();
+        if (event === 'SIGNED_IN') {
+          closeAuthScreen();
+          closeAuthPrompt();
+          enterApp();
+          toast('Welcome back.');
+        }
+        if (event === 'SIGNED_OUT') {
+          toast('Signed out');
+        }
+      });
+    }
+  } catch (e) {
+    // /api/config not reachable (e.g. no backend deployed yet) -> guest mode, same as unset env vars.
+    authConfigured = false;
+  }
+  renderAuthUI();
+}
+
+function userLabel(user) {
+  if (!user) return 'You';
+  return (user.user_metadata && user.user_metadata.name) || (user.email ? user.email.split('@')[0] : 'You');
+}
+
+function renderAuthUI() {
+  const navAuthActions = document.getElementById('navAuthActions');
+  const navProfileWrap = document.getElementById('navProfileWrap');
+  const navSignInBtn = document.getElementById('navSignInBtn');
+  const sidebarSignOutBtn = document.getElementById('sidebarSignOutBtn');
+  const sidebarSignInBtn = document.getElementById('sidebarSignInBtn');
+  const sidebarPlan = document.getElementById('sidebarPlan');
+
+  if (currentUser) {
+    navAuthActions.style.display = 'none';
+    navProfileWrap.style.display = 'flex';
+    const label = userLabel(currentUser);
+    document.getElementById('navProfileName').textContent = label;
+    document.getElementById('navAvatar').textContent = label.charAt(0).toUpperCase();
+    document.getElementById('sidebarName').textContent = label;
+    document.getElementById('sidebarAvatar').textContent = label.charAt(0).toUpperCase();
+    if (sidebarPlan) sidebarPlan.textContent = currentUser.email || 'Signed in';
+    if (sidebarSignOutBtn) sidebarSignOutBtn.style.display = 'block';
+    if (sidebarSignInBtn) sidebarSignInBtn.style.display = 'none';
+  } else {
+    navProfileWrap.style.display = 'none';
+    navAuthActions.style.display = 'flex';
+    navSignInBtn.style.display = 'inline-flex';
+    document.getElementById('sidebarName').textContent = SETTINGS.name || 'You';
+    document.getElementById('sidebarAvatar').textContent = (SETTINGS.name || 'Y').trim().charAt(0).toUpperCase() || 'Y';
+    if (sidebarPlan) sidebarPlan.textContent = 'Local storage';
+    if (sidebarSignOutBtn) sidebarSignOutBtn.style.display = 'none';
+    if (sidebarSignInBtn) sidebarSignInBtn.style.display = authConfigured ? 'block' : 'none';
+  }
+}
+
+/* ---- gate: call before any protected action; returns true if allowed to proceed ---- */
+function ensureAuthed(actionLabel) {
+  if (!authConfigured) return true; // guest mode: nothing gated
+  if (currentUser) return true;
+  openAuthPrompt();
+  return false;
+}
+function openAuthPrompt() { document.getElementById('authPromptOverlay').classList.add('active'); }
+function closeAuthPrompt() { document.getElementById('authPromptOverlay').classList.remove('active'); }
+document.getElementById('authPromptCancel').addEventListener('click', closeAuthPrompt);
+document.getElementById('authPromptOverlay').addEventListener('click', (e) => { if (e.target.id === 'authPromptOverlay') closeAuthPrompt(); });
+document.getElementById('authPromptSignup').addEventListener('click', () => { closeAuthPrompt(); openAuthScreen('signup'); });
+document.getElementById('authPromptSignin').addEventListener('click', () => { closeAuthPrompt(); openAuthScreen('signin'); });
+
+/* ---- auth screen ---- */
+let authReturnStage = 'landing';
+function openAuthScreen(mode) {
+  authReturnStage = document.getElementById('stage-app').style.display === 'block' ? 'app' : 'landing';
+  document.getElementById('stage-landing').style.display = 'none';
+  document.getElementById('stage-app').style.display = 'none';
+  document.getElementById('stage-auth').style.display = 'flex';
+  clearAuthMessages();
+  setAuthTab(mode || 'signin');
+  window.scrollTo({ top: 0 });
+}
+function closeAuthScreen() {
+  document.getElementById('stage-auth').style.display = 'none';
+}
+document.getElementById('authBackBtn').addEventListener('click', () => {
+  closeAuthScreen();
+  if (authReturnStage === 'app') { document.getElementById('stage-app').style.display = 'block'; }
+  else { document.getElementById('stage-landing').style.display = 'block'; }
+});
+function setAuthTab(mode) {
+  document.getElementById('authTabSignin').classList.toggle('active', mode === 'signin');
+  document.getElementById('authTabSignup').classList.toggle('active', mode === 'signup');
+  document.getElementById('authFormSignin').style.display = mode === 'signin' ? 'block' : 'none';
+  document.getElementById('authFormSignup').style.display = mode === 'signup' ? 'block' : 'none';
+  document.getElementById('authFormForgot').style.display = mode === 'forgot' ? 'block' : 'none';
+  document.getElementById('authGoogleBtn').style.display = mode === 'forgot' ? 'none' : 'flex';
+  document.querySelector('.auth-divider').style.display = mode === 'forgot' ? 'none' : 'flex';
+  document.getElementById('authTabSignin').style.display = mode === 'forgot' ? 'none' : 'block';
+  document.getElementById('authTabSignup').style.display = mode === 'forgot' ? 'none' : 'block';
+  clearAuthMessages();
+  if (mode === 'signin') { document.getElementById('authTitle').textContent = 'Welcome back'; document.getElementById('authSub').textContent = ''; document.getElementById('authFootRow').innerHTML = 'Don\'t have an account? <button type="button" class="auth-link" id="authFootSwitch">Sign up</button>'; document.getElementById('authFootSwitch').addEventListener('click', () => setAuthTab('signup')); }
+  else if (mode === 'signup') { document.getElementById('authTitle').textContent = 'Create your account'; document.getElementById('authSub').textContent = ''; document.getElementById('authFootRow').innerHTML = 'Already have an account? <button type="button" class="auth-link" id="authFootSwitch">Log in</button>'; document.getElementById('authFootSwitch').addEventListener('click', () => setAuthTab('signin')); }
+  else { document.getElementById('authTitle').textContent = 'Reset password'; document.getElementById('authSub').textContent = "We'll email you a link to get back in."; document.getElementById('authFootRow').innerHTML = '<button type="button" class="auth-link" id="authFootSwitch">Back to log in</button>'; document.getElementById('authFootSwitch').addEventListener('click', () => setAuthTab('signin')); }
+}
+document.getElementById('authTabSignin').addEventListener('click', () => setAuthTab('signin'));
+document.getElementById('authTabSignup').addEventListener('click', () => setAuthTab('signup'));
+document.getElementById('authForgotLink').addEventListener('click', () => setAuthTab('forgot'));
+document.getElementById('navSignInBtn').addEventListener('click', () => openAuthScreen('signin'));
+document.getElementById('navExploreBtn').addEventListener('click', () => lpOpenWorkspace());
+
+function clearAuthMessages() {
+  const err = document.getElementById('authError'); err.classList.remove('show'); err.textContent = '';
+  const info = document.getElementById('authInfo'); info.classList.remove('show'); info.textContent = '';
+}
+function showAuthError(msg) { clearAuthMessages(); const el = document.getElementById('authError'); el.textContent = msg; el.classList.add('show'); }
+function showAuthInfo(msg) { clearAuthMessages(); const el = document.getElementById('authInfo'); el.textContent = msg; el.classList.add('show'); }
+function friendlyAuthError(msg) {
+  if (/invalid login credentials/i.test(msg)) return "That email or password doesn't match.";
+  if (/already registered|already exists/i.test(msg)) return 'That email is already registered.';
+  if (/email not confirmed/i.test(msg)) return 'Please confirm your email before signing in — check your inbox.';
+  return msg || 'Something went wrong. Please try again.';
+}
+
+document.getElementById('authFormSignin').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  if (!supabaseClient) return;
+  const btn = document.getElementById('signinSubmit'); btn.disabled = true; btn.textContent = 'Logging in…';
+  const email = document.getElementById('signinEmail').value.trim();
+  const password = document.getElementById('signinPassword').value;
+  try {
+    const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+    if (error) throw error;
+    // onAuthStateChange handles the transition into the app.
+  } catch (err) {
+    showAuthError(friendlyAuthError(err.message));
+  } finally {
+    btn.disabled = false; btn.textContent = 'Log in';
+  }
+});
+
+document.getElementById('authFormSignup').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  if (!supabaseClient) return;
+  const name = document.getElementById('signupName').value.trim();
+  const email = document.getElementById('signupEmail').value.trim();
+  const password = document.getElementById('signupPassword').value;
+  const confirm = document.getElementById('signupConfirm').value;
+  if (password !== confirm) { showAuthError('Passwords do not match.'); return; }
+  const btn = document.getElementById('signupSubmit'); btn.disabled = true; btn.textContent = 'Creating account…';
+  try {
+    const { data, error } = await supabaseClient.auth.signUp({ email, password, options: { data: { name } } });
+    if (error) throw error;
+    if (data && data.session) {
+      // Email confirmation disabled on this project -> signed in immediately.
+    } else {
+      showAuthInfo('Account created. Check your email to confirm, then sign in.');
+      setAuthTab('signin');
+    }
+  } catch (err) {
+    showAuthError(friendlyAuthError(err.message));
+  } finally {
+    btn.disabled = false; btn.textContent = 'Sign up';
+  }
+});
+
+document.getElementById('authFormForgot').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  if (!supabaseClient) return;
+  const email = document.getElementById('forgotEmail').value.trim();
+  const btn = document.getElementById('forgotSubmit'); btn.disabled = true; btn.textContent = 'Sending…';
+  try {
+    const { error } = await supabaseClient.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin });
+    if (error) throw error;
+    showAuthInfo('If that email has an account, a reset link is on its way.');
+  } catch (err) {
+    showAuthError(friendlyAuthError(err.message));
+  } finally {
+    btn.disabled = false; btn.textContent = 'Send reset link';
+  }
+});
+
+document.getElementById('authGoogleBtn').addEventListener('click', async () => {
+  if (!supabaseClient) return;
+  try {
+    const { error } = await supabaseClient.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin } });
+    if (error) throw error;
+  } catch (err) {
+    showAuthError(friendlyAuthError(err.message));
+  }
+});
+
+async function signOut() {
+  if (!supabaseClient) return;
+  await supabaseClient.auth.signOut();
+  document.getElementById('sidebarProfileDropdown').classList.remove('open');
+  document.getElementById('navProfileDropdown').classList.remove('open');
+  document.getElementById('stage-app').style.display = 'none';
+  document.getElementById('stage-landing').style.display = 'block';
+  window.scrollTo({ top: 0 });
+}
+document.getElementById('navSignOutBtn').addEventListener('click', signOut);
+document.getElementById('sidebarSignOutBtn').addEventListener('click', signOut);
+document.getElementById('sidebarSignInBtn').addEventListener('click', () => openAuthScreen('signin'));
+
+/* ---- profile dropdowns ---- */
+document.getElementById('navProfileTrigger').addEventListener('click', (e) => { e.stopPropagation(); document.getElementById('navProfileDropdown').classList.toggle('open'); });
+document.getElementById('navOpenApp').addEventListener('click', () => { document.getElementById('navProfileDropdown').classList.remove('open'); document.getElementById('stage-landing').style.display = 'none'; enterApp(); });
+document.getElementById('navOpenLibrary').addEventListener('click', () => { document.getElementById('navProfileDropdown').classList.remove('open'); document.getElementById('stage-landing').style.display = 'none'; enterApp(); showScreen('library'); });
+document.getElementById('navOpenSettings').addEventListener('click', () => { document.getElementById('navProfileDropdown').classList.remove('open'); document.getElementById('stage-landing').style.display = 'none'; enterApp(); showScreen('settings'); });
+document.getElementById('sidebarProfileTrigger').addEventListener('click', (e) => { e.stopPropagation(); document.getElementById('sidebarProfileDropdown').classList.toggle('open'); });
+document.getElementById('sidebarOpenSettings').addEventListener('click', () => { document.getElementById('sidebarProfileDropdown').classList.remove('open'); showScreen('settings'); });
+document.addEventListener('click', () => { document.getElementById('navProfileDropdown').classList.remove('open'); document.getElementById('sidebarProfileDropdown').classList.remove('open'); });
+
 /* ======================= LANDING / APP TOGGLE ======================= */
+function lpOpenWorkspace(screen) {
+  if (authConfigured && !currentUser) { openAuthScreen('signin'); return; }
+  enterApp();
+  if (screen) showScreen(screen);
+}
 function enterApp() {
   document.getElementById('stage-landing').style.display = 'none';
   document.getElementById('stage-app').style.display = 'block';
   showScreen('dashboard');
 }
-document.getElementById('navExploreBtn').addEventListener('click', enterApp);
-document.getElementById('heroRecordBtn').addEventListener('click', () => { enterApp(); enterAddTab('record'); });
-document.getElementById('heroUploadBtn').addEventListener('click', () => { enterApp(); enterAddTab('upload'); });
-document.getElementById('heroUrlBtn').addEventListener('click', () => { enterApp(); enterAddTab('link'); });
+document.getElementById('heroRecordBtn').addEventListener('click', () => { if (!ensureAuthed('record')) return; enterApp(); enterAddTab('record'); });
+document.getElementById('heroUploadBtn').addEventListener('click', () => { if (!ensureAuthed('upload')) return; enterApp(); enterAddTab('upload'); });
+const heroUrlBtn = document.getElementById('heroUrlBtn'); if (heroUrlBtn) heroUrlBtn.addEventListener('click', () => { if (!ensureAuthed('import')) return; enterApp(); enterAddTab('link'); });
 document.getElementById('sidebarLogo').addEventListener('click', () => { document.getElementById('stage-app').style.display='none'; document.getElementById('stage-landing').style.display='block'; window.scrollTo({top:0}); });
 
 document.getElementById('openAddModalBtn').querySelector('.ic').innerHTML = ICONS.plus;
@@ -845,6 +1439,7 @@ function setStatus(mode) {
 }
 document.querySelectorAll('[data-nav]').forEach(el => el.addEventListener('click', () => {
   const target = el.dataset.nav;
+  if (target === 'library' && !ensureAuthed('open your library')) return;
   if (el.dataset.mode) { state.libMode = el.dataset.mode; state.libFilter='all'; }
   if (target === 'library' && !el.dataset.mode) state.libMode = 'sources';
   showScreen(target);
@@ -875,6 +1470,8 @@ function sourceCard(s) {
       transcribing: '<span class="badge-warn">Transcribing…</span>',
       upload_failed: '<span class="badge-warn" style="color:var(--danger);border-color:var(--danger);">Upload failed</span>',
       transcription_failed: '<span class="badge-warn" style="color:var(--danger);border-color:var(--danger);">Transcription failed</span>',
+      no_audio_track: '<span class="badge-warn">No audio track</span>',
+      invalid_media: '<span class="badge-warn" style="color:var(--danger);border-color:var(--danger);">Invalid media</span>',
     };
     metaBits.push(badges[st] || '<span class="badge-warn">No transcript</span>');
   } else { metaBits.push((s.wordCount||0) + ' words'); if (s.type==='web') metaBits.push(s.url ? new URL(s.url).hostname.replace('www.','') : 'web'); }
@@ -916,8 +1513,8 @@ function drawMiniWave(canvas, peaks, ratio) {
   canvas.width = cssW*dpr; canvas.height = 26*dpr;
   const ctx = canvas.getContext('2d');
   ctx.clearRect(0,0,canvas.width,canvas.height);
-  const accent = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#E2B04B';
-  const border = getComputedStyle(document.documentElement).getPropertyValue('--border').trim() || '#3D2C1D';
+  const accent = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#D6A13A';
+  const border = getComputedStyle(document.documentElement).getPropertyValue('--border').trim() || '#46372A';
   const step = Math.max(1, Math.floor(peaks.length/60));
   const sampled = []; for (let i=0;i<peaks.length;i+=step) sampled.push(peaks[i]);
   const barW = canvas.width/sampled.length;
@@ -1256,8 +1853,8 @@ function drawWaveform(canvas, peaks, progressRatio) {
   canvas.width = cssW * dpr; canvas.height = 60 * dpr;
   const ctx = canvas.getContext('2d');
   ctx.clearRect(0,0,canvas.width,canvas.height);
-  const accent = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#8A7CDB';
-  const border = getComputedStyle(document.documentElement).getPropertyValue('--border').trim() || '#322F3B';
+  const accent = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#D6A13A';
+  const border = getComputedStyle(document.documentElement).getPropertyValue('--border').trim() || '#46372A';
   const barW = canvas.width / peaks.length;
   peaks.forEach((p,i) => {
     const barH = Math.max(2*dpr, p*canvas.height*0.9);
@@ -1279,13 +1876,11 @@ async function openSource(id, startAt) {
   let content = '', segments = [];
   if (s.type === 'text' || s.type === 'web') { content = contentCache[s.id] ?? await idbGet('content', s.id) ?? ''; contentCache[s.id] = content; }
   let mediaUrl = null;
-  if ((s.type === 'audio' || s.type === 'video') && !s.noLocalMedia) {
+  if (s.type === 'audio' || s.type === 'video') {
     if (!blobUrlCache[s.id]) {
       try { const blob = await idbGet('blobs', s.id); if (blob) { blobUrlCache[s.id] = URL.createObjectURL(blob); mediaBlobCache[s.id] = blob; } } catch(e) {}
     }
     mediaUrl = blobUrlCache[s.id] || null;
-  }
-  if (s.type === 'audio' || s.type === 'video') {
     if (s.transcriptStatus === 'ready') {
       segments = transcriptCache[s.id] ?? await idbGet('transcripts', s.id) ?? [];
       transcriptCache[s.id] = segments;
@@ -1298,10 +1893,8 @@ async function openSource(id, startAt) {
   const relatedNotes = NOTES.filter(n => n.sourceId === s.id);
 
   let mediaBlock = '';
-  if (s.noLocalMedia) {
-    mediaBlock = `<a href="${escapeHtml(s.url)}" target="_blank" rel="noopener" class="open-source-btn" style="display:inline-flex;">${ICONS.external}<span>Open on YouTube</span></a><div class="empty-note" style="margin-top:12px;">This transcript came from YouTube's own captions for this video — there's no local audio file, so playback happens on YouTube itself. Clicking a transcript line opens the video at that timestamp.</div>`;
-  } else if (s.type === 'audio') mediaBlock = mediaUrl ? `<audio controls id="detailMedia" src="${mediaUrl}"></audio>` : `<div class="transcript-empty">Audio file not found in local storage.</div>`;
-  else if (s.type === 'video') mediaBlock = mediaUrl ? `<video controls id="detailMedia" src="${mediaUrl}" style="max-height:320px;"></video>` : `<div class="transcript-empty">Video file not found in local storage.</div>`;
+  if (s.type === 'audio') mediaBlock = mediaUrl ? `<audio controls id="detailMedia" src="${mediaUrl}"></audio>` : `<div class="transcript-empty">Audio file not found in local storage.</div>`;
+  if (s.type === 'video') mediaBlock = mediaUrl ? `<video controls id="detailMedia" src="${mediaUrl}" style="max-height:320px;"></video>` : `<div class="transcript-empty">Video file not found in local storage.</div>`;
 
   let transcriptBlock = '';
   if (s.type === 'audio' || s.type === 'video') {
@@ -1312,6 +1905,10 @@ async function openSource(id, startAt) {
         <div id="transcriptLines">${segments.map((sg,i) => `<div class="transcript-line" data-t="${sg.start}" data-i="${i}"><input type="checkbox" class="seg-check" data-i="${i}" /><span class="t-time mono">${formatSeconds(sg.start)}</span><span class="t-text">${escapeHtml(sg.text)}</span><button class="save-star ${isKeyMoment(s.id, sg.start)?'saved':''}" data-i="${i}" title="Save as Key Moment">${ICONS.star}</button></div>`).join('')}</div>`;
     } else if (status === 'no_speech') {
       transcriptBlock = `<div class="transcript-empty">No recognizable speech was detected in this audio. If this seems wrong, it may be an instrumental/music track, very quiet audio, or a language issue.<br/><button class="rec-btn" id="retryTranscribeBtn" style="margin-top:10px;">Try again</button></div>`;
+    } else if (status === 'no_audio_track') {
+      transcriptBlock = `<div class="transcript-empty">NO AUDIO TRACK<br/>This video doesn't contain an audio track, so there's nothing for VoiceVault to transcribe.</div>`;
+    } else if (status === 'invalid_media') {
+      transcriptBlock = `<div class="transcript-empty" style="border:1px solid var(--danger);">INVALID MEDIA<br/>This file couldn't be read as audio or video. It may be empty, corrupted, or in a format this browser can't open. Try exporting it again or choosing a different file.${s.transcriptError ? '<br/><span style="color:var(--text-tertiary);">Details: ' + escapeHtml(s.transcriptError) + '</span>' : ''}</div>`;
     } else if (status === 'uploading') {
       transcriptBlock = `<div class="transcript-empty">UPLOADING&hellip; ${escapeHtml(s.transcriptError || "sending this recording to storage before transcription can start.")}</div>`;
     } else if (status === 'transcribing') {
@@ -1429,10 +2026,6 @@ async function openSource(id, startAt) {
     if (s.type === 'text' || s.type === 'web') setupTextSelectionAsk('contentView', s, content);
   }
 
-  if (s.noLocalMedia && startAt != null) {
-    const sep = s.url.includes('?') ? '&' : '?';
-    window.open(s.url + sep + 't=' + Math.floor(startAt) + 's', '_blank');
-  }
   if (s.type !== 'audio' && s.type !== 'video') return; // link/text sources stop here
 
   // ---- media + waveform + resume + position tracking ----
@@ -1494,14 +2087,7 @@ async function openSource(id, startAt) {
   // ---- transcript search / seek / key-moment star / multi-select ----
   if (segments.length) {
     document.querySelectorAll('#transcriptLines .transcript-line').forEach(line => {
-      line.addEventListener('click', (e) => {
-        if (e.target.closest('.seg-check') || e.target.closest('.save-star')) return;
-        const t = parseFloat(line.dataset.t);
-        if (s.noLocalMedia) {
-          const sep = s.url.includes('?') ? '&' : '?';
-          window.open(s.url + sep + 't=' + Math.floor(t) + 's', '_blank');
-        } else if (media) { media.currentTime = t; media.play(); }
-      });
+      line.addEventListener('click', (e) => { if (e.target.closest('.seg-check') || e.target.closest('.save-star')) return; media.currentTime = parseFloat(line.dataset.t); media.play(); });
     });
     document.querySelectorAll('#transcriptLines .save-star').forEach(btn => btn.addEventListener('click', (e) => { e.stopPropagation(); toggleKeyMoment(s, segments[+btn.dataset.i], btn); }));
     document.querySelectorAll('#transcriptLines .seg-check').forEach(cb => cb.addEventListener('change', () => { if (cb.checked) state.selectedSegIdx.add(+cb.dataset.i); else state.selectedSegIdx.delete(+cb.dataset.i); renderSegToolbar(s, segments); }));
@@ -1525,11 +2111,7 @@ async function openSource(id, startAt) {
   }
 
   // ---- chapters ----
-  document.querySelectorAll('#chaptersList .chapter-row').forEach(row => row.addEventListener('click', () => {
-    const t = parseFloat(row.dataset.t);
-    if (s.noLocalMedia) { const sep = s.url.includes('?') ? '&' : '?'; window.open(s.url + sep + 't=' + Math.floor(t) + 's', '_blank'); }
-    else if (media) { media.currentTime = t; media.play(); }
-  }));
+  document.querySelectorAll('#chaptersList .chapter-row').forEach(row => row.addEventListener('click', () => { media.currentTime = parseFloat(row.dataset.t); media.play(); }));
   const genBtn = document.getElementById('genChaptersBtn');
   if (genBtn) genBtn.addEventListener('click', () => generateChaptersAI(s, segments));
   const addChBtn = document.getElementById('addChapterBtn');
@@ -1588,6 +2170,7 @@ function renderSegToolbar(source, segments) {
   });
   document.getElementById('segSave').addEventListener('click', () => { selSorted().forEach(sg => { if (!isKeyMoment(source.id, sg.start)) { KEYMOMENTS.unshift({ id:uid(), sourceId:source.id, sourceTitle:source.title, start:sg.start, label:sg.text.slice(0,80), note:'', dateCreated:new Date().toISOString() }); } }); saveKeyMoments(); toast('Saved as Key Moment'); openSource(source.id); });
   document.getElementById('segCard').addEventListener('click', () => {
+    if (!ensureAuthed('save knowledge')) return;
     const sel = selSorted(); const combined = sel.map(sg=>sg.text).join(' ');
     const title = prompt('Knowledge Card title:', combined.slice(0,40));
     if (!title) return;
@@ -1603,6 +2186,7 @@ function renderSegToolbar(source, segments) {
 /* ---- Key Moments ---- */
 function isKeyMoment(sourceId, start) { return KEYMOMENTS.some(k => k.sourceId===sourceId && Math.abs(k.start-start) < 0.05); }
 function toggleKeyMoment(source, segment, btnEl) {
+  if (!ensureAuthed('save key moment')) return;
   const idx = KEYMOMENTS.findIndex(k => k.sourceId===source.id && Math.abs(k.start-segment.start) < 0.05);
   if (idx > -1) { KEYMOMENTS.splice(idx,1); btnEl.classList.remove('saved'); toast('Removed Key Moment'); }
   else { KEYMOMENTS.unshift({ id:uid(), sourceId:source.id, sourceTitle:source.title, start:segment.start, label:segment.text.slice(0,80), note:'', dateCreated:new Date().toISOString() }); btnEl.classList.add('saved'); toast('Saved as Key Moment'); }
@@ -1611,6 +2195,7 @@ function toggleKeyMoment(source, segment, btnEl) {
 
 /* ---- Chapters: AI-generated (via Groq through /api/ask) + manual ---- */
 async function generateChaptersAI(source, segments) {
+  if (!ensureAuthed('save chapter')) return;
   const btn = document.getElementById('genChaptersBtn');
   if (btn) { btn.disabled = true; btn.textContent = 'Generating…'; }
   try {
@@ -1633,6 +2218,7 @@ async function generateChaptersAI(source, segments) {
   }
 }
 function addManualChapter(source, media) {
+  if (!ensureAuthed('save chapter')) return;
   const start = media ? media.currentTime : 0;
   const title = prompt('Chapter title at ' + formatSeconds(start) + ':');
   if (!title) return;
@@ -1644,6 +2230,7 @@ function addManualChapter(source, media) {
 
 /* ---- Ask VoiceVault: real Groq call, with [mm:ss] citations turned into clickable seek links ---- */
 async function askAboutSource(source, content, query, explicitSegments, understandingLabel) {
+  if (!ensureAuthed('ask VoiceVault')) return;
   query = (query||'').trim();
   const box = document.getElementById('localAskAnswer');
   if (!query || !box) return;
@@ -1666,16 +2253,7 @@ async function askAboutSource(source, content, query, explicitSegments, understa
       sourcesHtml = `<div class="ask-disclaimer" style="margin-top:10px;">Sources</div>` + data.sources.map(sr => `<span class="source-chip" data-t="${sr.timestamp}">${formatSeconds(sr.timestamp)} — "${escapeHtml((sr.text||'').slice(0,50))}"</span>`).join('');
     }
     box.innerHTML = `<div class="ask-answer-box reveal"><div class="ask-disclaimer" style="text-transform:uppercase;letter-spacing:.04em;font-weight:700;color:var(--accent-strong);background:none;padding:0;margin-bottom:8px;">Answer</div><p class="answer-text" style="font-size:13px;line-height:1.6;">${answerHtml}</p>${sourcesHtml}</div>`;
-    box.querySelectorAll('.seek-cite, .source-chip').forEach(el => el.addEventListener('click', () => {
-      const t = parseFloat(el.dataset.t);
-      if (source.noLocalMedia) {
-        const sep = source.url.includes('?') ? '&' : '?';
-        window.open(source.url + sep + 't=' + Math.floor(t) + 's', '_blank');
-      } else {
-        const media = document.getElementById('detailMedia');
-        if (media) { media.currentTime = t; media.play(); }
-      }
-    }));
+    box.querySelectorAll('.seek-cite, .source-chip').forEach(el => el.addEventListener('click', () => { const t = parseFloat(el.dataset.t); const media = document.getElementById('detailMedia'); if (media) { media.currentTime = t; media.play(); } }));
   } catch (err) {
     box.innerHTML = `<div class="ask-answer-box"><div class="ask-disclaimer" style="color:var(--danger);">AI request failed. Reason: ${escapeHtml(err.message)} <button class="rec-btn" id="askRetryBtn" style="margin-top:8px;">Retry</button></div></div>`;
     const retry = document.getElementById('askRetryBtn'); if (retry) retry.addEventListener('click', () => askAboutSource(source, content, query, explicitSegments, understandingLabel));
@@ -1716,6 +2294,7 @@ function setupTextSelectionAsk(containerId, source, content) {
       };
       document.getElementById('floatCard').onclick = () => {
         row.style.display='none';
+        if (!ensureAuthed('save knowledge')) return;
         const title = prompt('Knowledge Card title:', text.slice(0,40)); if (!title) return;
         const note = prompt('Optional note:', '') || '';
         KNOWLEDGECARDS.unshift({ id:uid(), title, sourceId: source.id, sourceTitle: source.title, timestamp: null, selectedText: text, note, dateCreated: new Date().toISOString() });
@@ -1852,12 +2431,13 @@ function openModalChooser() {
   modalBody.innerHTML = `<div class="choice-grid">
     <button class="choice-btn" data-choice="record"><div class="choice-icon">${ICONS.mic}</div><div><div class="choice-title">Record Audio</div><div class="choice-sub">Real browser microphone recording with a live waveform</div></div></button>
     <button class="choice-btn" data-choice="upload"><div class="choice-icon">${ICONS.upload}</div><div><div class="choice-title">Upload Audio / Video</div><div class="choice-sub">MP3, WAV, M4A, MP4, WebM, MOV</div></div></button>
-    <button class="choice-btn" data-choice="link"><div class="choice-icon">${ICONS.link}</div><div><div class="choice-title">Import URL</div><div class="choice-sub">Webpages extracted server-side. YouTube links use the video's existing captions &mdash; videos with no captions can't be imported yet.</div></div></button>
+    <button class="choice-btn" data-choice="link"><div class="choice-icon">${ICONS.link}</div><div><div class="choice-title">Import URL</div><div class="choice-sub">Extracted server-side; fails honestly on paywalled/login pages</div></div></button>
   </div>`;
   modalBody.querySelectorAll('[data-choice]').forEach(btn => btn.addEventListener('click', () => { closeModal(); enterAddTab(btn.dataset.choice); }));
   openModal();
 }
 function enterAddTab(tab) {
+  if (!ensureAuthed('add')) return;
   showScreen('add');
   document.querySelectorAll('.add-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
   document.querySelectorAll('.add-panel').forEach(p => p.style.display = 'none');
@@ -1879,7 +2459,7 @@ function drawRecWave() {
   if (!canvas || !recAnalyser) return;
   const ctx = canvas.getContext('2d');
   const dataArray = new Uint8Array(recAnalyser.frequencyBinCount);
-  const accent = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#E2B04B';
+  const accent = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#D6A13A';
   function draw() {
     recAnimId = requestAnimationFrame(draw);
     recAnalyser.getByteFrequencyData(dataArray);
@@ -2093,31 +2673,134 @@ async function splitIntoWavChunks(blobOrFile, chunkSeconds) {
 
 const CHUNK_THRESHOLD_SEC = 600; // ~10 minutes — above this, split client-side before sending to Groq
 
+// Groq's Whisper endpoint (OpenAI-compatible) only accepts these file
+// extensions natively. Anything else — most commonly .mov/.mkv, which this
+// app's own upload UI advertises as supported — would otherwise reach Groq
+// and fail with an honest but avoidable "unsupported format" error. Rather
+// than let that happen, such files are decoded client-side via the same
+// Web Audio pipeline used for long-recording chunking (see
+// splitIntoWavChunks) and re-encoded as a Groq-native WAV before upload.
+// This is real transcoding of the real audio track, not a workaround that
+// only pretends to support the format.
+const GROQ_NATIVE_EXTENSIONS = ['flac','m4a','mp3','mp4','mpeg','mpga','oga','ogg','wav','webm'];
+function fileExtension(name) {
+  const m = /\.([a-z0-9]+)$/i.exec(name || '');
+  return m ? m[1].toLowerCase() : '';
+}
+function needsClientTranscode(filename) {
+  const ext = fileExtension(filename);
+  return !GROQ_NATIVE_EXTENSIONS.includes(ext);
+}
+
+/* ---- Media probe: does this file actually contain an audio track? ----
+   Reads only the container header (MP4/MOV 'hdlr' boxes, WebM/Matroska TrackType) so a silent video
+   is reported as NO AUDIO TRACK instead of being sent to transcription or mislabelled "No speech".
+   It FAILS OPEN: anything it can't positively parse returns hasAudio:null and the normal pipeline runs. */
+async function probeMediaTracks(file) {
+  const unknown = { container: 'unknown', hasAudio: null, hasVideo: null };
+  try {
+    if (!file || !file.size) return { container: null, hasAudio: null, hasVideo: null, empty: true };
+    const head = new Uint8Array(await file.slice(0, 16).arrayBuffer());
+    const asc = (u, o, n) => { let r = ''; for (let i = 0; i < n; i++) r += String.fromCharCode(u[o + i] || 0); return r; };
+    if (asc(head, 4, 4) === 'ftyp') return await probeIsoBmff(file);
+    if (head[0] === 0x1A && head[1] === 0x45 && head[2] === 0xDF && head[3] === 0xA3) return await probeMatroska(file);
+    return unknown; // wav/mp3/ogg/flac/etc. are audio containers by nature
+  } catch (e) { return unknown; }
+}
+async function probeIsoBmff(file) {
+  const res = { container: 'mp4', hasAudio: null, hasVideo: null };
+  const str = (v, o) => String.fromCharCode(v.getUint8(o), v.getUint8(o + 1), v.getUint8(o + 2), v.getUint8(o + 3));
+  let off = 0; const total = file.size;
+  while (off + 8 <= total) {
+    const hv = new DataView(await file.slice(off, off + 16).arrayBuffer());
+    let size = hv.getUint32(0), hdr = 8; const type = str(hv, 4);
+    if (size === 1) { size = Number(hv.getBigUint64(8)); hdr = 16; } else if (size === 0) size = total - off;
+    if (size < hdr) return res;
+    if (type === 'moov') {
+      if (size > 64 * 1024 * 1024) return res;
+      const view = new DataView(await file.slice(off + hdr, off + size).arrayBuffer());
+      const handlers = [];
+      (function walk(start, end) {
+        let o = start;
+        while (o + 8 <= end) {
+          let sz = view.getUint32(o), h = 8; const t = str(view, o + 4);
+          if (sz === 1) { sz = Number(view.getBigUint64(o + 8)); h = 16; } else if (sz === 0) sz = end - o;
+          if (sz < h || o + sz > end) break;
+          if (t === 'trak' || t === 'mdia') walk(o + h, o + sz);
+          else if (t === 'hdlr' && o + h + 12 <= end) handlers.push(str(view, o + h + 8));
+          o += sz;
+        }
+      })(0, view.byteLength);
+      if (handlers.length) { res.hasAudio = handlers.includes('soun'); res.hasVideo = handlers.includes('vide'); }
+      return res;
+    }
+    off += size;
+  }
+  return res;
+}
+async function probeMatroska(file) {
+  const res = { container: 'matroska', hasAudio: null, hasVideo: null };
+  const u = new Uint8Array(await file.slice(0, Math.min(file.size, 2 * 1024 * 1024)).arrayBuffer());
+  const readId = (o) => { const b = u[o]; let len = 1, m = 0x80; while (len <= 4 && !(b & m)) { len++; m >>= 1; } if (len > 4) return null; let id = 0; for (let i = 0; i < len; i++) id = id * 256 + u[o + i]; return { id, len }; };
+  const readSize = (o) => { const b = u[o]; let len = 1, m = 0x80; while (len <= 8 && !(b & m)) { len++; m >>= 1; } if (len > 8) return null; let v = b & (m - 1), unk = v === m - 1; for (let i = 1; i < len; i++) { v = v * 256 + u[o + i]; if (u[o + i] !== 0xFF) unk = false; } return { size: unk ? -1 : v, len }; };
+  const types = []; let sawTracks = false;
+  (function walk(start, end, depth) {
+    let o = start;
+    while (o < end && o + 2 < u.length) {
+      const id = readId(o); if (!id) return; const sz = readSize(o + id.len); if (!sz) return;
+      const body = o + id.len + sz.len, bodyEnd = sz.size < 0 ? end : Math.min(end, body + sz.size);
+      if (id.id === 0x18538067 || id.id === 0x1654AE6B || id.id === 0xAE) { if (id.id === 0x1654AE6B) sawTracks = true; walk(body, bodyEnd, depth + 1); }
+      else if (id.id === 0x83 && sz.size === 1) types.push(u[body]);
+      else if (id.id === 0x1F43B675) return; // reached clusters
+      if (sz.size < 0) return;
+      o = body + sz.size;
+    }
+  })(0, u.length, 0);
+  if (sawTracks && types.length) { res.hasAudio = types.includes(2); res.hasVideo = types.includes(1); }
+  return res;
+}
+
 /* ---- Real transcription pipeline: Upload -> Transcribe -> Ready/No speech, each a distinct real state ---- */
 async function transcribeSource(id, blobOrFile, filename, contentType) {
   const s = SOURCES.find(x => x.id === id);
   if (!s) return;
   contentType = contentType || baseContentType(blobOrFile.type || 'audio/webm');
-  let phase = 'upload';
+  let phase = 'upload'; let probe = null;
   s.transcriptStatus = 'uploading'; s.transcriptError = null;
   saveSources(); refreshIfVisible(id);
   setStatus('processing');
 
   try {
+    // Distinguish NO AUDIO TRACK / INVALID MEDIA from NO SPEECH first: it needs no network and no upload.
+    probe = await probeMediaTracks(blobOrFile);
+    if (probe.empty || probe.hasAudio === false) {
+      try { await idbPut('transcripts', id, []); } catch(e) {}
+      try { await idbPut('content', id, ''); } catch(e) {}
+      transcriptCache[id] = []; contentCache[id] = '';
+      s.transcriptStatus = probe.empty ? 'invalid_media' : 'no_audio_track';
+      s.transcriptError = probe.empty ? 'The file is empty.' : null; s.transcriptWordCount = 0;
+      setStatus('ready'); saveSources(); refreshIfVisible(id);
+      return;
+    }
+
     if (!window.__vercelBlobUpload) throw new Error('Upload library failed to load.');
 
     let allSegments = [], combinedText = '', anySpeech = false;
-    const useChunking = s.durationSec && s.durationSec > CHUNK_THRESHOLD_SEC;
+    const tooLong = s.durationSec && s.durationSec > CHUNK_THRESHOLD_SEC;
+    const unsupportedFormat = needsClientTranscode(filename);
+    const useChunking = tooLong || unsupportedFormat;
 
     if (useChunking) {
       const chunks = await splitIntoWavChunks(blobOrFile, CHUNK_THRESHOLD_SEC);
+      const multi = chunks.length > 1;
       for (let i = 0; i < chunks.length; i++) {
-        const chunkName = `chunk-${i+1}-of-${chunks.length}.wav`;
+        const chunkName = multi ? `chunk-${i+1}-of-${chunks.length}.wav` : 'audio.wav';
+        const partLabel = multi ? ` part ${i+1} of ${chunks.length}` : '';
         phase = 'upload';
-        s.transcriptStatus = 'uploading'; s.transcriptError = `Uploading part ${i+1} of ${chunks.length}…`; saveSources(); refreshIfVisible(id);
+        s.transcriptStatus = 'uploading'; s.transcriptError = `Uploading${partLabel}${unsupportedFormat && !multi ? ' (converted for transcription)' : ''}…`; saveSources(); refreshIfVisible(id);
         const blobResult = await window.__vercelBlobUpload(chunkName, chunks[i].blob, { access: 'public', handleUploadUrl: apiBase() + '/api/blob-upload', contentType: 'audio/wav' });
         phase = 'transcribe';
-        s.transcriptStatus = 'transcribing'; s.transcriptError = `Transcribing part ${i+1} of ${chunks.length}…`; saveSources(); refreshIfVisible(id);
+        s.transcriptStatus = 'transcribing'; s.transcriptError = `Transcribing${partLabel}…`; saveSources(); refreshIfVisible(id);
         const res = await fetch(apiBase() + '/api/transcribe', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ blobUrl: blobResult.url, filename: chunkName, contentType: 'audio/wav' }) });
         const data = await res.json().catch(() => ({}));
         if (!res.ok) throw new Error(data.error || ('Server responded with ' + res.status));
@@ -2154,7 +2837,9 @@ async function transcribeSource(id, blobOrFile, filename, contentType) {
       setStatus('captured');
     }
   } catch (err) {
-    s.transcriptStatus = phase === 'upload' ? 'upload_failed' : 'transcription_failed';
+    const emsg = (err && err.message) ? err.message : '';
+    const looksInvalid = /unable to decode audio data|EncodingError|valid media file|invalid file format|could not process file|file is empty/i.test(emsg) && !(probe && probe.hasAudio === true);
+    s.transcriptStatus = looksInvalid ? 'invalid_media' : (phase === 'upload' ? 'upload_failed' : 'transcription_failed');
     s.transcriptError = (err && err.message) ? err.message : 'Something went wrong.';
     setStatus('ready');
   }
@@ -2171,81 +2856,54 @@ const dropzone = document.getElementById('dropzone'); const fileInput = document
 dropzone.addEventListener('click', () => fileInput.click());
 dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.style.borderColor='var(--accent)'; });
 dropzone.addEventListener('dragleave', () => dropzone.style.borderColor='var(--border)');
-dropzone.addEventListener('drop', e => { e.preventDefault(); dropzone.style.borderColor='var(--border)'; if (e.dataTransfer.files.length) handleUploadFiles(e.dataTransfer.files); });
-fileInput.addEventListener('change', e => { if (e.target.files.length) handleUploadFiles(e.target.files); });
+dropzone.addEventListener('drop', e => { e.preventDefault(); dropzone.style.borderColor='var(--border)'; if (e.dataTransfer.files.length) handleUploadFile(e.dataTransfer.files[0]); });
+fileInput.addEventListener('change', e => { if (e.target.files.length) handleUploadFile(e.target.files[0]); });
 function formatBytes(n) { if (n<1024) return n+' B'; if (n<1024*1024) return (n/1024).toFixed(1)+' KB'; return (n/1024/1024).toFixed(1)+' MB'; }
-
-let pickedFiles = [];
-async function handleUploadFiles(fileList) {
-  pickedFiles = pickedFiles.concat(Array.from(fileList));
-  await renderPickedFiles();
-}
-async function renderPickedFiles() {
-  const box = document.getElementById('pickedFileBox');
-  if (!pickedFiles.length) { box.innerHTML = ''; document.getElementById('uploadSubmit').disabled = true; return; }
-  const rows = await Promise.all(pickedFiles.map(async (file, i) => {
-    const isVideo = file.type.startsWith('video') || /\.(mp4|mov|mkv|webm)$/i.test(file.name);
-    const duration = await getMediaDuration(URL.createObjectURL(file)).catch(() => null);
-    return `<div class="picked-file-row" style="display:flex;align-items:center;gap:12px;margin-top:10px;padding:11px 13px;border:1px solid var(--border);border-radius:var(--radius-m);background:var(--surface);">${isVideo?ICONS.video:ICONS.audio}<div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(file.name)}</div><div style="font-size:11.5px;color:var(--text-tertiary);">${formatBytes(file.size)}${duration?' · '+formatSeconds(duration):''}</div></div><button type="button" class="remove-picked" data-i="${i}" style="background:none;border:none;color:var(--text-tertiary);font-size:12px;">Remove</button></div>`;
-  }));
-  box.innerHTML = rows.join('') +
-    (pickedFiles.length === 1
-      ? `<label class="field-label" style="margin-top:14px;">Title</label><input class="field-input" id="uploadTitleInput" value="${escapeHtml(pickedFiles[0].name.replace(/\.[a-z0-9]+$/i,''))}" />`
-      : `<div class="empty-note" style="margin-top:12px;">${pickedFiles.length} files selected — each becomes its own source, titled from its filename, uploaded and transcribed one at a time.</div>`) +
-    `<div class="empty-note" style="margin-top:10px;">Files are uploaded and sent to Groq's Whisper endpoint for real transcription after saving. A failure on one file won't stop the rest.</div>`;
-  box.querySelectorAll('.remove-picked').forEach(btn => btn.addEventListener('click', () => { pickedFiles.splice(+btn.dataset.i, 1); renderPickedFiles(); }));
+let pickedFile = null;
+async function handleUploadFile(file) {
+  pickedFile = file;
+  const isVideo = file.type.startsWith('video') || /\.(mp4|mov|mkv|webm)$/i.test(file.name);
+  const url = URL.createObjectURL(file);
+  const duration = await getMediaDuration(url).catch(() => null);
+  document.getElementById('pickedFileBox').innerHTML = `<div style="display:flex;align-items:center;gap:12px;margin-top:14px;padding:11px 13px;border:1px solid var(--border);border-radius:var(--radius-m);background:var(--surface);">${isVideo?ICONS.video:ICONS.audio}<div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(file.name)}</div><div style="font-size:11.5px;color:var(--text-tertiary);">${formatBytes(file.size)}${duration?' · '+formatSeconds(duration):''}</div></div><button type="button" id="removeFile" style="background:none;border:none;color:var(--text-tertiary);font-size:12px;">Remove</button></div>
+  <label class="field-label" style="margin-top:14px;">Title</label>
+  <input class="field-input" id="uploadTitleInput" value="${escapeHtml(file.name.replace(/\.[a-z0-9]+$/i,''))}" />
+  <div class="empty-note">This file will be uploaded and sent to Groq's Whisper endpoint for real transcription after saving.</div>`;
   document.getElementById('uploadSubmit').disabled = false;
+  document.getElementById('removeFile').addEventListener('click', () => { pickedFile=null; document.getElementById('pickedFileBox').innerHTML=''; document.getElementById('uploadSubmit').disabled=true; fileInput.value=''; });
 }
-
 document.getElementById('uploadSubmit').addEventListener('click', async () => {
-  if (!pickedFiles.length) return;
-  const filesToProcess = pickedFiles.slice();
-  const singleTitleOverride = filesToProcess.length === 1 ? (document.getElementById('uploadTitleInput')?.value.trim()) : null;
-  pickedFiles = []; document.getElementById('pickedFileBox').innerHTML = ''; document.getElementById('uploadSubmit').disabled = true; fileInput.value = '';
-  renderDashboard(); state.libMode = 'sources'; showScreen('library');
-
-  // Controlled sequential processing: one file at a time, so we never
-  // overload the server with concurrent uploads/transcriptions. Each file
-  // is fully independent — transcribeSource() catches its own errors and
-  // always resolves, so one failed file never blocks the rest of the batch.
-  for (const file of filesToProcess) {
-    const isVideo = file.type.startsWith('video') || /\.(mp4|mov|mkv|webm)$/i.test(file.name);
-    const duration = await getMediaDuration(URL.createObjectURL(file)).catch(() => 0);
-    const title = singleTitleOverride || file.name.replace(/\.[a-z0-9]+$/i, '');
-    const id = uid();
-    try { await idbPut('blobs', id, file); } catch (e) { toast('Could not store ' + file.name + ': ' + e.message); continue; }
-    SOURCES.unshift({ id, type: isVideo ? 'video' : 'audio', title, dateAdded: new Date().toISOString(), durationSec: duration || 0, transcriptStatus: 'uploading', tags: [], collectionIds: [], favorite: false, lastPositionSec: 0, chapters: [] });
-    saveSources();
-    if (state.screen === 'library') renderLibrary();
-    await transcribeSource(id, file, file.name, baseContentType(file.type || 'audio/webm'));
-  }
+  if (!pickedFile) return;
+  const file = pickedFile;
+  const isVideo = file.type.startsWith('video') || /\.(mp4|mov|mkv|webm)$/i.test(file.name);
+  const duration = await getMediaDuration(URL.createObjectURL(file)).catch(()=>0);
+  const title = (document.getElementById('uploadTitleInput')?.value.trim()) || file.name;
+  const id = uid();
+  try { await idbPut('blobs', id, file); } catch (e) { alert('Could not store this file: ' + e.message); return; }
+  SOURCES.unshift({ id, type: isVideo ? 'video' : 'audio', title, dateAdded: new Date().toISOString(), durationSec: duration || 0, transcriptStatus: 'uploading', tags: [], collectionIds: [], favorite: false, lastPositionSec: 0, chapters: [] });
+  saveSources(); pickedFile=null; document.getElementById('pickedFileBox').innerHTML=''; document.getElementById('uploadSubmit').disabled=true; fileInput.value='';
+  renderDashboard(); state.libMode='sources'; showScreen('library');
+  transcribeSource(id, file, file.name, baseContentType(file.type || 'audio/webm'));
 });
 
 /* ---- URL import (real server-side extraction) ---- */
 document.getElementById('linkExtractBtn').addEventListener('click', () => attemptExtraction(document.getElementById('linkUrlInput').value.trim()));
-function isYouTubeUrl(url) {
-  return /(?:youtube\.com\/(?:watch\?v=|shorts\/|embed\/)|youtu\.be\/)[a-zA-Z0-9_-]{6,}/.test(url || '');
-}
-function linkStepsHtml(activeIdx, doneUpTo, youtube) {
-  const steps = youtube
-    ? ['YouTube source detected', 'Fetching captions…', 'Processing captions…', 'Creating source…']
-    : ['Fetching webpage…','Extracting readable text…','Cleaning content…','Creating source…'];
+function linkStepsHtml(activeIdx, doneUpTo) {
+  const steps = ['Fetching webpage…','Extracting readable text…','Cleaning content…','Creating source…'];
   return `<div class="link-steps">${steps.map((s,i) => `<div class="link-step ${i===activeIdx?'active':''} ${i<doneUpTo?'done':''}"><span class="dot">${ICONS.check}</span>${s}</div>`).join('')}</div>`;
 }
 async function attemptExtraction(url) {
   const area = document.getElementById('linkProcessArea');
   if (!url) { area.innerHTML = `<div class="empty-note">Enter a URL first.</div>`; return; }
   try { new URL(url); } catch(e) { area.innerHTML = `<div class="empty-note">That doesn't look like a valid URL.</div>`; return; }
-  const youtube = isYouTubeUrl(url);
-  area.innerHTML = linkStepsHtml(0, 0, youtube);
+  area.innerHTML = linkStepsHtml(0, 0);
   try {
     const res = await fetch(apiBase() + '/api/extract-url', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ url }) });
-    area.innerHTML = linkStepsHtml(2, 2, youtube);
+    area.innerHTML = linkStepsHtml(2, 2);
     const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data.error || ('Server responded with ' + res.status));
-    area.innerHTML = linkStepsHtml(3, 3, youtube);
-    if (data.kind === 'youtube') finishYouTubeExtraction(data, area);
-    else finishExtraction(url, data.title || url, data.text || '', area);
+    area.innerHTML = linkStepsHtml(3, 3);
+    finishExtraction(url, data.title || url, data.text || '', area);
   } catch (err) { showExtractionFailure(url, err.message); }
 }
 function finishExtraction(url, title, text, area) {
@@ -2262,36 +2920,9 @@ function finishExtraction(url, title, text, area) {
     renderDashboard(); state.libMode='sources'; showScreen('library');
   });
 }
-// YouTube sources are created with a real transcript immediately — the
-// captions ARE the transcript (fetched server-side from YouTube itself),
-// so there's no separate /api/transcribe step and no Groq call involved.
-function finishYouTubeExtraction(data, area) {
-  const preview = (data.text||'').slice(0,600);
-  area.innerHTML += `<div class="link-extract-preview">${escapeHtml(preview)}${(data.text||'').length>600?'…':''}</div>
-    <label class="field-label">Title</label><input class="field-input" id="linkTitleInput" value="${escapeHtml(data.title)}" />
-    <div class="empty-note">Real transcript from this video's own YouTube captions &mdash; ${data.segments.length} timestamped lines. Not generated by Whisper/Groq.</div>
-    <button class="modal-submit" id="linkSaveBtn">Create Source</button>`;
-  document.getElementById('linkSaveBtn').addEventListener('click', async () => {
-    const finalTitle = document.getElementById('linkTitleInput').value.trim() || data.title;
-    const id = uid();
-    try { await idbPut('transcripts', id, data.segments); await idbPut('content', id, data.text); }
-    catch(e) { alert('Could not save this source: ' + e.message); return; }
-    transcriptCache[id] = data.segments; contentCache[id] = data.text;
-    const lastEnd = data.segments.length ? data.segments[data.segments.length-1].end : 0;
-    SOURCES.unshift({
-      id, type:'video', title: finalTitle, url: data.url, dateAdded: new Date().toISOString(),
-      durationSec: lastEnd, transcriptStatus: 'ready', transcriptReadyAt: new Date().toISOString(),
-      transcriptWordCount: wordCount(data.text), noLocalMedia: true,
-      tags: [], collectionIds: [], favorite: false, lastPositionSec: 0, chapters: []
-    });
-    saveSources(); document.getElementById('linkUrlInput').value=''; area.innerHTML='';
-    renderDashboard(); state.libMode='sources'; showScreen('library');
-  });
-}
 function showExtractionFailure(url, reason) {
   const area = document.getElementById('linkProcessArea');
-  const youtube = isYouTubeUrl(url);
-  area.innerHTML = `<div class="link-fail-box"><p><strong>${youtube ? "Couldn't get a transcript for this video." : "Couldn't extract this webpage."}</strong> ${escapeHtml(reason)}</p>
+  area.innerHTML = `<div class="link-fail-box"><p><strong>Couldn't extract this webpage.</strong> ${escapeHtml(reason)}</p>
     <div class="link-fail-actions"><button class="rec-btn" id="failRetry">Try Again</button><button class="rec-btn primary" id="failOpen">Open Link</button></div></div>`;
   document.getElementById('failRetry').addEventListener('click', () => attemptExtraction(url));
   document.getElementById('failOpen').addEventListener('click', () => window.open(url, '_blank'));
@@ -2340,11 +2971,242 @@ function populateAmbientWave(id, count, withParticles) {
     el.appendChild(particles);
   }
 }
-populateAmbientWave('heroAmbientWave', 70, true);
 populateAmbientWave('dashAmbientWave', 90, false);
 document.querySelector('[data-nav="dashboard"]').classList.add('active');
 loadLocal();
+initAuth();
 preloadTextContent().then(() => { if (document.getElementById('stage-app').style.display !== 'none') renderDashboard(); });
+</script>
+<script>
+/* =====================================================================
+   LANDING (curated)
+   Three small interactive pieces (hero waveform, transcript, key moments),
+   a gentle reveal, and glue to the existing app/login.
+   Everything on the landing is a labelled SAMPLE: it never touches the app's
+   real audio, transcript or AI code. The only continuous loop is the hero
+   playhead, and it sleeps when the hero is off-screen, the tab is hidden,
+   the landing is hidden (app open), or reduced motion is requested.
+   ===================================================================== */
+(function () {
+  'use strict';
+  const $ = (s, r) => (r || document).querySelector(s);
+  const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
+  const stage = $('#stage-landing');
+  if (!stage) return;
+  const reducedMQ = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const reduced = () => reducedMQ.matches;
+  const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+  const pad = (n) => String(n).padStart(2, '0');
+  const mmss = (t) => { t = Math.max(0, Math.round(t)); return pad(Math.floor(t / 60)) + ':' + pad(t % 60); };
+  const esc = (s) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  let landingOn = stage.style.display !== 'none';
+
+  /* ---- sample data ---- */
+  const DUR = 860;
+  const LINES = [
+    { t: 42,  text: 'The first important observation is that attention behaves like a scarce currency. Every notification is a small withdrawal.', hl: 'scarce currency' },
+    { t: 78,  text: 'Free products aren\u2019t free. You pay for them in minutes of focus, and those minutes are sold on to advertisers.', hl: 'minutes of focus' },
+    { t: 161, text: 'When information is abundant, attention is the scarce resource, not information.', hl: 'attention is the scarce resource' },
+    { t: 198, text: 'So the main problem is that the systems deciding what deserves your attention are built to maximize engagement, not understanding.', hl: 'engagement, not understanding' },
+    { t: 222, text: 'This changes the way we should think about design. If attention is the currency, every interface is a budget decision.', hl: 'every interface is a budget decision' },
+    { t: 465, text: 'Take a newsroom that moves from counting page views to measuring reading time. Within a quarter, its front page looks completely different.', hl: 'measuring reading time' },
+    { t: 751, text: 'To close: attention is scarce, defaults shape behavior, and what we measure decides what gets built.', hl: 'what we measure decides what gets built' },
+  ];
+  const firstSentence = (s) => s.split(/(?<=[.:])\s/)[0];
+  const MOMENTS = [
+    { t: 42, title: 'Introduction' }, { t: 198, title: 'Main problem' }, { t: 465, title: 'Important example' }, { t: 751, title: 'Conclusion' },
+  ];
+  const lineAt = (t) => { let i = 0; LINES.forEach((l, k) => { if (l.t <= t) i = k; }); return i; };
+  function mulberry32(a) { return function () { a |= 0; a = (a + 0x6D2B79F5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
+  const PEAKS = (function () {
+    const r = mulberry32(7), raw = [], n = 480;
+    for (let i = 0; i < n; i++) { const x = i / n, ph = .5 + .5 * Math.sin(x * 41 + Math.sin(x * 7) * 2.2); raw.push((ph > .3 ? 1 : .12 + ph * .3) * (.18 + .82 * r()) * (.55 + .45 * ph)); }
+    const sm = raw.map((v, i) => (v * 2 + (raw[i - 1] ?? v) + (raw[i + 1] ?? v)) / 4), mx = Math.max(...sm);
+    return sm.map((v) => v / mx);
+  })();
+
+  /* ---- one loop, asleep unless something needs a frame ---- */
+  const comps = []; let raf = 0, last = 0;
+  function loop(now) {
+    raf = 0; if (!landingOn || document.hidden) return;
+    const dt = Math.min(.05, (now - last) / 1000 || .016); last = now;
+    let any = false; for (const c of comps) if (c.needs()) { c.tick(dt); any = true; }
+    if (any) raf = requestAnimationFrame(loop);
+  }
+  const kick = () => { if (!raf && landingOn && !document.hidden) { last = performance.now(); raf = requestAnimationFrame(loop); } };
+  document.addEventListener('visibilitychange', () => { if (document.hidden) { cancelAnimationFrame(raf); raf = 0; } else kick(); });
+  const watch = (el, cb, margin) => { const io = new IntersectionObserver((es) => es.forEach((e) => cb(e.isIntersecting)), { rootMargin: margin || '0px' }); io.observe(el); return io; };
+
+  /* ---- waveform (redraws only when asked) ---- */
+  function Wave(canvas, o) {
+    const ctx = canvas.getContext('2d'); let w = 0, h = 0, dpr = 1, time = 0, hover = null;
+    function resize() { dpr = Math.min(window.devicePixelRatio || 1, 2); w = canvas.clientWidth; h = canvas.clientHeight; if (!w || !h) return; canvas.width = Math.round(w * dpr); canvas.height = Math.round(h * dpr); draw(); }
+    function draw() {
+      if (!w || !h) return; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, w, h);
+      const bw = 2, gap = 4, step = bw + gap, n = Math.floor((w + gap) / step), per = PEAKS.length / n, cy = h / 2, px = (time / DUR) * w;
+      for (let i = 0; i < n; i++) {
+        let p = 0; const a = Math.floor(i * per), b = Math.max(a + 1, Math.floor((i + 1) * per)); for (let j = a; j < b; j++) p = Math.max(p, PEAKS[j] || 0);
+        const bh = Math.max(3, p * (h - 8)), x = i * step;
+        ctx.fillStyle = x + bw / 2 <= px ? '#C99A32' : 'rgba(242,236,227,.22)'; ctx.fillRect(x, cy - bh / 2, bw, bh);
+      }
+    }
+    const tAt = (x) => { const r = canvas.getBoundingClientRect(); return clamp((x - r.left) / r.width, 0, 1) * DUR; };
+    canvas.addEventListener('pointermove', (e) => { hover = tAt(e.clientX); o.onHover && o.onHover(hover); });
+    canvas.addEventListener('pointerleave', () => { hover = null; o.onHover && o.onHover(null); });
+    canvas.addEventListener('pointerdown', (e) => { o.onSeek && o.onSeek(tAt(e.clientX)); });
+    new ResizeObserver(resize).observe(canvas); resize();
+    return { setTime(t) { time = t; draw(); }, redraw: draw };
+  }
+
+  /* ---- 1. hero: the waveform plays, the caption follows ---- */
+  const hero = { t: 30, hover: null, vis: true, idx: -1, timer: 0 };
+  const heroCap = $('.lp-caption'), heroT = $('#lpHeroT'), heroText = $('#lpHeroText');
+  const heroWave = Wave($('#lpHeroWave'), {
+    onHover: (t) => { hero.hover = t; if (t != null) hero.t = t; heroPaint(); kick(); },
+    onSeek: (t) => { hero.t = t; heroPaint(); },
+  });
+  function setCaption(i) {
+    const apply = () => { heroT.textContent = mmss(LINES[i].t); heroText.textContent = firstSentence(LINES[i].text); };
+    if (hero.idx === -1 || reduced()) { hero.idx = i; apply(); return; }
+    if (i === hero.idx) return; hero.idx = i;
+    heroCap.classList.add('is-out'); clearTimeout(hero.timer);
+    hero.timer = setTimeout(() => { apply(); heroCap.classList.remove('is-out'); }, 400);
+  }
+  function heroPaint() { const t = hero.hover != null ? hero.hover : hero.t; heroWave.setTime(t); setCaption(lineAt(t)); }
+  watch($('#lpTop'), (v) => { hero.vis = v; if (v) kick(); });
+  comps.push({ needs: () => hero.vis && hero.hover == null && !reduced(), tick: (dt) => { hero.t += dt * 12; if (hero.t >= DUR) hero.t = 0; heroPaint(); } });
+  if (reduced()) hero.t = 198;
+  heroPaint();
+
+  /* ---- 2. transcript: scroll moves the playhead; hover, click and search work too ---- */
+  const tr = { scrollT: 42, hover: null, manual: null, q: '', idx: -1 };
+  const linesEl = $('#lpLines'), box = $('#lpBox'), nowEl = $('#lpNow'), cnt = $('#lpCount');
+  const trShown = () => tr.hover != null ? tr.hover : (tr.manual != null ? tr.manual : tr.scrollT);
+  function lineHtml(l) {
+    let h = esc(l.text);
+    if (tr.q) h = h.replace(new RegExp('(' + esc(tr.q).replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'ig'), '<mark>$1</mark>');
+    else h = h.replace(esc(l.hl), '<span class="hl">' + esc(l.hl) + '</span>');
+    return h;
+  }
+  function renderLines() {
+    let n = 0; const q = tr.q.toLowerCase();
+    linesEl.innerHTML = LINES.map((l, i) => { const hit = q && l.text.toLowerCase().includes(q); if (hit) n += l.text.toLowerCase().split(q).length - 1;
+      return `<li><button type="button" class="lp-line${q && !hit ? ' is-dim' : ''}" data-i="${i}"><time>${mmss(l.t)}</time><span>${lineHtml(l)}</span></button></li>`; }).join('');
+    cnt.textContent = q ? (n ? n + (n === 1 ? ' match' : ' matches') : 'No matches') : '';
+    tr.idx = -2; trPaint();
+  }
+  const trWave = Wave($('#lpWave'), {
+    onHover: (t) => { tr.hover = t; trPaint(); },
+    onSeek: (t) => { tr.manual = t; trPaint(); },
+  });
+  function trPaint() {
+    const t = trShown(), i = lineAt(t);
+    nowEl.textContent = mmss(t); trWave.setTime(t);
+    if (i !== tr.idx) {
+      tr.idx = i; $$('.lp-line', linesEl).forEach((b, k) => b.classList.toggle('is-now', k === i));
+      const li = linesEl.children[i]; if (li) box.scrollTo({ top: li.offsetTop - box.clientHeight / 2 + li.offsetHeight / 2, behavior: reduced() ? 'auto' : 'smooth' });
+    }
+  }
+  renderLines();
+  linesEl.addEventListener('click', (e) => { const b = e.target.closest('.lp-line'); if (b) { tr.manual = LINES[+b.dataset.i].t; trPaint(); } });
+  $('#lpSearch').addEventListener('input', (e) => { tr.q = e.target.value.trim(); renderLines(); });
+  let queued = false;
+  function onScroll() {
+    if (queued) return; queued = true;
+    requestAnimationFrame(() => {
+      queued = false; if (!landingOn) return;
+      const r = $('#lpDemo').getBoundingClientRect(), vh = window.innerHeight;
+      const t = 30 + clamp((vh * .5 - r.top) / (r.height + vh * .1), 0, 1) * (DUR - 60);
+      if (Math.abs(t - tr.scrollT) > .5) { tr.scrollT = t; tr.manual = null; trPaint(); }
+    });
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+
+  /* ---- 3. key moments: one moment, shown large ---- */
+  const tl = $('#lpTl'), momEl = $('#lpMoment');
+  tl.insertAdjacentHTML('beforeend', MOMENTS.map((m, i) => `<button type="button" class="lp-dot" role="tab" data-i="${i}" style="left:${(m.t / DUR) * 100}%" aria-label="${mmss(m.t)} ${m.title}"><span>${mmss(m.t)}</span></button>`).join(''));
+  function pick(i) {
+    const m = MOMENTS[i], line = LINES.find((l) => l.t === m.t);
+    $$('.lp-dot', tl).forEach((d, k) => { d.classList.toggle('is-active', k === i); d.setAttribute('aria-selected', String(k === i)); });
+    momEl.innerHTML = `<p class="lp-moment-t lp-swap">${mmss(m.t)} &nbsp;${m.title}</p><p class="lp-moment-q lp-swap">&ldquo;${esc(line.text)}&rdquo;</p>`;
+  }
+  tl.addEventListener('click', (e) => { const d = e.target.closest('.lp-dot'); if (d) pick(+d.dataset.i); });
+  pick(1);
+
+  /* ---- floating text: float in, settle, stay ----
+     One IntersectionObserver reveals each element once (delays set in the markup: heading first,
+     supporting text after, labels last). Headings are split into words that settle a hair apart.
+     While you scroll, a very small eased parallax (4-10px) runs as one more component on the
+     existing ticker, so there is still exactly one animation loop and it sleeps when scrolling stops.
+     Reduced motion: plain opacity fade only, no travel, no blur, no parallax. */
+  (function initFloat() {
+    if (!('IntersectionObserver' in window)) { stage.classList.remove('lp-js'); return; }
+    $$('.fl-h', stage).forEach((el) => {
+      el.setAttribute('aria-label', el.textContent.replace(/\s+/g, ' ').trim());
+      let n = 0;
+      (function walk(node) {
+        Array.from(node.childNodes).forEach((c) => {
+          if (c.nodeType === 3) {
+            const frag = document.createDocumentFragment();
+            c.textContent.split(/(\s+)/).forEach((part) => {
+              if (!part) return;
+              if (/^\s+$/.test(part)) { frag.appendChild(document.createTextNode(' ')); return; }
+              const w = document.createElement('span'); w.className = 'w'; w.setAttribute('aria-hidden', 'true');
+              w.style.setProperty('--i', n); w.style.setProperty('--k', Math.min(n, 6)); w.textContent = part; frag.appendChild(w); n++;
+            });
+            node.replaceChild(frag, c);
+          } else if (c.nodeType === 1) walk(c);
+        });
+      })(el);
+    });
+    const items = $$('.fl', stage).map((el) => { el.style.setProperty('--d', (+el.dataset.d || 0) + 'ms'); return { el, p: +el.dataset.p || 0, vis: false, cur: 0, tgt: 0 }; });
+    const byEl = new Map(items.map((it) => [it.el, it]));
+    const io = new IntersectionObserver((es) => es.forEach((e) => {
+      byEl.get(e.target).vis = e.isIntersecting;
+      if (e.isIntersecting) e.target.classList.add('in');
+    }), { rootMargin: '100px 0px -8% 0px' });
+    items.forEach((it) => io.observe(it.el));
+
+    if (!reduced()) {
+      const live = items.filter((it) => it.p);
+      let hot = 0;
+      const docY = (el) => { let y = 0; for (let e = el; e; e = e.offsetParent) y += e.offsetTop; return y; };   // layout position, unaffected by our own transforms
+      window.addEventListener('scroll', () => { hot = performance.now() + 220; kick(); }, { passive: true });
+      comps.push({
+        needs: () => live.some((i) => i.vis) && (performance.now() < hot || live.some((i) => i.vis && Math.abs(i.cur - i.tgt) > .05)),
+        tick: (dt) => {
+          const vh = window.innerHeight, sy = window.scrollY, k = 1 - Math.pow(.002, dt), vis = live.filter((i) => i.vis);
+          const mids = vis.map((i) => docY(i.el) + i.el.offsetHeight / 2);            // all reads first
+          vis.forEach((i, n) => { const rel = clamp((mids[n] - sy - vh / 2) / (vh / 2 + i.el.offsetHeight / 2), -1, 1); i.tgt = -rel * i.p; i.cur += (i.tgt - i.cur) * k; });
+          vis.forEach((i) => i.el.style.setProperty('--py', i.cur.toFixed(2) + 'px'));  // then all writes
+        },
+      });
+    }
+    window.__vvFloat = true;
+  })();
+
+  /* ---- glue ---- */
+  const on = (id, fn) => { const el = document.getElementById(id); if (el) el.addEventListener('click', fn); };
+  on('lpFinalOpen', () => lpOpenWorkspace());
+  $$('[data-lp-top]', stage).forEach((a) => a.addEventListener('click', (e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: reduced() ? 'auto' : 'smooth' }); }));
+  new MutationObserver(() => { const now = stage.style.display !== 'none'; if (now !== landingOn) { landingOn = now; if (now) { heroWave.redraw(); trWave.redraw(); kick(); onScroll(); } } }).observe(stage, { attributes: true, attributeFilter: ['style'] });
+
+  /* ---- login: honest guest state (no accounts configured) ---- */
+  const authStage = $('#stage-auth');
+  function renderAuthAvailability() {
+    const guest = !authConfigured;
+    $('#authGuestNote').style.display = guest ? 'block' : 'none';
+    $('#authForms').classList.toggle('is-off', guest);
+    $$('#authForms input, #authForms button').forEach((el) => { el.disabled = guest; });
+    $('#authFootRow').style.display = guest ? 'none' : 'block';
+  }
+  if (authStage) {
+    new MutationObserver(() => { if (authStage.style.display !== 'none') renderAuthAvailability(); }).observe(authStage, { attributes: true, attributeFilter: ['style'] });
+    on('authGuestOpen', () => { closeAuthScreen(); enterApp(); });
+  }
+  onScroll(); kick();
+})();
+
 </script>
 </body>
 </html>

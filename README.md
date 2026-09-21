@@ -36,7 +36,7 @@ Whisper needs a PyTorch (or CTranslate2) runtime, gigabytes of model
 weights in memory, and real CPU/GPU time per request — none of which fits
 inside a Vercel Function's size and execution-time limits. Groq instead
 hosts the actual open-source Whisper (`whisper-large-v3` /
-`whisper-large-v3-turbo`) and Llama (`openai/gpt-oss-120b`) model
+`whisper-large-v3-turbo`) and Llama (`llama-3.3-70b-versatile`) model
 weights on their own inference hardware, exposed through a plain HTTP API.
 Calling that from a Vercel Function is just a `fetch()` — genuinely
 practical regardless of how large the model behind it is. That's the
@@ -109,9 +109,44 @@ Project → **Settings** → **Environment Variables**:
 |---|---|---|
 | `GROQ_API_KEY` | Yes | Used by `/api/transcribe` and `/api/ask`. Never exposed to the browser — only read inside the serverless functions. Confidential: treat it like a password, never commit it, never put it in frontend code. |
 | `GROQ_WHISPER_MODEL` | No | Defaults to `whisper-large-v3-turbo`. |
-| `GROQ_CHAT_MODEL` | No | Defaults to `openai/gpt-oss-120b`. |
+| `GROQ_CHAT_MODEL` | No | Defaults to `llama-3.3-70b-versatile`. |
 | `BLOB_READ_WRITE_TOKEN` | Auto-added | Added automatically when you connect a Blob store (step 1). |
+| `SUPABASE_URL` | No | Enables real accounts (Supabase Auth). Omit both Supabase vars to run in guest mode — no login, nothing gated, identical to before this feature existed. |
+| `SUPABASE_ANON_KEY` | No | From Supabase Project Settings -> API. This key is meant to be public (Row Level Security enforces access on Supabase's side) — it is safe to expose to the browser, unlike `GROQ_API_KEY`. |
 | `ALLOWED_ORIGIN` | Optional | Leave unset (defaults to `*`) since frontend + API share one domain here. |
+
+## Accounts (optional) — Supabase Auth
+
+VoiceVault's login/signup screen uses [Supabase Auth](https://supabase.com/docs/guides/auth).
+This is entirely optional:
+
+- **Unset `SUPABASE_URL`/`SUPABASE_ANON_KEY`** → the app runs in guest mode.
+  No sign-in screen, no gated actions — Record/Upload/Import/Ask/Library all
+  work immediately, exactly as before this feature was added.
+- **Set both** → a real sign-up/sign-in flow appears, and those same actions
+  ask an unauthenticated visitor to create an account first.
+
+To turn it on:
+
+1. Create a free project at [supabase.com](https://supabase.com).
+2. Project → **Settings → API** → copy the **Project URL** and the
+   **anon public** key.
+3. Add them to Vercel as `SUPABASE_URL` and `SUPABASE_ANON_KEY` and redeploy.
+4. (Optional) Project → **Authentication → Providers** → enable Google if
+   you want the "Continue with Google" button to work; it's shown either
+   way but will error clearly if the provider isn't enabled.
+
+**Important scope note:** this only adds accounts and gates actions behind
+sign-in. Recordings, transcripts, notes, key moments, chapters and
+knowledge cards still live in the browser's own localStorage/IndexedDB —
+they are **not** synced to Supabase or split per-account. Signing in on a
+different browser (or as a different user on the same browser) does not
+give you a separate library; it's still whichever device's local storage
+you're using. Turning this into real per-user cloud storage is a bigger
+follow-up (a Postgres schema + Row Level Security policies + rewriting
+every save/load call to hit a `/api/*` route instead of localStorage) —
+ask if you want that built out next.
+
 
 ## 4. Set the Node.js version
 
@@ -206,3 +241,27 @@ you want it built out instead of/alongside the Groq path.
   or `GROQ_WHISPER_MODEL` ever start failing, check
   console.groq.com/docs/models for current names and update the env var
   — no code change needed.
+
+
+## Landing page, login page and media states
+
+These are presentation changes in `index.html`; no `/api/*` file changed.
+
+- **Landing page** is curated to six sections: hero (type plus a sample waveform that plays), the transcript (seekable
+  waveform, timestamped lines that scroll with the playhead, search), Key Moments (one moment shown large), Ask
+  VoiceVault (one answer), a small library preview, and a closing call to action. Everything on it is a labelled
+  **sample** and never touches the app's real audio, transcript or AI code. The only continuous loop is the hero playhead;
+  it sleeps when the hero is off-screen, the tab is hidden, the app is open, or `prefers-reduced-motion` is set.
+- **Floating text.** Headings float up word by word, supporting text and labels follow on longer delays, and each block
+  settles and stays (`.fl` elements in the markup carry `data-d` delay and `data-p` parallax depth, at most 10px).
+  It is one `IntersectionObserver` plus one component on the same ticker, which only runs while you scroll. With
+  `prefers-reduced-motion` it is a plain opacity fade with no movement, blur or parallax.
+- **Login page** is the same Supabase flow as before (log in, sign up, forgot password), reduced to the essentials. With no
+  `SUPABASE_URL` / `SUPABASE_ANON_KEY` it says accounts are off and offers the workspace; it never fakes a login. The
+  "Continue with Google" button is still in the code but hidden; move it out of the `display:none` wrapper in `#stage-auth` to show it.
+- **Palette** is warm walnut (`#211A16`) with cream text and a muted mustard accent (`#C99A32`), set once in the `:root`
+  design tokens at the top of `index.html`, so the app and the landing page share it.
+- **Media states.** A video whose container has no audio track is reported as **NO AUDIO TRACK** (and is not uploaded), an
+  empty or unreadable file as **INVALID MEDIA**, and a real audio track with no speech still as **No speech detected**.
+  Detection reads only the MP4/MOV or WebM/Matroska header (`probeMediaTracks`) and fails open: if it cannot be sure, the
+  file goes through the normal pipeline exactly as before.
