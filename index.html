@@ -640,18 +640,25 @@
   .tsearch-nav button:hover { color: var(--text-primary); }
 
   .transcript-toolbar { position: sticky; top: 8px; z-index: 15; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; background: var(--surface-2); border: 1px solid var(--accent); border-radius: var(--radius-m); padding: 9px 12px; margin-bottom: 10px; }
-  .seg-check { margin-right: 2px; accent-color: var(--accent); cursor: pointer; flex-shrink: 0; }
+  /* Quiet by default — a raw checkbox and star on every single row reads as a dashboard, not an editorial
+     transcript. Both fade in on row hover, and stay visible once actually used (checked / saved), so the
+     row shows only the timestamp and the words most of the time. Nothing about the underlying multi-select
+     or Key Moments feature changes — this is purely visual. */
+  .seg-check { margin-right: 2px; accent-color: var(--accent); cursor: pointer; flex-shrink: 0; opacity: 0; transition: opacity .15s ease; }
+  .transcript-line:hover .seg-check, .seg-check:checked { opacity: 1; }
   .transcript-line { display: flex; gap: 10px; padding: 10px 8px; border-radius: var(--radius-s); cursor: pointer; align-items: baseline; }
   .transcript-line:hover { background: var(--surface-2); }
   .transcript-line.matched { background: var(--accent-soft); }
   .transcript-line.playing { background: var(--accent-soft); }
-  .t-time { font-size: 12px; color: var(--text-tertiary); flex-shrink: 0; width: 44px; }
+  .t-time { font-size: 12px; color: var(--text-tertiary); flex-shrink: 0; width: 44px; transition: color .15s ease; }
+  .transcript-line:hover .t-time { color: var(--accent-strong); }
   .transcript-line.playing .t-time, .transcript-line.matched .t-time { color: var(--accent-strong); }
   .t-text { font-size: 14px; line-height: 1.6; color: var(--text-secondary); flex: 1; }
   .transcript-line.playing .t-text, .transcript-line.matched .t-text { color: var(--text-primary); }
   .matched-badge { font-size: 10px; font-weight: 700; color: var(--accent-strong); border: 1px solid var(--accent); border-radius: 100px; padding: 1px 8px; margin-left: 8px; }
-  .save-star { background: none; border: none; color: var(--text-tertiary); flex-shrink: 0; padding: 2px; }
-  .save-star svg { width: 15px; height: 15px; }
+  .save-star { background: none; border: none; color: var(--text-tertiary); flex-shrink: 0; padding: 2px; opacity: 0; transition: opacity .15s ease, color .15s ease; }
+  .save-star svg { width: 14px; height: 14px; }
+  .transcript-line:hover .save-star, .save-star.saved { opacity: 1; }
   .save-star:hover { color: var(--accent-strong); }
   .save-star.saved { color: var(--accent-strong); }
   .save-star.saved svg { fill: currentColor; }
@@ -687,8 +694,10 @@
   .ask-example:hover { color: var(--text-primary); border-color: var(--accent); }
   .ask-answer-box { border-top: 1px solid var(--border); padding-top: 12px; margin-top: 4px; }
   .ask-disclaimer { font-size: 11px; color: var(--text-tertiary); background: var(--surface-2); border-radius: var(--radius-s); padding: 8px 10px; margin-bottom: 10px; line-height: 1.5; }
-  .source-chip { display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--border); background: var(--bg); border-radius: 100px; padding: 6px 12px; font-size: 12px; margin: 0 6px 6px 0; cursor: pointer; }
-  .source-chip:hover { border-color: var(--accent); }
+  .source-chip { display: inline-flex; align-items: center; border: 1px solid transparent; background: var(--accent-soft); color: var(--accent-strong); border-radius: 100px; padding: 4px 10px; font-size: 11px; font-weight: 600; font-family: inherit; margin: 0 6px 6px 0; cursor: pointer; transition: border-color .15s ease, background .15s ease, transform .12s ease; }
+  .source-chip:hover { border-color: var(--accent); background: var(--surface-2); transform: translateY(-1px); }
+  .ask-sources-label { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--text-tertiary); margin: 14px 0 8px; }
+  .ask-sources-row { display: flex; flex-wrap: wrap; }
   .float-ask-btn { position: fixed; z-index: 60; background: var(--accent); color: #211A16; border: none; padding: 7px 12px; border-radius: 100px; font-size: 11.5px; font-weight: 700; box-shadow: var(--shadow); display: none; }
   .float-btn-row { position: fixed; z-index: 60; display: none; gap: 6px; }
   .float-btn-row button { background: var(--accent); color: #211A16; border: none; padding: 7px 12px; border-radius: 100px; font-size: 11.5px; font-weight: 700; box-shadow: var(--shadow); }
@@ -1362,6 +1371,49 @@ function linkifyTimestamps(escapedText) {
     const secs = parts.length === 3 ? parts[0]*3600+parts[1]*60+parts[2] : parts[0]*60+parts[1];
     return `<span class="seek-cite" data-t="${secs}" style="color:var(--accent-strong);cursor:pointer;text-decoration:underline;">[${t}]</span>`;
   });
+}
+// Parses a "[mm:ss]" or "[mm:ss-mm:ss]" clock string into whole seconds. A range's END is intentionally
+// discarded — only the range's start is ever surfaced as a source chip, per spec (precision comes from
+// the real segment timestamps already sent as context; this just reads what the model wrote).
+function parseClockToSeconds(str) {
+  const first = str.split(/[-–—]/)[0].trim();
+  const parts = first.split(':').map(Number);
+  return parts.length === 3 ? parts[0]*3600 + parts[1]*60 + parts[2] : parts[0]*60 + parts[1];
+}
+// Strips every [mm:ss] / [mm:ss-mm:ss] citation out of the model's raw prose (so the answer reads as
+// clean natural language) and returns the de-duplicated, chronologically-sorted list of seconds they
+// referenced, for rendering as a separate Sources row instead.
+function extractCitations(rawText) {
+  const CITE_RE = /\s*\[(\d{1,2}:\d{2}(?::\d{2})?(?:\s*[-–—]\s*\d{1,2}:\d{2}(?::\d{2})?)?)\]/g;
+  const seen = new Set();
+  const cleaned = String(rawText || '')
+    .replace(CITE_RE, (m, clock) => { seen.add(parseClockToSeconds(clock)); return ''; })
+    .replace(/[ \t]{2,}/g, ' ')
+    .replace(/\s+([.,;:!?])/g, '$1')
+    .replace(/\(\s*\)/g, '')
+    .trim();
+  return { cleaned, timestamps: Array.from(seen).sort((a, b) => a - b) };
+}
+// Best-effort snippet for a chip's hover title, read from the same "[mm:ss] text" timestamped context
+// that was actually sent to the model — never invented, and only used for a tooltip.
+function nearestContextSnippet(content, targetSec) {
+  if (!content) return '';
+  let best = null, bestDist = Infinity;
+  for (const line of String(content).split('\n')) {
+    const m = /^\[(\d{1,2}:\d{2}(?::\d{2})?)\]\s*(.*)$/.exec(line);
+    if (!m) continue;
+    const dist = Math.abs(parseClockToSeconds(m[1]) - targetSec);
+    if (dist < bestDist) { bestDist = dist; best = m[2]; }
+  }
+  return best || '';
+}
+function sourceChipsHtml(seconds, content) {
+  if (!seconds.length) return '';
+  const chips = seconds.map(sec => {
+    const title = nearestContextSnippet(content, sec);
+    return `<button type="button" class="source-chip" data-t="${sec}"${title ? ` title="${escapeHtml(title.slice(0,90))}"` : ''}>${formatClock(sec)}</button>`;
+  }).join('');
+  return `<div class="ask-sources-label">Sources</div><div class="ask-sources-row">${chips}</div>`;
 }
 
 /* ======================= AUTH (Supabase, optional) ======================= */
@@ -2509,7 +2561,8 @@ function addManualChapter(source, media) {
   saveSources(); openSource(source.id);
 }
 
-/* ---- Ask VoiceVault: real Groq call, with [mm:ss] citations turned into clickable seek links ---- */
+/* ---- Ask VoiceVault: real Groq call. Raw [mm:ss] citations are stripped from the prose and
+   re-rendered as a compact, clickable Sources row instead of left inline. ---- */
 async function askAboutSource(source, content, query, explicitSegments, understandingLabel) {
   if (!ensureAuthed('ask VoiceVault')) return;
   query = (query||'').trim();
@@ -2528,13 +2581,22 @@ async function askAboutSource(source, content, query, explicitSegments, understa
     const res = await fetch(apiBase() + '/api/ask', { method:'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload) });
     const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data.error || ('Server responded with ' + res.status));
-    const answerHtml = linkifyTimestamps(escapeHtml(data.answer || '(empty response)'));
-    let sourcesHtml = '';
-    if (Array.isArray(data.sources) && data.sources.length) {
-      sourcesHtml = `<div class="ask-disclaimer" style="margin-top:10px;">Sources</div>` + data.sources.map(sr => `<span class="source-chip" data-t="${sr.timestamp}">${formatSeconds(sr.timestamp)} — "${escapeHtml((sr.text||'').slice(0,50))}"</span>`).join('');
-    }
-    box.innerHTML = `<div class="ask-answer-box reveal"><div class="ask-disclaimer" style="text-transform:uppercase;letter-spacing:.04em;font-weight:700;color:var(--accent-strong);background:none;padding:0;margin-bottom:8px;">Answer</div><p class="answer-text" style="font-size:13px;line-height:1.6;">${answerHtml}</p>${sourcesHtml}</div>`;
-    box.querySelectorAll('.seek-cite, .source-chip').forEach(el => el.addEventListener('click', () => { const t = parseFloat(el.dataset.t); const media = document.getElementById('detailMedia'); if (media) { media.currentTime = t; media.play(); } }));
+
+    const { cleaned, timestamps } = extractCitations(data.answer || '(empty response)');
+    // Explicit selectedSegments (the user's own multi-selection) are genuine grounding text too,
+    // even on the rare turn the model didn't happen to cite them inline — merge both, deduped.
+    const explicitSecs = Array.isArray(data.sources) ? data.sources.map(sr => Math.round(sr.timestamp)) : [];
+    const allSecs = Array.from(new Set([...timestamps, ...explicitSecs])).sort((a, b) => a - b);
+
+    box.innerHTML = `<div class="ask-answer-box reveal">
+      <div class="ask-disclaimer" style="text-transform:uppercase;letter-spacing:.04em;font-weight:700;color:var(--accent-strong);background:none;padding:0;margin-bottom:8px;">Answer</div>
+      <p class="answer-text" style="font-size:13px;line-height:1.6;">${escapeHtml(cleaned)}</p>
+      ${sourceChipsHtml(allSecs, content)}
+    </div>`;
+    // Clicking a source chip seeks + plays; the existing media-sync loop (tied to the play/timeupdate
+    // events on #detailMedia) takes care of the active-segment highlight, auto-scroll and continued
+    // playback from there on its own — nothing extra to wire up here.
+    box.querySelectorAll('.source-chip').forEach(el => el.addEventListener('click', () => { const t = parseFloat(el.dataset.t); const media = document.getElementById('detailMedia'); if (media) { media.currentTime = t; media.play(); } }));
   } catch (err) {
     box.innerHTML = `<div class="ask-answer-box"><div class="ask-disclaimer" style="color:var(--danger);">AI request failed. Reason: ${escapeHtml(err.message)} <button class="rec-btn" id="askRetryBtn" style="margin-top:8px;">Retry</button></div></div>`;
     const retry = document.getElementById('askRetryBtn'); if (retry) retry.addEventListener('click', () => askAboutSource(source, content, query, explicitSegments, understandingLabel));
@@ -3260,7 +3322,7 @@ function cleanSegmentText(text) {
 }
 function txDisplayText(s, sg) { return (s.transcriptViewMode === 'original') ? sg.text : cleanSegmentText(sg.text); }
 function transcriptLineHtml(s, sg, i, text) {
-  return `<div class="transcript-line" data-t="${sg.start}" data-i="${i}"><input type="checkbox" class="seg-check" data-i="${i}" /><span class="t-time">${formatClock(sg.start)}</span><span class="t-text">${escapeHtml(text)}</span><button class="save-star ${isKeyMoment(s.id, sg.start) ? 'saved' : ''}" data-i="${i}" title="Save as Key Moment">${ICONS.star}</button></div>`;
+  return `<div class="transcript-line" data-t="${sg.start}" data-i="${i}"><input type="checkbox" class="seg-check" data-i="${i}" /><span class="t-time">${formatClock(sg.start)}</span><span class="t-text">${escapeHtml(text)}</span></div>`;
 }
 function refreshIfVisible(id) {
   if (state.screen === 'detail' && state.currentSourceId === id) openSource(id);
