@@ -680,10 +680,22 @@
   .article-body p.matched-para { color: var(--text-primary); background: var(--accent-soft); padding: 12px 14px; border-radius: var(--radius-s); border-left: 3px solid var(--accent); }
   .article-heading { font-weight: 700; font-size: 12.5px; color: var(--text-tertiary); margin: 20px 0 8px; }
 
-  .ask-panel { position: sticky; top: 20px; }
+  .ask-panel { position: sticky; top: 20px; display: flex; flex-direction: column; max-height: calc(100vh - 40px); }
+  .ask-panel > .ask-panel-title, .ask-panel > .ask-input-row, .ask-panel > .ask-examples, .ask-panel > .ask-disclaimer { flex-shrink: 0; }
   .ask-panel-title { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 700; margin-bottom: 4px; }
   .ask-panel-title svg { width: 15px; height: 15px; color: var(--accent); }
   .ask-panel-sub { font-size: 12px; color: var(--text-tertiary); margin: 0 0 14px; }
+  /* The answer area scrolls on its own so a long AI answer never forces the whole page to scroll —
+     the header, question box and example chips above it stay put (flex-shrink:0 above). */
+  #localAskAnswer { flex: 1 1 auto; min-height: 0; overflow-y: auto; margin-top: 4px; padding-right: 6px; scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
+  #localAskAnswer::-webkit-scrollbar { width: 6px; }
+  #localAskAnswer::-webkit-scrollbar-track { background: transparent; }
+  #localAskAnswer::-webkit-scrollbar-thumb { background: var(--border); border-radius: 100px; }
+  #localAskAnswer::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+  @media (max-width: 940px) {
+    .ask-panel { position: static; max-height: none; }
+    #localAskAnswer { max-height: 340px; }
+  }
   .ask-input-row { display: flex; gap: 8px; margin-bottom: 12px; }
   .ask-input-row input { flex: 1; border: 1px solid var(--border); background: var(--bg); color: var(--text-primary); border-radius: var(--radius-m); padding: 10px 12px; font-size: 13px; font-family: inherit; outline: none; }
   .ask-input-row input:focus { border-color: var(--accent); }
@@ -698,6 +710,13 @@
   .source-chip:hover { border-color: var(--accent); background: var(--surface-2); transform: translateY(-1px); }
   .ask-sources-label { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--text-tertiary); margin: 14px 0 8px; }
   .ask-sources-row { display: flex; flex-wrap: wrap; }
+  .answer-text { font-size: 13px; line-height: 1.65; color: var(--text-secondary); margin: 0 0 10px; }
+  .answer-text:last-child { margin-bottom: 0; }
+  .answer-text strong { color: var(--text-primary); font-weight: 700; }
+  .answer-text em { font-style: italic; color: var(--text-primary); }
+  .answer-subhead { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--accent-strong); margin: 2px 0 8px; }
+  .answer-list { margin: 0 0 10px; padding-left: 18px; }
+  .answer-list li { font-size: 13px; line-height: 1.6; color: var(--text-secondary); margin-bottom: 4px; }
   .float-ask-btn { position: fixed; z-index: 60; background: var(--accent); color: #211A16; border: none; padding: 7px 12px; border-radius: 100px; font-size: 11.5px; font-weight: 700; box-shadow: var(--shadow); display: none; }
   .float-btn-row { position: fixed; z-index: 60; display: none; gap: 6px; }
   .float-btn-row button { background: var(--accent); color: #211A16; border: none; padding: 7px 12px; border-radius: 100px; font-size: 11.5px; font-weight: 700; box-shadow: var(--shadow); }
@@ -807,7 +826,7 @@
     <!-- 1. hero: typography + a waveform that plays -->
     <section class="lp-hero lp-grid-bg" id="lpTop" aria-labelledby="lpH1"><div class="lp-frag lp-frag-2x2 fl fl-grid" data-d="1250" data-p="0" style="top:28px; right:clamp(24px,6vw,96px);" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
       <div class="lp-wrap lp-hero-top">
-        <h1 class="lp-h1 fl fl-h" id="lpH1" data-d="150" data-p="10"><span>Your voice,</span><span>turned into knowledge.</span></h1>
+        <h1 class="lp-h1 fl fl-h" id="lpH1" data-d="150" data-p="10"><span>Every voice,</span><span>understood.</span></h1>
         <p class="lp-sub fl fl-b" data-d="650" data-p="7">Turn recordings into searchable knowledge.</p>
         <div class="lp-actions fl" data-d="850" data-p="5">
           <button class="lp-btn lp-btn-primary" id="heroRecordBtn" type="button">Start recording</button>
@@ -1046,7 +1065,7 @@
     <!-- DASHBOARD -->
     <section class="screen" id="screen-dashboard" style="position:relative;">
       <div class="ambient-wave" id="dashAmbientWave" style="position:absolute;inset:-20px 0 auto 0;height:130px;opacity:.16;z-index:-1;"></div>
-      <h1 class="dash-greeting" id="greetingText">Your voice, in motion.</h1>
+      <h1 class="dash-greeting" id="greetingText">Every voice, in motion.</h1>
       <p class="dash-sub">Turn recordings, conversations, lectures and videos into searchable knowledge.</p>
       <form class="global-search-box" id="dashSearchForm">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21 16.65 16.65"/></svg>
@@ -1414,6 +1433,28 @@ function sourceChipsHtml(seconds, content) {
     return `<button type="button" class="source-chip" data-t="${sec}"${title ? ` title="${escapeHtml(title.slice(0,90))}"` : ''}>${formatClock(sec)}</button>`;
   }).join('');
   return `<div class="ask-sources-label">Sources</div><div class="ask-sources-row">${chips}</div>`;
+}
+// Turns the model's plain-text answer (citations already stripped by extractCitations) into clean,
+// safe HTML — never raw Markdown syntax. Handles the formatting Groq's chat models actually produce
+// (bold, headings, bullet lines, inline code, paragraph breaks); anything else is left as plain text.
+// Escaping happens FIRST so this only ever emits the small set of tags below, never model-supplied HTML.
+function renderAnswerHtml(cleanedRawText) {
+  const paras = String(cleanedRawText || '').split(/\n{2,}/).map(p => p.trim()).filter(Boolean);
+  if (!paras.length) return '<p class="answer-text">(empty response)</p>';
+  return paras.map(para => {
+    let p = escapeHtml(para);
+    const isHeading = /^#{1,6}\s+/.test(p) || (/^\*\*[^*]+\*\*:?$/.test(p) && p.length < 90);
+    p = p.replace(/^#{1,6}\s+/, '');
+    p = p.replace(/\*\*([^*]+?)\*\*/g, '<strong>$1</strong>').replace(/__([^_]+?)__/g, '<strong>$1</strong>');
+    p = p.replace(/(^|[^*])\*([^*\n]+?)\*(?!\*)/g, '$1<em>$2</em>');
+    p = p.replace(/`([^`]+?)`/g, '$1');
+    if (isHeading) return `<div class="answer-subhead">${p.replace(/<\/?strong>/g, '')}</div>`;
+    if (/^[-*]\s+/m.test(p)) {
+      const items = p.split(/\n/).map(line => line.replace(/^[-*]\s+/, '').trim()).filter(Boolean);
+      return `<ul class="answer-list">${items.map(li => `<li>${li}</li>`).join('')}</ul>`;
+    }
+    return `<p class="answer-text">${p.replace(/\n/g, '<br>')}</p>`;
+  }).join('');
 }
 
 /* ======================= AUTH (Supabase, optional) ======================= */
@@ -1970,7 +2011,7 @@ function renderKnowledgeConstellation() {
     box.querySelector('.const-jump').addEventListener('click', (e) => openSource(e.target.dataset.id, e.target.dataset.t!=null?parseFloat(e.target.dataset.t):null));
   }));
 }
-document.querySelectorAll('.quick-action[data-qa]').forEach(btn => btn.addEventListener('click', () => enterAddTab(btn.dataset.qa)));
+document.querySelectorAll('[data-qa]').forEach(btn => btn.addEventListener('click', () => enterAddTab(btn.dataset.qa)));
 document.getElementById('dashSearchForm').addEventListener('submit', (e) => { e.preventDefault(); const q=document.getElementById('dashSearchInput').value; document.getElementById('dashSearchInput').value=''; showScreen('search'); document.getElementById('globalSearchInput').value=q; runGlobalSearch(q); });
 
 /* ======================= SELECTION / BULK (Sources mode) ======================= */
@@ -2590,7 +2631,7 @@ async function askAboutSource(source, content, query, explicitSegments, understa
 
     box.innerHTML = `<div class="ask-answer-box reveal">
       <div class="ask-disclaimer" style="text-transform:uppercase;letter-spacing:.04em;font-weight:700;color:var(--accent-strong);background:none;padding:0;margin-bottom:8px;">Answer</div>
-      <p class="answer-text" style="font-size:13px;line-height:1.6;">${escapeHtml(cleaned)}</p>
+      ${renderAnswerHtml(cleaned)}
       ${sourceChipsHtml(allSecs, content)}
     </div>`;
     // Clicking a source chip seeks + plays; the existing media-sync loop (tied to the play/timeupdate
