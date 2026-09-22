@@ -542,6 +542,24 @@
   .modal-submit:hover { background: var(--accent-strong); transform: translateY(-1px); }
   .modal-submit:disabled { opacity: .4; cursor: not-allowed; }
 
+  /* Add Source — compact dropzone (previously unstyled, which is why it looked oversized/empty) */
+  .dropzone { display: flex; align-items: center; gap: 14px; border: 1.5px dashed var(--border); border-radius: var(--radius-m); background: var(--surface); padding: 18px 20px; cursor: pointer; transition: border-color .2s ease, background .2s ease; }
+  .dropzone:hover { border-color: var(--accent); }
+  .dropzone.drag { border-color: var(--accent); background: var(--surface-2); }
+  .dropzone svg { width: 22px; height: 22px; flex-shrink: 0; color: var(--text-tertiary); }
+  .dropzone-copy { min-width: 0; }
+  .dropzone-title { font-size: 13.5px; font-weight: 700; color: var(--text-primary); margin-bottom: 3px; }
+  .dropzone-hint { font-size: 11.5px; color: var(--text-tertiary); }
+
+  /* Add Source — picked file list (previously unstyled: icons rendered at raw SVG default size, ~300x150px) */
+  .picked-list { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; }
+  .picked-row { display: flex; align-items: center; gap: 10px; border: 1px solid var(--border); background: var(--surface); border-radius: var(--radius-s); padding: 8px 10px; }
+  .picked-ico { display: flex; align-items: center; justify-content: center; flex-shrink: 0; width: 18px; height: 18px; color: var(--text-tertiary); }
+  .picked-ico svg { width: 16px; height: 16px; }
+  .picked-title { flex: 1; min-width: 0; background: transparent; border: none; color: var(--text-primary); font-size: 13px; font-family: inherit; padding: 4px 2px; outline: none; border-bottom: 1px solid transparent; }
+  .picked-title:focus { border-bottom-color: var(--accent); }
+  .picked-meta { flex-shrink: 0; font-size: 11px; color: var(--text-tertiary); }
+
   /* Recording */
   .record-orb { width: 70px; height: 70px; border-radius: 100%; background: var(--grad); border: none; display: flex; align-items: center; justify-content: center; margin: 6px auto 16px; color: #211A16; }
   .record-orb svg { width: 24px; height: 24px; }
@@ -586,6 +604,11 @@
   @media (max-width: 940px) { .detail-grid { grid-template-columns: 1fr; } }
   .panel-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-l); padding: 20px; margin-bottom: 16px; }
   .panel-card h4 { font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--text-tertiary); margin: 0 0 12px; display: flex; align-items: center; justify-content: space-between; }
+  /* The actual audio/video player (previously unstyled: a video's native pixel resolution — e.g. a 1920x1080
+     phone recording — would render at full width inside the panel, blowing out the layout). */
+  #detailMedia { display: block; width: 100%; max-width: 100%; border-radius: var(--radius-m); background: #000; }
+  audio#detailMedia { height: 40px; background: none; }
+  video#detailMedia { max-height: 320px; height: auto; object-fit: contain; }
   .content-view { font-size: 14px; line-height: 1.7; color: var(--text-secondary); white-space: pre-wrap; max-height: 460px; overflow-y: auto; }
   .content-view mark, mark { background: var(--accent-soft); color: var(--text-primary); border-radius: 3px; }
   .transcript-empty { font-size: 13px; color: var(--text-tertiary); line-height: 1.6; background: var(--surface-2); border-radius: var(--radius-m); padding: 14px; }
@@ -965,6 +988,13 @@
         <button type="submit" class="auth-submit" id="forgotSubmit">Send reset link</button>
       </form>
 
+      <!-- Shown only after the user arrives here via the emailed reset link (PASSWORD_RECOVERY event) -->
+      <form id="authFormReset" style="display:none;" novalidate>
+        <label class="av-field"><span>New password</span><input class="field-input" type="password" id="resetPassword" autocomplete="new-password" required minlength="6" /></label>
+        <label class="av-field"><span>Confirm new password</span><input class="field-input" type="password" id="resetConfirm" autocomplete="new-password" required minlength="6" /></label>
+        <button type="submit" class="auth-submit" id="resetSubmit">Set new password</button>
+      </form>
+
       <!-- Google sign-in is kept in the code but not shown, to keep this page to the essentials -->
       <div style="display:none;">
         <div class="auth-divider">or</div>
@@ -981,7 +1011,7 @@
 <div class="shell">
   <aside class="sidebar">
     <div class="sidebar-logo" id="sidebarLogo"><div class="brand-mark"><svg viewBox="0 0 24 24" fill="none" stroke="#211A16" stroke-width="2" stroke-linecap="round"><path d="M4 12 L8 12 L10 6 L14 18 L16 12 L20 12"/></svg></div><span class="brand-name">VoiceVault</span></div>
-    <button class="add-source-btn" id="openAddModalBtn"><span class="ic"></span>+ Add Audio</button>
+    <button class="add-source-btn" id="openAddModalBtn"><span class="ic"></span>Add Audio</button>
     <nav class="side-nav">
       <button class="side-link" data-nav="dashboard"><span class="ic"></span><span class="lbl">Home</span></button>
       <button class="side-link" data-nav="library"><span class="ic"></span><span class="lbl">Library<span class="side-count" id="countLibrary"></span></span></button>
@@ -1017,7 +1047,6 @@
         <button class="record-cta" data-qa="record"><span class="ic"></span><span>Record</span></button>
         <div class="qa-side-actions">
           <button class="cta-ghost" data-qa="upload" style="display:flex;align-items:center;gap:8px;"><span class="ic"></span>Upload</button>
-          <button class="cta-ghost" data-qa="link" style="display:flex;align-items:center;gap:8px;"><span class="ic"></span>Import URL</button>
         </div>
       </div>
       <div class="stats-strip" id="statsStrip"></div>
@@ -1143,19 +1172,16 @@
       <div class="add-tabs" style="display:flex;gap:8px;margin:20px 0 22px;">
         <button class="add-tab active" data-tab="upload">Upload</button>
         <button class="add-tab" data-tab="record">Record</button>
-        <button class="add-tab" data-tab="link">URL Import</button>
       </div>
 
-      <div class="tx-options" id="txOptions" style="display:none;">
-        <label class="tx-field"><span>Language</span><select id="txLang" class="tx-select"><option value="auto">Auto</option><option value="en">English</option><option value="hi">Hindi</option><option value="mr">Marathi</option></select></label>
-        <label class="tx-field tx-grow"><span>Context <em>optional</em></span><input id="txContext" class="tx-input" maxlength="400" placeholder="Names, technical terms, course words&hellip;" autocomplete="off" /></label>
-      </div>
       <div class="add-panel active" id="panel-upload">
         <div class="dropzone" id="dropzone">
           <input type="file" id="fileInput" multiple accept="audio/*,video/*,.mp3,.wav,.m4a,.aac,.ogg,.oga,.opus,.flac,.webm,.mp4,.mov,.mkv" style="display:none;" />
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:28px;height:28px;color:var(--text-tertiary);margin-bottom:12px;"><path d="M12 16V4M12 4 7 9M12 4l5 5"/><path d="M4 16v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg>
-          <div style="font-size:14.5px;font-weight:700;margin-bottom:6px;">Drop recordings here</div>
-          <div style="font-size:12.5px;color:var(--text-tertiary);">or click to choose one or several files &middot; MP3, WAV, M4A, OGG, WebM, MP4, MOV</div>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M12 4 7 9M12 4l5 5"/><path d="M4 16v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg>
+          <div class="dropzone-copy">
+            <div class="dropzone-title">Drop recordings here, or click to browse</div>
+            <div class="dropzone-hint">MP3 &middot; WAV &middot; M4A &middot; OGG &middot; WebM &middot; MP4 &middot; MOV &middot; select multiple to queue them</div>
+          </div>
         </div>
         <div id="pickedFileBox"></div>
         <button class="modal-submit" id="uploadSubmit" disabled style="margin-top:14px;">Add to library</button>
@@ -1170,13 +1196,6 @@
           <div class="rec-status-msg" id="recStatus">Click Start Recording and allow microphone access when prompted.</div>
           <div class="record-preview" id="recPreview"></div>
         </div>
-      </div>
-
-      <div class="add-panel" id="panel-link" style="display:none;">
-        <label class="field-label">URL</label>
-        <input class="field-input" id="linkUrlInput" placeholder="https://example.com/article" />
-        <button class="modal-submit" id="linkExtractBtn">Extract</button>
-        <div id="linkProcessArea"></div>
       </div>
     </section>
 
@@ -1357,11 +1376,22 @@ async function initAuth() {
     authConfigured = Boolean(cfg && cfg.authConfigured);
     if (authConfigured && window.__supabaseCreateClient) {
       supabaseClient = window.__supabaseCreateClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
-      const { data } = await supabaseClient.auth.getSession();
-      currentUser = data && data.session ? data.session.user : null;
+      // Attach the listener before the initial getSession() call: Supabase
+      // parses a recovery/magic-link token from the URL as soon as the
+      // client is created, and can fire PASSWORD_RECOVERY before this
+      // function would otherwise get around to subscribing.
       supabaseClient.auth.onAuthStateChange((event, session) => {
         currentUser = session ? session.user : null;
         renderAuthUI();
+        if (event === 'PASSWORD_RECOVERY') {
+          // Supabase has already established a temporary recovery session
+          // from the emailed link's token — do NOT treat this as a normal
+          // sign-in. Show the "set a new password" form instead of
+          // dropping the user straight into the app with a session they
+          // didn't knowingly start.
+          openAuthScreen('reset');
+          return;
+        }
         if (event === 'SIGNED_IN') {
           closeAuthScreen();
           closeAuthPrompt();
@@ -1372,6 +1402,8 @@ async function initAuth() {
           toast('Signed out');
         }
       });
+      const { data } = await supabaseClient.auth.getSession();
+      currentUser = data && data.session ? data.session.user : null;
     }
   } catch (e) {
     // /api/config not reachable (e.g. no backend deployed yet) -> guest mode, same as unset env vars.
@@ -1455,14 +1487,16 @@ function setAuthTab(mode) {
   document.getElementById('authFormSignin').style.display = mode === 'signin' ? 'block' : 'none';
   document.getElementById('authFormSignup').style.display = mode === 'signup' ? 'block' : 'none';
   document.getElementById('authFormForgot').style.display = mode === 'forgot' ? 'block' : 'none';
-  document.getElementById('authGoogleBtn').style.display = mode === 'forgot' ? 'none' : 'flex';
-  document.querySelector('.auth-divider').style.display = mode === 'forgot' ? 'none' : 'flex';
-  document.getElementById('authTabSignin').style.display = mode === 'forgot' ? 'none' : 'block';
-  document.getElementById('authTabSignup').style.display = mode === 'forgot' ? 'none' : 'block';
+  document.getElementById('authFormReset').style.display = mode === 'reset' ? 'block' : 'none';
+  document.getElementById('authGoogleBtn').style.display = (mode === 'forgot' || mode === 'reset') ? 'none' : 'flex';
+  document.querySelector('.auth-divider').style.display = (mode === 'forgot' || mode === 'reset') ? 'none' : 'flex';
+  document.getElementById('authTabSignin').style.display = (mode === 'forgot' || mode === 'reset') ? 'none' : 'block';
+  document.getElementById('authTabSignup').style.display = (mode === 'forgot' || mode === 'reset') ? 'none' : 'block';
   clearAuthMessages();
-  if (mode === 'signin') { document.getElementById('authTitle').textContent = 'Welcome back'; document.getElementById('authSub').textContent = ''; document.getElementById('authFootRow').innerHTML = 'Don\'t have an account? <button type="button" class="auth-link" id="authFootSwitch">Sign up</button>'; document.getElementById('authFootSwitch').addEventListener('click', () => setAuthTab('signup')); }
-  else if (mode === 'signup') { document.getElementById('authTitle').textContent = 'Create your account'; document.getElementById('authSub').textContent = ''; document.getElementById('authFootRow').innerHTML = 'Already have an account? <button type="button" class="auth-link" id="authFootSwitch">Log in</button>'; document.getElementById('authFootSwitch').addEventListener('click', () => setAuthTab('signin')); }
-  else { document.getElementById('authTitle').textContent = 'Reset password'; document.getElementById('authSub').textContent = "We'll email you a link to get back in."; document.getElementById('authFootRow').innerHTML = '<button type="button" class="auth-link" id="authFootSwitch">Back to log in</button>'; document.getElementById('authFootSwitch').addEventListener('click', () => setAuthTab('signin')); }
+  if (mode === 'signin') { document.getElementById('authTitle').textContent = 'Welcome back'; document.getElementById('authSub').textContent = ''; document.getElementById('authFootRow').style.display = 'block'; document.getElementById('authFootRow').innerHTML = 'Don\'t have an account? <button type="button" class="auth-link" id="authFootSwitch">Sign up</button>'; document.getElementById('authFootSwitch').addEventListener('click', () => setAuthTab('signup')); }
+  else if (mode === 'signup') { document.getElementById('authTitle').textContent = 'Create your account'; document.getElementById('authSub').textContent = ''; document.getElementById('authFootRow').style.display = 'block'; document.getElementById('authFootRow').innerHTML = 'Already have an account? <button type="button" class="auth-link" id="authFootSwitch">Log in</button>'; document.getElementById('authFootSwitch').addEventListener('click', () => setAuthTab('signin')); }
+  else if (mode === 'reset') { document.getElementById('authTitle').textContent = 'Set a new password'; document.getElementById('authSub').textContent = "You're signed in from the reset link — choose a new password below."; document.getElementById('authFootRow').style.display = 'none'; }
+  else { document.getElementById('authTitle').textContent = 'Reset password'; document.getElementById('authSub').textContent = "We'll email you a link to get back in."; document.getElementById('authFootRow').style.display = 'block'; document.getElementById('authFootRow').innerHTML = '<button type="button" class="auth-link" id="authFootSwitch">Back to log in</button>'; document.getElementById('authFootSwitch').addEventListener('click', () => setAuthTab('signin')); }
 }
 document.getElementById('authTabSignin').addEventListener('click', () => setAuthTab('signin'));
 document.getElementById('authTabSignup').addEventListener('click', () => setAuthTab('signup'));
@@ -1541,6 +1575,29 @@ document.getElementById('authFormForgot').addEventListener('submit', async (e) =
   }
 });
 
+// Reached only via the emailed reset link: Supabase parses the recovery
+// token from the URL itself and fires a PASSWORD_RECOVERY auth event (see
+// the onAuthStateChange handler in initAuth), which opens this form.
+document.getElementById('authFormReset').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  if (!supabaseClient) return;
+  const pw = document.getElementById('resetPassword').value;
+  const confirm = document.getElementById('resetConfirm').value;
+  if (pw.length < 6) { showAuthError('Password must be at least 6 characters.'); return; }
+  if (pw !== confirm) { showAuthError('Passwords do not match.'); return; }
+  const btn = document.getElementById('resetSubmit'); btn.disabled = true; btn.textContent = 'Saving…';
+  try {
+    const { error } = await supabaseClient.auth.updateUser({ password: pw });
+    if (error) throw error;
+    showAuthInfo('Password updated. Taking you in…');
+    setTimeout(() => { closeAuthScreen(); enterApp(); toast('Password updated.'); }, 900);
+  } catch (err) {
+    showAuthError(friendlyAuthError(err.message));
+  } finally {
+    btn.disabled = false; btn.textContent = 'Set new password';
+  }
+});
+
 document.getElementById('authGoogleBtn').addEventListener('click', async () => {
   if (!supabaseClient) return;
   try {
@@ -1601,7 +1658,6 @@ document.querySelector('[data-nav="analytics"] .ic').innerHTML = ICONS.chart;
 document.querySelector('[data-nav="settings"] .ic').innerHTML = ICONS.gear;
 document.querySelector('[data-qa="record"] .ic').innerHTML = ICONS.mic;
 document.querySelector('[data-qa="upload"] .ic').innerHTML = ICONS.upload;
-document.querySelector('[data-qa="link"] .ic').innerHTML = ICONS.link;
 document.getElementById('newNoteBtn').querySelector('.ic').innerHTML = ICONS.plus;
 document.getElementById('libAddBtn').innerHTML = ICONS.plus + '<span>Add source</span>';
 document.getElementById('recordIcon').innerHTML = ICONS.mic;
@@ -1956,7 +2012,7 @@ function renderLibrary() {
 
   document.getElementById('libToolbarWrap').style.display = 'block';
   document.getElementById('libList').className = 'lib-grid';
-  const filters = [ ['all','All'], ['audio','Audio'], ['video','Video'], ['text','Text'], ['web','Web'], ['favorites','Favorites'] ];
+  const filters = [ ['all','All'], ['audio','Audio'], ['video','Video'], ['text','Text'], ['favorites','Favorites'] ];
   document.getElementById('filterRow').innerHTML = filters.map(([k,l]) => `<button class="filter-pill ${state.libFilter===k?'active':''}" data-key="${k}">${l}</button>`).join('');
   document.querySelectorAll('.filter-pill').forEach(p => p.addEventListener('click', () => { state.libFilter = p.dataset.key; renderLibrary(); }));
 
@@ -2656,7 +2712,6 @@ function openModalChooser() {
   modalBody.innerHTML = `<div class="choice-grid">
     <button class="choice-btn" data-choice="record"><div class="choice-icon">${ICONS.mic}</div><div><div class="choice-title">Record Audio</div><div class="choice-sub">Real browser microphone recording with a live waveform</div></div></button>
     <button class="choice-btn" data-choice="upload"><div class="choice-icon">${ICONS.upload}</div><div><div class="choice-title">Upload Audio / Video</div><div class="choice-sub">MP3, WAV, M4A, MP4, WebM, MOV</div></div></button>
-    <button class="choice-btn" data-choice="link"><div class="choice-icon">${ICONS.link}</div><div><div class="choice-title">Import URL</div><div class="choice-sub">Extracted server-side; fails honestly on paywalled/login pages</div></div></button>
   </div>`;
   modalBody.querySelectorAll('[data-choice]').forEach(btn => btn.addEventListener('click', () => { closeModal(); enterAddTab(btn.dataset.choice); }));
   openModal();
@@ -2667,7 +2722,6 @@ function enterAddTab(tab) {
   document.querySelectorAll('.add-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
   document.querySelectorAll('.add-panel').forEach(p => p.style.display = 'none');
   document.getElementById('panel-' + tab).style.display = 'block';
-  document.getElementById('txOptions').style.display = tab === 'link' ? 'none' : 'flex';
 }
 document.querySelectorAll('.add-tab').forEach(tab => tab.addEventListener('click', () => enterAddTab(tab.dataset.tab)));
 
@@ -2822,10 +2876,10 @@ function showRecordingPreview() {
     const durationSec = await getMediaDuration(url).catch(() => recSeconds);
     const mime = recBlob.type || recChosenMime;
     const filename = 'recording.' + extensionForType(mime);
-    SOURCES.unshift({ id, type:'audio', title, dateAdded: new Date().toISOString(), durationSec: durationSec || recSeconds, transcriptStatus: 'queued', language: document.getElementById('txLang').value, context: document.getElementById('txContext').value.trim(), tags: [], collectionIds: [], favorite: false, lastPositionSec: 0, chapters: [] });
+    SOURCES.unshift({ id, type:'audio', title, dateAdded: new Date().toISOString(), durationSec: durationSec || recSeconds, transcriptStatus: 'queued', language: 'auto', context: '', tags: [], collectionIds: [], favorite: false, lastPositionSec: 0, chapters: [] });
     saveSources();
     resetRecordUI(); renderDashboard(); state.libMode='sources'; showScreen('library');
-    enqueueTranscription({ id, blob: recBlob, filename, contentType: baseContentType(mime), lang: document.getElementById('txLang').value, prompt: document.getElementById('txContext').value.trim() });
+    enqueueTranscription({ id, blob: recBlob, filename, contentType: baseContentType(mime), lang: 'auto', prompt: '' });
   });
 }
 function getMediaDuration(url) {
@@ -3271,7 +3325,7 @@ function renderPicked() {
 document.getElementById('uploadSubmit').addEventListener('click', async () => {
   const files = pickedFiles.slice(); if (!files.length) return;
   pickedFiles = []; renderPicked();
-  const lang = document.getElementById('txLang').value, prompt = document.getElementById('txContext').value.trim();
+  const lang = 'auto', prompt = '';
   const entries = [], jobs = [];
   for (const p of files) {                                   // each file is handled independently; one failing never stops the rest
     const id = uid(), file = p.file;
@@ -3290,47 +3344,6 @@ document.getElementById('uploadSubmit').addEventListener('click', async () => {
   jobs.forEach(enqueueTranscription);                        // processed one after another, each with its own status
 });
 
-/* ---- URL import (real server-side extraction) ---- */
-document.getElementById('linkExtractBtn').addEventListener('click', () => attemptExtraction(document.getElementById('linkUrlInput').value.trim()));
-function linkStepsHtml(activeIdx, doneUpTo) {
-  const steps = ['Fetching webpage…','Extracting readable text…','Cleaning content…','Creating source…'];
-  return `<div class="link-steps">${steps.map((s,i) => `<div class="link-step ${i===activeIdx?'active':''} ${i<doneUpTo?'done':''}"><span class="dot">${ICONS.check}</span>${s}</div>`).join('')}</div>`;
-}
-async function attemptExtraction(url) {
-  const area = document.getElementById('linkProcessArea');
-  if (!url) { area.innerHTML = `<div class="empty-note">Enter a URL first.</div>`; return; }
-  try { new URL(url); } catch(e) { area.innerHTML = `<div class="empty-note">That doesn't look like a valid URL.</div>`; return; }
-  area.innerHTML = linkStepsHtml(0, 0);
-  try {
-    const res = await fetch(apiBase() + '/api/extract-url', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ url }) });
-    area.innerHTML = linkStepsHtml(2, 2);
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok) throw new Error(data.error || ('Server responded with ' + res.status));
-    area.innerHTML = linkStepsHtml(3, 3);
-    finishExtraction(url, data.title || url, data.text || '', area);
-  } catch (err) { showExtractionFailure(url, err.message); }
-}
-function finishExtraction(url, title, text, area) {
-  area.innerHTML += `<div class="link-extract-preview">${escapeHtml(text.slice(0,600))}${text.length>600?'…':''}</div>
-    <label class="field-label">Title</label><input class="field-input" id="linkTitleInput" value="${escapeHtml(title)}" />
-    <button class="modal-submit" id="linkSaveBtn">Create Source</button>`;
-  document.getElementById('linkSaveBtn').addEventListener('click', async () => {
-    const finalTitle = document.getElementById('linkTitleInput').value.trim() || title;
-    const id = uid();
-    try { await idbPut('content', id, text); } catch(e) { alert('Could not save this source: ' + e.message); return; }
-    contentCache[id] = text;
-    SOURCES.unshift({ id, type:'web', title: finalTitle, url, dateAdded: new Date().toISOString(), wordCount: wordCount(text), tags: [], collectionIds: [], favorite: false });
-    saveSources(); document.getElementById('linkUrlInput').value=''; area.innerHTML='';
-    renderDashboard(); state.libMode='sources'; showScreen('library');
-  });
-}
-function showExtractionFailure(url, reason) {
-  const area = document.getElementById('linkProcessArea');
-  area.innerHTML = `<div class="link-fail-box"><p><strong>Couldn't extract this webpage.</strong> ${escapeHtml(reason)}</p>
-    <div class="link-fail-actions"><button class="rec-btn" id="failRetry">Try Again</button><button class="rec-btn primary" id="failOpen">Open Link</button></div></div>`;
-  document.getElementById('failRetry').addEventListener('click', () => attemptExtraction(url));
-  document.getElementById('failOpen').addEventListener('click', () => window.open(url, '_blank'));
-}
 function resetAddScreen() { /* kept for compatibility with libAddBtn */ }
 
 /* ======================= INIT ======================= */

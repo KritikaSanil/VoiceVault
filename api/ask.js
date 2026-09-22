@@ -19,7 +19,11 @@
 import { jsonResponse, preflight } from '../lib/cors.js';
 
 const GROQ_CHAT_URL = 'https://api.groq.com/openai/v1/chat/completions';
-const CHAT_MODEL = process.env.GROQ_CHAT_MODEL || 'llama-3.3-70b-versatile';
+// llama-3.3-70b-versatile was deprecated by Groq (shut down 08/16/26); Groq's
+// own migration guidance recommends openai/gpt-oss-120b as the replacement,
+// which is what's used here as the default. GROQ_CHAT_MODEL still overrides
+// it, so nothing here fights a value you've already set.
+const CHAT_MODEL = process.env.GROQ_CHAT_MODEL || 'openai/gpt-oss-120b';
 
 export async function OPTIONS() {
   return preflight();
