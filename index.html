@@ -71,13 +71,19 @@
   .lp-word-sm { font-size: 1.05rem; color: var(--lp-muted); cursor: default; }
   .lp-nav-end { display: flex; align-items: center; }
   #stage-landing .nav-auth-actions { gap: 4px; }
-  .lp-link { background: none; border: 0; padding: 10px 14px; border-radius: 999px; color: var(--lp-muted); font: 500 14px 'Inter', sans-serif; cursor: pointer; transition: color .25s; }
+  .lp-link { position: relative; background: none; border: 0; padding: 10px 14px; border-radius: 999px; color: var(--lp-muted); font: 500 14px 'Inter', sans-serif; cursor: pointer; transition: color .25s; }
   .lp-link:hover { color: var(--lp-text); }
+  .lp-link::after { content: ''; position: absolute; left: 14px; right: 14px; bottom: 6px; height: 1px; background: var(--lp-mustard); transform: scaleX(0); transform-origin: left; transition: transform .3s cubic-bezier(.2,.7,.2,1); }
+  .lp-link:hover::after { transform: scaleX(1); }
+  .lp-arrow { display: inline-block; margin-left: 4px; transition: transform .2s cubic-bezier(.2,.7,.2,1); }
+  .lp-link:hover .lp-arrow { transform: translateX(3px); }
   .lp-link-strong { color: var(--lp-text); }
   .lp-link-strong:hover { color: var(--lp-mustard); }
 
   /* ---- buttons ---- */
-  .lp-btn { display: inline-flex; align-items: center; justify-content: center; font: 500 15px/1 'Inter', sans-serif; padding: 16px 28px; border-radius: 999px; border: 1px solid transparent; cursor: pointer; transition: background .25s, border-color .25s, color .25s; white-space: nowrap; }
+  .lp-btn { display: inline-flex; align-items: center; justify-content: center; font: 500 15px/1 'Inter', sans-serif; padding: 16px 28px; border-radius: 999px; border: 1px solid transparent; cursor: pointer; transition: background .25s, border-color .25s, color .25s, transform .15s cubic-bezier(.2,.7,.2,1); white-space: nowrap; }
+  .lp-btn:hover { transform: translateY(-1.5px); }
+  .lp-btn:active { transform: scale(.98) translateY(0); }
   .lp-btn-primary { background: var(--lp-mustard); color: #211A16; }
   .lp-btn-primary:hover { background: var(--lp-mustard-hi); }
   .lp-btn-line { background: transparent; color: var(--lp-text); border-color: var(--lp-line-2); }
@@ -94,11 +100,15 @@
   .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
   /* ---- 1. hero: type, then a waveform that plays ---- */
-  .lp-hero { min-height: calc(100svh - var(--lp-nav-h)); display: flex; flex-direction: column; justify-content: space-between; gap: clamp(56px, 10vh, 120px); padding-block: clamp(48px, 9vh, 110px) clamp(32px, 5vh, 56px); }
+  .lp-hero { min-height: calc(100svh - var(--lp-nav-h)); display: flex; flex-direction: column; justify-content: space-between; gap: clamp(44px, 8vh, 96px); padding-block: clamp(40px, 7vh, 88px) clamp(28px, 4vh, 48px); }
   .lp-hero > .lp-wrap { width: 100%; }
   #lpHeroWave { display: block; width: 100%; height: clamp(72px, 9vw, 112px); cursor: ew-resize; touch-action: pan-y; }
   .lp-caption { display: flex; gap: 16px; align-items: baseline; margin: 18px 0 0; min-height: 3.2em; font-size: 14px; line-height: 1.6; color: var(--lp-muted); transition: opacity .4s ease; }
   .lp-caption time { color: var(--lp-mustard); font-variant-numeric: tabular-nums; flex-shrink: 0; }
+  .lp-vak-tags { margin: 10px 0 0; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--lp-mustard); }
+  /* completes the VOICE -> AUDIO -> WORDS -> KNOWLEDGE arc: resolves last, once the hero waveform block itself has revealed. Plain CSS, no separate parallax/observer entry (it already lives inside a .fl-parallax parent; a nested one would double up the transform). */
+  .lp-js .lp-vak-tags { opacity: 0; translate: 0 6px; transition: opacity .9s ease .45s, translate .9s cubic-bezier(.2,.7,.2,1) .45s; }
+  .lp-js .lp-hero-wave.in .lp-vak-tags { opacity: .85; translate: 0 0; }
   .lp-caption.is-out { opacity: 0; }
 
   /* ---- floating text: float in, settle, stay ----
@@ -117,7 +127,25 @@
   .lp-js .lp-search.fl { transition: opacity 1.4s cubic-bezier(.22,.61,.36,1) var(--d, 0ms), translate 1.8s cubic-bezier(.16,1,.3,1) var(--d, 0ms), scale 1.8s cubic-bezier(.16,1,.3,1) var(--d, 0ms), filter 1.3s ease var(--d, 0ms), border-color .25s; }
   .lp-js .lp-libs li.fl { transition: opacity 1.4s cubic-bezier(.22,.61,.36,1) var(--d, 0ms), translate 1.8s cubic-bezier(.16,1,.3,1) var(--d, 0ms), scale 1.8s cubic-bezier(.16,1,.3,1) var(--d, 0ms), filter 1.3s ease var(--d, 0ms), color .3s; }
 
-  .lp-demo, .lp-moments, .lp-ask, .lp-lib, .lp-final { padding-block: clamp(88px, 14vw, 190px); }
+  /* ---- architectural grid: a very quiet background texture, plus small decorative fragments that pop in once ---- */
+  .lp-grid-bg { position: relative; }
+  .lp-grid-bg::before { content: ''; position: absolute; inset: 0; z-index: 0; pointer-events: none;
+    background-image: linear-gradient(rgba(226,204,174,0.035) 1px, transparent 1px), linear-gradient(90deg, rgba(226,204,174,0.035) 1px, transparent 1px);
+    background-size: 48px 48px; -webkit-mask-image: linear-gradient(180deg, transparent, #000 8%, #000 88%, transparent);
+    mask-image: linear-gradient(180deg, transparent, #000 8%, #000 88%, transparent); }
+  .lp-grid-bg > * { position: relative; z-index: 1; }
+  .lp-frag { position: absolute; z-index: 0; display: grid; gap: 7px; pointer-events: none; }
+  .lp-frag i { display: block; width: 5px; height: 5px; border: 1px solid var(--lp-line-2); border-radius: 1px; }
+  .lp-frag-2x2 { grid-template-columns: repeat(2, 5px); }
+  .lp-frag-3x3 { grid-template-columns: repeat(3, 5px); }
+  .lp-js .fl.fl-grid { opacity: 0; translate: 0 8px; scale: 1; filter: none;
+    transition: opacity .8s cubic-bezier(.2,.7,.2,1) var(--d, 0ms), translate .8s cubic-bezier(.2,.7,.2,1) var(--d, 0ms); }
+  .lp-js .fl.fl-grid.in { opacity: 1; translate: 0 0; }
+  @media (max-width: 700px) { .lp-frag { display: none; } .lp-grid-bg::before { opacity: .45; } }   /* mobile: quieter still, and no corner fragments competing for a small screen */
+
+  .lp-demo, .lp-moments, .lp-ask, .lp-lib { padding-block: clamp(48px, 7.5vw, 84px); }
+  .lp-moments { padding-block: clamp(40px, 6vw, 76px); }   /* Moments, Not Minutes was removed; this section is a single compact block now */
+  .lp-moments, .lp-final { position: relative; }   /* containing block for their small decorative grid-fragment corner */
 
   /* ---- 2. transcript ---- */
   .lp-head-row { display: flex; justify-content: space-between; align-items: flex-end; gap: 24px 48px; flex-wrap: wrap; }
@@ -132,11 +160,12 @@
   .lp-cap { color: var(--lp-faint); }
   #lpWave { display: block; width: 100%; height: clamp(84px, 11vw, 120px); cursor: ew-resize; touch-action: pan-y; }
   .lp-tbox { position: relative; height: clamp(250px, 32vw, 330px); margin-top: clamp(24px, 3vw, 40px); overflow: hidden; max-width: 46rem; -webkit-mask-image: linear-gradient(180deg, transparent, #000 18%, #000 82%, transparent); mask-image: linear-gradient(180deg, transparent, #000 18%, #000 82%, transparent); }
-  .lp-lines { list-style: none; margin: 0; padding: 90px 0; display: grid; gap: 2px; }
-  .lp-line { display: grid; grid-template-columns: 56px 1fr; gap: 16px; width: 100%; text-align: left; background: none; border: 0; padding: 12px 0; color: var(--lp-faint); font: 400 clamp(1.05rem, 1.5vw, 1.3rem)/1.5 'Inter', sans-serif; cursor: pointer; transition: color .5s; }
+  .lp-lines { list-style: none; margin: 0; padding: 60px 0; display: grid; gap: 2px; }
+  .lp-line { display: grid; grid-template-columns: 56px 1fr; gap: 16px; width: 100%; text-align: left; background: none; border: 0; border-left: 2px solid transparent; padding: 12px 0 12px 10px; margin-left: -12px; color: var(--lp-faint); font: 400 clamp(1.05rem, 1.5vw, 1.3rem)/1.5 'Inter', sans-serif; cursor: pointer; transition: color .5s, background-color .4s, border-color .4s; }
   .lp-line time { font-size: 13px; font-variant-numeric: tabular-nums; padding-top: .45em; }
   .lp-line:hover { color: var(--lp-muted); }
-  .lp-line.is-now { color: var(--lp-text); }
+  .lp-line:hover time { color: var(--lp-mustard); }
+  .lp-line.is-now { color: var(--lp-text); background: rgba(201,154,50,.05); border-left-color: var(--lp-mustard); }
   .lp-line.is-now time { color: var(--lp-mustard); }
   .lp-line.is-dim { opacity: .35; }
   .lp-line mark { background: none; color: inherit; box-shadow: inset 0 -.42em 0 rgba(201,154,50,.34); }
@@ -155,6 +184,15 @@
   .lp-dot.is-active span { color: var(--lp-mustard); }
   .lp-moment { margin-top: clamp(40px, 6vw, 72px); min-height: clamp(200px, 22vw, 280px); max-width: 58rem; }
   .lp-moment-t { margin: 0 0 20px; font-size: 14px; color: var(--lp-mustard); }
+  .lp-mnm { margin-top: clamp(40px, 5vw, 64px); padding-top: clamp(24px, 3vw, 36px); border-top: 1px solid var(--lp-line); display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: clamp(24px, 4vw, 56px); align-items: start; }
+  .lp-mnm-h { grid-row: 1 / span 2; font-family: var(--lp-serif); font-weight: 400; font-size: clamp(1.5rem, 2.4vw, 2.1rem); line-height: 1.15; letter-spacing: -.02em; margin: 0; color: var(--lp-text); }
+  .lp-mnm-sub { display: none; }
+  .lp-mnm-list { grid-column: 2; list-style: none; margin: 0; padding: 0; }
+  .lp-mnm-list li { display: flex; align-items: baseline; gap: 16px; padding: 12px 6px; border-bottom: 1px solid var(--lp-line); color: var(--lp-muted); font-size: 14px; transition: color .25s, padding-left .25s; cursor: pointer; }
+  .lp-mnm-list li:first-child { border-top: 1px solid var(--lp-line); }
+  .lp-mnm-list li:hover { color: var(--lp-text); padding-left: 12px; }
+  .lp-mnm-list time { color: var(--lp-mustard); font-variant-numeric: tabular-nums; font-size: 13px; flex-shrink: 0; width: 44px; }
+  @media (max-width: 800px) { .lp-mnm { grid-template-columns: 1fr; } .lp-mnm-h { grid-row: auto; } }
   .lp-moment-q { margin: 0; font-family: var(--lp-serif); font-style: italic; font-weight: 400; font-size: clamp(1.7rem, 3.3vw, 3rem); line-height: 1.22; letter-spacing: -.015em; text-wrap: pretty; }
   .lp-swap { animation: lpSwap .8s ease both; }
   @keyframes lpSwap { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
@@ -162,7 +200,8 @@
   /* ---- 4. ask ---- */
   .lp-ask-grid { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: clamp(32px, 6vw, 96px); align-items: start; }
   .lp-q { font-family: var(--lp-serif); font-style: italic; font-weight: 400; font-size: clamp(1.3rem, 2vw, 1.8rem); line-height: 1.25; margin: 0 0 clamp(20px, 2.5vw, 32px); color: var(--lp-muted); }
-  .lp-card { background: var(--lp-s2); border-radius: 14px; padding: clamp(28px, 3.5vw, 48px); }
+  .lp-card { background: var(--lp-s2); border-radius: 14px; padding: clamp(28px, 3.5vw, 48px); border: 1px solid transparent; transition: border-color .25s ease; }
+  .lp-card:hover { border-color: var(--lp-line-2); }
   .lp-a { font-size: clamp(1.15rem, 1.7vw, 1.5rem); line-height: 1.6; margin: 0; color: var(--lp-text); }
   .lp-cite { display: block; margin-top: 22px; font-size: 13px; font-variant-numeric: tabular-nums; color: var(--lp-mustard); }
   .lp-js .lp-card .lp-s { opacity: 0; transition: opacity 1s ease; }
@@ -181,7 +220,94 @@
   .lp-libs .p::after { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: var(--p); background: var(--lp-mustard); }
 
   /* ---- 6. final ---- */
-  .lp-final-h { font-family: var(--lp-serif); font-weight: 400; font-size: clamp(2.4rem, 6vw, 5.6rem); line-height: 1.04; letter-spacing: -.033em; margin: 0 0 clamp(36px, 5vw, 60px); max-width: 12em; text-wrap: balance; }
+  .lp-final { min-height: 92svh; display: flex; align-items: center; border-top: 1px solid var(--lp-line); background: radial-gradient(1000px 620px at 50% 60%, rgba(201,154,50,.07), transparent 70%), var(--lp-e0, var(--lp-bg)); }
+  .lp-final-inner { width: 100%; text-align: center; display: flex; flex-direction: column; align-items: center; }
+  .lp-final-h { font-family: var(--lp-serif); font-weight: 600; font-size: clamp(3.4rem, 10vw, 9rem); line-height: .98; letter-spacing: -.035em; margin: 0 0 clamp(40px, 6vw, 68px); color: var(--lp-text); text-wrap: balance; }
+  .lp-final .lp-actions { justify-content: center; margin-bottom: clamp(48px, 7vw, 84px); }
+  .lp-final-wave { display: block; width: min(420px, 70vw); height: 26px; fill: var(--lp-mustard); opacity: .55; }
+
+  /* ---- search results panel (Every word, searchable) ---- */
+  .lp-player { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 3fr); gap: clamp(20px, 3vw, 40px); align-items: start; }
+  .lp-player > .lp-time, .lp-player > .lp-tbox { grid-column: 1; }
+  .lp-sr-panel { grid-column: 2; grid-row: 1 / span 2; border-left: 1px solid var(--lp-line); padding-left: clamp(16px, 2vw, 28px); align-self: start; }
+  .lp-sr-label { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--lp-faint); margin: 0 0 14px; }
+  .lp-sr-empty { font-size: 13.5px; color: var(--lp-faint); line-height: 1.6; }
+  .lp-sr-item { display: block; width: 100%; text-align: left; background: none; border: 0; border-top: 1px solid var(--lp-line); padding: 12px 0; cursor: pointer; transition: padding-left .2s; }
+  .lp-sr-item:first-child { border-top: 0; }
+  .lp-sr-item:hover { padding-left: 6px; }
+  .lp-sr-item time { display: block; font-size: 12px; color: var(--lp-faint); transition: color .2s; margin-bottom: 4px; }
+  .lp-sr-item:hover time { color: var(--lp-mustard); }
+  .lp-sr-item p { margin: 0; font-size: 13px; line-height: 1.5; color: var(--lp-muted); }
+  .lp-sr-item mark { background: none; color: var(--lp-mustard); }
+  @media (max-width: 900px) { .lp-player { grid-template-columns: 1fr; } .lp-sr-panel { grid-column: 1; border-left: 0; border-top: 1px solid var(--lp-line); padding: 20px 0 0; margin-top: 8px; } }
+  .lp-sr-semantic { margin-top: 20px; padding-top: 18px; border-top: 1px solid var(--lp-line); }
+  .lp-sr-semantic-label { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--lp-faint); margin: 0 0 8px; }
+  .lp-sr-semantic-q { font-family: var(--lp-serif); font-style: italic; font-size: 14.5px; line-height: 1.45; color: var(--lp-muted); margin: 0 0 10px; }
+  .lp-sr-semantic .lp-sem-jump { font-size: 12.5px; padding: 2px 0; }
+
+  /* ---- ask: follow-ups, jumpable citation ---- */
+  button.lp-cite { font: inherit; cursor: pointer; transition: background .2s, border-color .2s, transform .15s; }
+  button.lp-cite:hover { background: rgba(201,154,50,.14); }
+  button.lp-cite:active { transform: scale(.98); }
+  .lp-followups { margin-top: 22px; display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: baseline; }
+  .lp-fu-label { font-size: 12.5px; color: var(--lp-faint); }
+  .lp-fu { font-size: 13px; padding: 4px 2px; }
+
+  /* ---- resume strip ---- */
+  .lp-resume { margin: clamp(28px, 4vw, 44px) 0 clamp(40px, 5vw, 60px); padding: clamp(18px, 2.2vw, 26px); border: 1px solid var(--lp-line-2); border-radius: 12px; background: var(--lp-s1); }
+  .lp-resume-label { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--lp-mustard); margin: 0 0 14px; }
+  .lp-resume-row { display: flex; align-items: center; gap: clamp(14px, 2vw, 26px); flex-wrap: wrap; }
+  .lp-resume-info { display: flex; flex-direction: column; gap: 3px; min-width: 140px; }
+  .lp-resume-title { font-family: var(--lp-serif); font-size: 1.15rem; color: var(--lp-text); }
+  .lp-resume-time { font-size: 12px; color: var(--lp-faint); font-variant-numeric: tabular-nums; }
+  .lp-resume-track { flex: 1; min-width: 100px; height: 3px; border-radius: 3px; background: var(--lp-line-2); position: relative; overflow: hidden; }
+  .lp-resume-fill { position: absolute; inset: 0; width: var(--p); background: var(--lp-mustard); border-radius: 3px; }
+
+  /* ---- richer library rows: moment counts, hover-reveal actions ---- */
+  .lp-libs li { position: relative; }
+  .lib-meta { display: flex; flex-direction: column; gap: 2px; }
+  .lib-meta .mm { font-size: 11px; color: var(--lp-faint); transition: color .25s; }
+  .lp-libs li:hover .lib-meta .mm { color: var(--lp-muted); }
+  .lib-hover { position: absolute; right: 0; top: 50%; transform: translateY(-50%); display: flex; gap: 6px; opacity: 0; transition: opacity .2s; background: var(--lp-bg); padding-left: 10px; }
+  .lp-libs li:hover .lib-hover { opacity: 1; }
+  .lp-libs li:hover .d { opacity: 0; }
+  .lib-hover .icon-mini-btn { width: 26px; height: 26px; display: grid; place-items: center; border-radius: 50%; border: 1px solid var(--lp-line-2); background: var(--lp-s1); color: var(--lp-muted); font-size: 10px; cursor: pointer; transition: border-color .2s, color .2s; }
+  .lib-hover .icon-mini-btn:hover { border-color: var(--lp-mustard); color: var(--lp-mustard); }
+
+  /* ---- recently found ---- */
+  .lp-found { margin-top: clamp(40px, 5vw, 60px); padding-top: clamp(24px, 3vw, 36px); border-top: 1px solid var(--lp-line); }
+  .lp-found-label { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--lp-faint); margin: 0 0 16px; }
+  .lp-found-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; max-width: 42em; }
+  .lp-found-list li { display: flex; gap: 14px; align-items: baseline; font-size: 13.5px; color: var(--lp-muted); }
+  .lp-found-list time { color: var(--lp-mustard); font-variant-numeric: tabular-nums; font-size: 12.5px; flex-shrink: 0; width: 40px; }
+
+  /* ---- everything, connected: the flow diagram ---- */
+  .lp-flow { padding-block: clamp(40px, 6vw, 80px); border-top: 1px solid var(--lp-line); }
+  .lp-flow-grid { display: grid; grid-template-columns: minmax(0, 6fr) minmax(0, 4fr); gap: clamp(32px, 5vw, 72px); align-items: start; }
+  .lp-flow-diagram { display: flex; flex-direction: column; align-items: center; gap: 0; margin-top: clamp(32px, 4vw, 52px); }
+  .lp-flow-node { font-size: 13.5px; font-weight: 500; color: var(--lp-text); border: 1px solid var(--lp-line-2); border-radius: 999px; padding: 10px 20px; background: var(--lp-s1); position: relative; transition: border-color .2s, background .2s, transform .2s; }
+  .lp-flow-node:hover { border-color: var(--lp-mustard); background: var(--lp-s2); transform: translateY(-1.5px); }
+  .lp-flow-node::before { content: ''; position: absolute; left: 50%; top: -22px; width: 1px; height: 22px; background: var(--lp-line-2); transform: translateX(-50%); }
+  .lp-flow-node:first-child::before { display: none; }
+  .lp-flow-final { border-color: rgba(201,154,50,.5); color: var(--lp-mustard); font-weight: 600; }
+  /* the branch fans out to three equal-width columns (so each column's center, and therefore each connector, lands correctly) */
+  .lp-flow-branch { display: grid; grid-template-columns: repeat(3, minmax(88px, 140px)); justify-content: center; gap: clamp(10px, 2vw, 28px); position: relative; margin-top: 30px; padding-top: 30px; }
+  .lp-flow-branch::before { content: ''; position: absolute; left: 15%; right: 15%; top: 0; height: 1px; background: var(--lp-line-2); }   /* the horizontal bar the three columns hang from */
+  .lp-flow-branch::after { content: ''; position: absolute; left: 50%; top: -30px; width: 1px; height: 30px; background: var(--lp-line-2); transform: translateX(-50%); }   /* Transcripts down to the bar */
+  .lp-flow-branch .lp-flow-node { justify-self: center; }
+  .lp-flow-branch .lp-flow-node::before { top: -30px; height: 30px; }   /* each column's own short drop from the bar (inherits left:50%/width/background from .lp-flow-node::before) */
+  .lp-flow-final { margin-top: 30px; }
+  .lp-flow-final::before { height: 30px; top: -30px; }
+  .lp-flow-stat { border: 1px solid var(--lp-line-2); border-radius: 14px; padding: clamp(22px, 3vw, 34px); background: var(--lp-s2); transition: border-color .25s ease, transform .2s ease; }
+  .lp-flow-stat:hover { border-color: var(--lp-mustard); transform: translateY(-1.5px); }
+  .lp-flow-stat-label { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--lp-mustard); margin: 0 0 18px; }
+  .lp-flow-stat-nums { margin: 0 0 20px; display: grid; gap: 10px; }
+  .lp-flow-stat-nums div { display: flex; justify-content: space-between; font-size: 13.5px; border-top: 1px solid var(--lp-line); padding-top: 10px; }
+  .lp-flow-stat-nums div:first-child { border-top: 0; padding-top: 0; }
+  .lp-flow-stat-nums dt { color: var(--lp-muted); } .lp-flow-stat-nums dd { margin: 0; color: var(--lp-text); font-variant-numeric: tabular-nums; }
+  .lp-flow-stat-latest { font-size: 13px; line-height: 1.5; color: var(--lp-muted); font-style: italic; margin: 0; padding-top: 16px; border-top: 1px solid var(--lp-line); }
+  @media (max-width: 800px) { .lp-flow-grid { grid-template-columns: 1fr; } .lp-flow-branch { flex-direction: column; align-items: center; } }
+
   .lp-footer { padding-block: 24px 56px; }
   .lp-footer-row { display: flex; justify-content: space-between; align-items: baseline; gap: 24px 48px; flex-wrap: wrap; }
   .lp-footer p { margin: 0; font-size: 12.5px; line-height: 1.6; color: var(--lp-faint); max-width: 44em; }
@@ -278,7 +404,8 @@
   .app { max-width: 1080px; margin: 0 auto; padding: 30px 30px 100px; }
 
   @media (max-width: 880px) {
-    .sidebar { position: static; width: 100%; height: auto; flex-direction: row; align-items: center; padding: 12px 14px; overflow-x: auto; gap: 14px; }
+    .shell { flex-direction: column; }   /* pre-existing bug: without this, the mobile top-bar sidebar stays in the same row as main content instead of stacking above it */
+    .sidebar { position: static; width: 100%; height: auto; flex-direction: row; align-items: center; padding: 12px 14px; overflow-x: auto; gap: 14px; min-width: 0; }
     .sidebar-logo { padding: 0; }
     .add-source-btn { width: auto; margin-bottom: 0; padding: 9px 14px; white-space: nowrap; }
     .side-nav { flex-direction: row; flex: none; }
@@ -326,9 +453,14 @@
   .dash-wide { margin-bottom: 18px; }
   @media (max-width: 820px) { .dash-grid { grid-template-columns: 1fr; } }
 
-  .source-card { display: flex; gap: 12px; padding: 13px; border: 1px solid var(--border); border-radius: var(--radius-m); background: var(--surface); transition: border-color .2s ease, transform .2s ease; margin-bottom: 8px; }
-  .source-card:hover { border-color: var(--accent); transform: translateY(-2px); }
-  .source-card.selected { border-color: var(--accent); background: var(--accent-soft); }
+  .source-card { position: relative; display: flex; gap: 14px; padding: 16px 6px; border: 0; border-bottom: 1px solid var(--border-soft); border-radius: 0; background: transparent; transition: background-color .2s ease, transform .2s ease; margin-bottom: 8px; }
+  .source-card:hover { background: var(--surface); transform: translateY(-1.5px); }
+  .source-card:hover .source-meta-row { color: var(--text-secondary); }
+  #libList .source-card:hover .mini-wave { opacity: 1; }
+  .source-card:last-child { border-bottom: 0; }
+  #libList .mini-wave { opacity: 0; transition: opacity .25s ease; }   /* a tiny waveform detail appears only on hover, so the row stays quiet at rest */
+  .source-card.selected { background: var(--accent-soft); }
+  .source-card.selected::before { content: ''; position: absolute; left: -1px; top: 6px; bottom: 6px; width: 2px; background: var(--accent); border-radius: 2px; }
   .src-check { width: 17px; height: 17px; margin-top: 2px; accent-color: var(--accent); flex-shrink: 0; cursor: pointer; }
   .type-dot { width: 32px; height: 32px; border-radius: 9px; flex-shrink: 0; display:flex; align-items:center; justify-content:center; background: var(--surface-2); color: var(--text-secondary); }
   .type-dot svg { width: 14px; height: 14px; }
@@ -336,7 +468,7 @@
   .source-title { font-size: 13.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .fav-star { color: var(--accent); flex-shrink: 0; }
   .fav-star svg { width: 12px; height: 12px; fill: currentColor; }
-  .source-meta-row { display: flex; gap: 9px; flex-wrap: wrap; font-size: 11px; color: var(--text-tertiary); margin-top: 3px; }
+  .source-meta-row { display: flex; gap: 9px; flex-wrap: wrap; font-size: 11px; color: var(--text-tertiary); margin-top: 3px; transition: color .2s ease; }
   .badge-warn { color: var(--text-tertiary); border: 1px solid var(--border); border-radius: 100px; padding: 1px 8px; }
   .tag-row { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 7px; }
   .tag-chip { font-size: 10px; border: 1px solid var(--border); border-radius: 100px; padding: 2px 8px; color: var(--text-tertiary); }
@@ -378,8 +510,7 @@
   .bulk-btn:hover { color: var(--text-primary); border-color: var(--accent); }
   .bulk-btn.danger:hover { color: var(--danger); border-color: var(--danger); }
   .bulk-btn.disabled { opacity: .45; cursor: not-allowed; }
-  .lib-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 0; }
-  @media (max-width: 700px) { .lib-grid { grid-template-columns: 1fr; } }
+  .lib-grid { display: block; }   /* one vertical, editorial list -- each recording its own row, not a card grid */
 
   /* Modal */
   .modal-overlay { position: fixed; inset: 0; background: rgba(24,18,14,0.6); backdrop-filter: blur(3px); z-index: 100; display: none; align-items: center; justify-content: center; padding: 20px; }
@@ -642,7 +773,7 @@
   <div class="lp-main">
 
     <!-- 1. hero: typography + a waveform that plays -->
-    <section class="lp-hero" id="lpTop" aria-labelledby="lpH1">
+    <section class="lp-hero lp-grid-bg" id="lpTop" aria-labelledby="lpH1"><div class="lp-frag lp-frag-2x2 fl fl-grid" data-d="1250" data-p="0" style="top:28px; right:clamp(24px,6vw,96px);" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
       <div class="lp-wrap lp-hero-top">
         <h1 class="lp-h1 fl fl-h" id="lpH1" data-d="150" data-p="10"><span>Your voice,</span><span>turned into knowledge.</span></h1>
         <p class="lp-sub fl fl-b" data-d="650" data-p="7">Turn recordings into searchable knowledge.</p>
@@ -654,11 +785,12 @@
       <div class="lp-wrap lp-hero-wave fl" data-d="1100" data-p="4">
         <canvas id="lpHeroWave" role="img" aria-label="Waveform of a sample recording"></canvas>
         <p class="lp-caption"><time id="lpHeroT">00:42</time><span id="lpHeroText"></span></p>
+        <p class="lp-vak-tags">Searchable &middot; Timestamped &middot; Organized</p>
       </div>
     </section>
 
     <!-- 2. the transcript: the product experience -->
-    <section class="lp-demo" id="lpDemo" aria-labelledby="lpDemoH">
+    <section class="lp-demo lp-grid-bg" id="lpDemo" aria-labelledby="lpDemoH">
       <div class="lp-wrap">
         <div class="lp-head-row">
           <h2 class="lp-h2 fl fl-h" id="lpDemoH" data-p="10">Every word, searchable.</h2>
@@ -666,14 +798,23 @@
         </div>
         <div class="lp-player">
           <div class="lp-time fl fl-b" data-d="450" data-p="5"><span id="lpNow">00:42</span><span class="lp-cap">Sample recording</span></div>
-          <canvas id="lpWave" class="fl" data-d="640" data-p="4" role="img" aria-label="Waveform of a sample recording"></canvas>
-          <div class="lp-tbox fl" id="lpBox" data-d="830" data-p="4"><ol class="lp-lines" id="lpLines"></ol></div>
+          <div class="lp-tbox fl" id="lpBox" data-d="640" data-p="4"><ol class="lp-lines" id="lpLines"></ol></div>
+          <div class="lp-sr-panel fl" id="lpSrPanel" data-d="900" data-p="4" aria-live="polite">
+            <p class="lp-sr-label">Results</p>
+            <div id="lpSrBody"></div>
+            <div class="lp-sr-semantic">
+              <p class="lp-sr-semantic-label">Try asking it differently</p>
+              <p class="lp-sr-semantic-q">&ldquo;That part where they talked about engagement.&rdquo;</p>
+              <button type="button" class="lp-link lp-link-strong lp-sem-jump">03:18 &middot; Jump to moment<span class="lp-arrow">&rarr;</span></button>
+            </div>
+          </div>
         </div>
       </div>
     </section>
 
-    <!-- 3. key moments: one moment, shown large -->
-    <section class="lp-moments" id="lpMoments" aria-labelledby="lpMomH">
+    <!-- from speech to signal: one compact horizontal transformation -->
+        <!-- 3. key moments: one moment, shown large -->
+    <section class="lp-moments" id="lpMoments" aria-labelledby="lpMomH"><div class="lp-frag lp-frag-3x3 fl fl-grid" data-d="0" data-p="0" style="top:4px; left:clamp(24px,6vw,96px);" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
       <div class="lp-wrap">
         <h2 class="lp-h2 fl fl-h" id="lpMomH" data-p="10">Find what matters.</h2>
         <div class="lp-tl fl" id="lpTl" data-d="400" data-p="5" role="tablist" aria-label="Key moments"><span class="lp-tl-line"></span></div>
@@ -686,10 +827,15 @@
       <div class="lp-wrap lp-ask-grid">
         <h2 class="lp-h2 fl fl-h" id="lpAskH" data-p="10">Ask your recordings.</h2>
         <div class="lp-qa">
-          <p class="lp-q fl fl-b" data-d="400" data-p="6">What did the speaker say about attention?</p>
+          <p class="lp-q fl fl-b" id="lpQ" data-d="400" data-p="6">What did the speaker say about attention?</p>
           <div class="lp-card fl" id="lpAnswer" data-d="650" data-p="4" aria-live="polite">
-            <p class="lp-a"><span class="lp-s">Attention, not information, is the scarce resource.</span> <span class="lp-s">Once information is abundant, focus is what runs out.</span></p>
-            <span class="lp-cite lp-s">02:41</span>
+            <p class="lp-a" id="lpA"><span class="lp-s">Attention, not information, is the scarce resource.</span> <span class="lp-s">Once information is abundant, focus is what runs out.</span></p>
+            <button type="button" class="lp-cite lp-s" id="lpCite" title="Jump to 02:41">02:41</button>
+          </div>
+          <div class="lp-followups fl" data-d="900" data-p="3">
+            <span class="lp-fu-label">Ask another &mdash;</span>
+            <button type="button" class="lp-link lp-fu" data-i="1">What was the main problem?</button>
+            <button type="button" class="lp-link lp-fu" data-i="2">Find related moments</button>
           </div>
         </div>
       </div>
@@ -698,22 +844,70 @@
     <!-- 5. library: a small preview -->
     <section class="lp-lib" aria-labelledby="lpLibH">
       <div class="lp-wrap">
-        <h2 class="lp-h2 fl fl-h" id="lpLibH" data-p="10">Everything, in one place.</h2>
+        <h2 class="lp-h2 fl fl-h" id="lpLibH" data-p="10">Your recordings.</h2>
+
+        <div class="lp-resume fl" data-d="250" data-p="5">
+          <p class="lp-resume-label">Continue listening</p>
+          <div class="lp-resume-row">
+            <div class="lp-resume-info"><span class="lp-resume-title">Economics Lecture</span><span class="lp-resume-time">03:18 / 14:20</span></div>
+            <span class="lp-resume-track"><span class="lp-resume-fill" style="--p:23%"></span></span>
+            <button type="button" class="lp-btn lp-btn-line lp-btn-sm" id="lpResumeBtn">Resume</button>
+          </div>
+        </div>
+
         <ol class="lp-libs">
-          <li class="fl" data-d="350" data-p="4"><span class="n">Economics Lecture</span><span class="m">Lecture</span><span class="d">14:20</span><span class="p" style="--p:100%" aria-label="Finished"></span></li>
-          <li class="fl" data-d="460" data-p="4"><span class="n">Research Interview</span><span class="m">Interview</span><span class="d">47:32</span><span class="p" style="--p:62%" aria-label="62% listened"></span></li>
-          <li class="fl" data-d="570" data-p="4"><span class="n">Project Meeting</span><span class="m">Meeting</span><span class="d">31:05</span><span class="p" style="--p:100%" aria-label="Finished"></span></li>
-          <li class="fl" data-d="680" data-p="4"><span class="n">Podcast</span><span class="m">Podcast</span><span class="d">1:12:40</span><span class="p" style="--p:18%" aria-label="18% listened"></span></li>
-          <li class="fl" data-d="790" data-p="4"><span class="n">Research Notes</span><span class="m">Notes</span><span class="d">2.3k words</span><span class="p" style="--p:40%" aria-label="40% read"></span></li>
+          <li class="fl" data-d="350" data-p="4"><span class="n">Economics Lecture</span><span class="lib-meta"><span class="m">Lecture</span><span class="mm">4 moments</span></span><span class="d">14:20</span><span class="p" style="--p:100%" aria-label="Finished"></span><span class="lib-hover"><button type="button" class="icon-mini-btn" title="Play" aria-label="Play">&#9654;</button><button type="button" class="icon-mini-btn" title="Search" aria-label="Search">&#9906;</button></span></li>
+          <li class="fl" data-d="460" data-p="4"><span class="n">Research Interview</span><span class="lib-meta"><span class="m">Interview</span><span class="mm">3 moments</span></span><span class="d">47:32</span><span class="p" style="--p:62%" aria-label="62% listened"></span><span class="lib-hover"><button type="button" class="icon-mini-btn" title="Play" aria-label="Play">&#9654;</button><button type="button" class="icon-mini-btn" title="Search" aria-label="Search">&#9906;</button></span></li>
+          <li class="fl" data-d="570" data-p="4"><span class="n">Project Meeting</span><span class="lib-meta"><span class="m">Meeting</span><span class="mm">4 moments</span></span><span class="d">31:05</span><span class="p" style="--p:100%" aria-label="Finished"></span><span class="lib-hover"><button type="button" class="icon-mini-btn" title="Play" aria-label="Play">&#9654;</button><button type="button" class="icon-mini-btn" title="Search" aria-label="Search">&#9906;</button></span></li>
+          <li class="fl" data-d="680" data-p="4"><span class="n">Podcast</span><span class="lib-meta"><span class="m">Podcast</span><span class="mm">2 moments</span></span><span class="d">1:12:40</span><span class="p" style="--p:18%" aria-label="18% listened"></span><span class="lib-hover"><button type="button" class="icon-mini-btn" title="Play" aria-label="Play">&#9654;</button><button type="button" class="icon-mini-btn" title="Search" aria-label="Search">&#9906;</button></span></li>
+          <li class="fl" data-d="790" data-p="4"><span class="n">Research Notes</span><span class="lib-meta"><span class="m">Notes</span><span class="mm">Saved</span></span><span class="d">2.3k words</span><span class="p" style="--p:40%" aria-label="40% read"></span><span class="lib-hover"><button type="button" class="icon-mini-btn" title="Open" aria-label="Open">&#9654;</button><button type="button" class="icon-mini-btn" title="Search" aria-label="Search">&#9906;</button></span></li>
         </ol>
+
+        <div class="lp-found fl" data-d="200" data-p="3">
+          <p class="lp-found-label">Recently found</p>
+          <ul class="lp-found-list">
+            <li><time>03:18</time><span>&ldquo;the systems deciding what deserves your attention&hellip;&rdquo;</span></li>
+            <li><time>07:45</time><span>&ldquo;a newsroom that moves from counting page views&hellip;&rdquo;</span></li>
+            <li><time>12:31</time><span>&ldquo;attention is scarce, defaults shape behavior&hellip;&rdquo;</span></li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- everything in one place: the knowledge flow -->
+    <section class="lp-flow" aria-labelledby="lpFlowH">
+      <div class="lp-wrap lp-flow-grid">
+        <div>
+          <h2 class="lp-h2 fl fl-h" id="lpFlowH" data-p="8">Everything, in one place.</h2>
+          <div class="lp-flow-diagram" id="lpFlowDiagram">
+            <div class="lp-flow-node fl" data-d="150" data-p="3" data-n="1">Recordings</div>
+            <div class="lp-flow-node fl" data-d="330" data-p="3" data-n="2">Transcripts</div>
+            <div class="lp-flow-branch">
+              <div class="lp-flow-node lp-flow-leaf fl" data-d="510" data-p="3" data-n="3">Search</div>
+              <div class="lp-flow-node lp-flow-leaf fl" data-d="600" data-p="3" data-n="3">Moments</div>
+              <div class="lp-flow-node lp-flow-leaf fl" data-d="690" data-p="3" data-n="3">Questions</div>
+            </div>
+            <div class="lp-flow-node lp-flow-final fl" data-d="870" data-p="3" data-n="4">Knowledge</div>
+          </div>
+        </div>
+        <div class="lp-flow-stat fl" data-d="450" data-p="5">
+          <p class="lp-flow-stat-label">Knowledge</p>
+          <dl class="lp-flow-stat-nums">
+            <div><dt>Recordings</dt><dd>12</dd></div>
+            <div><dt>Key moments</dt><dd>84</dd></div>
+            <div><dt>Searchable segments</dt><dd>327</dd></div>
+          </dl>
+          <p class="lp-flow-stat-latest">Latest: &ldquo;Consumer demand changed after&hellip;&rdquo;</p>
+        </div>
       </div>
     </section>
 
     <!-- 6. final call to action -->
     <section class="lp-final" aria-labelledby="lpFinalH">
-      <div class="lp-wrap">
-        <h2 class="lp-final-h fl fl-h" id="lpFinalH" data-p="10">Make your recordings useful.</h2>
-        <div class="fl" data-d="550" data-p="5"><button class="lp-btn lp-btn-primary lp-btn-lg" id="lpFinalOpen" type="button">Start using VoiceVault</button></div>
+      <div class="lp-wrap lp-final-inner">
+        <h2 class="lp-final-h fl fl-h" id="lpFinalH" data-p="6">Your voice<br>is worth<br>remembering.</h2>
+        <div class="lp-actions fl" data-d="900" data-p="4"><button class="lp-btn lp-btn-primary lp-btn-lg" id="lpFinalRecord" type="button">Start recording</button><button class="lp-btn lp-btn-line lp-btn-lg" id="lpFinalUpload" type="button">Upload a recording</button></div>
+        <svg class="lp-final-wave fl" data-d="1150" data-p="2" viewBox="0 0 300 28" aria-hidden="true"><rect x="0" y="10" width="3" height="8"/><rect x="8" y="4" width="3" height="20"/><rect x="16" y="12" width="3" height="4"/><rect x="24" y="0" width="3" height="28"/><rect x="32" y="8" width="3" height="12"/><rect x="40" y="6" width="3" height="16"/><rect x="48" y="11" width="3" height="6"/><rect x="56" y="2" width="3" height="24"/><rect x="64" y="9" width="3" height="10"/><rect x="72" y="5" width="3" height="18"/><rect x="80" y="12" width="3" height="4"/><rect x="88" y="1" width="3" height="26"/><rect x="96" y="7" width="3" height="14"/><rect x="104" y="10" width="3" height="8"/><rect x="112" y="3" width="3" height="22"/><rect x="120" y="9" width="3" height="10"/><rect x="128" y="6" width="3" height="16"/><rect x="136" y="11" width="3" height="6"/><rect x="144" y="0" width="3" height="28"/><rect x="152" y="8" width="3" height="12"/><rect x="160" y="4" width="3" height="20"/><rect x="168" y="10" width="3" height="8"/><rect x="176" y="2" width="3" height="24"/><rect x="184" y="9" width="3" height="10"/><rect x="192" y="6" width="3" height="16"/><rect x="200" y="12" width="3" height="4"/><rect x="208" y="1" width="3" height="26"/><rect x="216" y="7" width="3" height="14"/><rect x="224" y="10" width="3" height="8"/><rect x="232" y="3" width="3" height="22"/><rect x="240" y="9" width="3" height="10"/><rect x="248" y="5" width="3" height="18"/><rect x="256" y="11" width="3" height="6"/><rect x="264" y="0" width="3" height="28"/><rect x="272" y="8" width="3" height="12"/><rect x="280" y="4" width="3" height="20"/><rect x="288" y="10" width="3" height="8"/><rect x="296" y="6" width="3" height="16"/></svg>
       </div>
     </section>
   </div>
@@ -952,12 +1146,16 @@
         <button class="add-tab" data-tab="link">URL Import</button>
       </div>
 
+      <div class="tx-options" id="txOptions" style="display:none;">
+        <label class="tx-field"><span>Language</span><select id="txLang" class="tx-select"><option value="auto">Auto</option><option value="en">English</option><option value="hi">Hindi</option><option value="mr">Marathi</option></select></label>
+        <label class="tx-field tx-grow"><span>Context <em>optional</em></span><input id="txContext" class="tx-input" maxlength="400" placeholder="Names, technical terms, course words&hellip;" autocomplete="off" /></label>
+      </div>
       <div class="add-panel active" id="panel-upload">
-        <div class="dropzone" id="dropzone" style="border:1.5px dashed var(--border); border-radius:var(--radius-l); padding:46px 22px; text-align:center; cursor:pointer; background:var(--surface);">
-          <input type="file" id="fileInput" accept="audio/*,video/*" style="display:none;" />
+        <div class="dropzone" id="dropzone">
+          <input type="file" id="fileInput" multiple accept="audio/*,video/*,.mp3,.wav,.m4a,.aac,.ogg,.oga,.opus,.flac,.webm,.mp4,.mov,.mkv" style="display:none;" />
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:28px;height:28px;color:var(--text-tertiary);margin-bottom:12px;"><path d="M12 16V4M12 4 7 9M12 4l5 5"/><path d="M4 16v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg>
-          <div style="font-size:14.5px;font-weight:700;margin-bottom:6px;">Drop your recording here</div>
-          <div style="font-size:12.5px;color:var(--text-tertiary);">or click to browse &middot; MP3, WAV, M4A, MP4, WebM, MOV</div>
+          <div style="font-size:14.5px;font-weight:700;margin-bottom:6px;">Drop recordings here</div>
+          <div style="font-size:12.5px;color:var(--text-tertiary);">or click to choose one or several files &middot; MP3, WAV, M4A, OGG, WebM, MP4, MOV</div>
         </div>
         <div id="pickedFileBox"></div>
         <button class="modal-submit" id="uploadSubmit" disabled style="margin-top:14px;">Add to library</button>
@@ -1085,6 +1283,7 @@ function loadLocal() {
   try { KNOWLEDGECARDS = JSON.parse(localStorage.getItem('vv2-knowledgecards') || '[]'); } catch(e) { KNOWLEDGECARDS = []; }
   try { SETTINGS = JSON.parse(localStorage.getItem('vv2-settings') || '{}'); } catch(e) { SETTINGS = {}; }
   if (!SETTINGS.name) SETTINGS.name = '';
+  markInterruptedJobs();
 }
 function saveSources() { try { localStorage.setItem('vv2-sources', JSON.stringify(SOURCES)); } catch(e) { console.warn('Could not save sources', e); } }
 function saveNotes() { try { localStorage.setItem('vv2-notes', JSON.stringify(NOTES)); } catch(e) {} }
@@ -1387,6 +1586,8 @@ function enterApp() {
 }
 document.getElementById('heroRecordBtn').addEventListener('click', () => { if (!ensureAuthed('record')) return; enterApp(); enterAddTab('record'); });
 document.getElementById('heroUploadBtn').addEventListener('click', () => { if (!ensureAuthed('upload')) return; enterApp(); enterAddTab('upload'); });
+document.getElementById('lpFinalRecord') && document.getElementById('lpFinalRecord').addEventListener('click', () => { if (!ensureAuthed('record')) return; enterApp(); enterAddTab('record'); });
+document.getElementById('lpFinalUpload') && document.getElementById('lpFinalUpload').addEventListener('click', () => { if (!ensureAuthed('upload')) return; enterApp(); enterAddTab('upload'); });
 const heroUrlBtn = document.getElementById('heroUrlBtn'); if (heroUrlBtn) heroUrlBtn.addEventListener('click', () => { if (!ensureAuthed('import')) return; enterApp(); enterAddTab('link'); });
 document.getElementById('sidebarLogo').addEventListener('click', () => { document.getElementById('stage-app').style.display='none'; document.getElementById('stage-landing').style.display='block'; window.scrollTo({top:0}); });
 
@@ -1407,8 +1608,11 @@ document.getElementById('recordIcon').innerHTML = ICONS.mic;
 
 /* ======================= NAV ======================= */
 const state = { screen:'dashboard', libFilter:'all', libMode:'sources', selectedIds:new Set(), currentSourceId:null, selectedSegIdx:new Set() };
+let mediaSyncStop = null;
+function stopMediaSync() { if (mediaSyncStop) { mediaSyncStop(); mediaSyncStop = null; } }
 function showScreen(name) {
   state.screen = name;
+  if (name !== 'detail') stopMediaSync();
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById('screen-' + name).classList.add('active');
   document.querySelectorAll('.side-link').forEach(b => b.classList.toggle('active', b.dataset.nav === name));
@@ -1465,13 +1669,15 @@ function sourceCard(s) {
     const st = s.transcriptStatus;
     const badges = {
       ready: '<span class="badge-warn" style="color:var(--good);border-color:var(--good);">Transcript ready</span>',
-      no_speech: '<span class="badge-warn">No speech detected</span>',
-      uploading: '<span class="badge-warn">Uploading…</span>',
-      transcribing: '<span class="badge-warn">Transcribing…</span>',
-      upload_failed: '<span class="badge-warn" style="color:var(--danger);border-color:var(--danger);">Upload failed</span>',
-      transcription_failed: '<span class="badge-warn" style="color:var(--danger);border-color:var(--danger);">Transcription failed</span>',
+      no_speech: '<span class="badge-warn">No speech</span>',
+      queued: '<span class="badge-warn" data-tx="1">Waiting</span>',
+      preparing: '<span class="badge-warn" data-tx="1">Processing…</span>',
+      uploading: '<span class="badge-warn" data-tx="1">Uploading…</span>',
+      transcribing: '<span class="badge-warn" data-tx="1">Transcribing…</span>',
+      upload_failed: '<span class="badge-warn" style="color:var(--danger);border-color:var(--danger);">Failed</span>',
+      transcription_failed: '<span class="badge-warn" style="color:var(--danger);border-color:var(--danger);">Failed</span>',
       no_audio_track: '<span class="badge-warn">No audio track</span>',
-      invalid_media: '<span class="badge-warn" style="color:var(--danger);border-color:var(--danger);">Invalid media</span>',
+      invalid_media: '<span class="badge-warn" style="color:var(--danger);border-color:var(--danger);">Unreadable</span>',
     };
     metaBits.push(badges[st] || '<span class="badge-warn">No transcript</span>');
   } else { metaBits.push((s.wordCount||0) + ' words'); if (s.type==='web') metaBits.push(s.url ? new URL(s.url).hostname.replace('www.','') : 'web'); }
@@ -1514,7 +1720,7 @@ function drawMiniWave(canvas, peaks, ratio) {
   const ctx = canvas.getContext('2d');
   ctx.clearRect(0,0,canvas.width,canvas.height);
   const accent = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#D6A13A';
-  const border = getComputedStyle(document.documentElement).getPropertyValue('--border').trim() || '#46372A';
+  const border = getComputedStyle(document.documentElement).getPropertyValue('--wave-muted').trim() || 'rgba(226,204,174,0.28)';
   const step = Math.max(1, Math.floor(peaks.length/60));
   const sampled = []; for (let i=0;i<peaks.length;i+=step) sampled.push(peaks[i]);
   const barW = canvas.width/sampled.length;
@@ -1833,34 +2039,36 @@ document.getElementById('globalSearchInput').addEventListener('input', (e) => ru
 async function getOrComputePeaks(id, blob) {
   if (peaksCache[id] !== undefined) return peaksCache[id];
   try {
-    const arrayBuffer = await blob.arrayBuffer();
-    const ctx = new (window.AudioContext||window.webkitAudioContext)();
-    const audioBuffer = await ctx.decodeAudioData(arrayBuffer);
-    const raw = audioBuffer.getChannelData(0);
-    const samples = 130;
-    const blockSize = Math.max(1, Math.floor(raw.length / samples));
-    const peaks = [];
-    for (let i=0;i<samples;i++) { let sum=0; const start=i*blockSize; for (let j=0;j<blockSize;j++) sum += Math.abs(raw[start+j]||0); peaks.push(sum/blockSize); }
-    const max = Math.max(...peaks, 0.0001);
-    try { ctx.close(); } catch(e) {}
-    peaksCache[id] = peaks.map(p=>p/max);
+    const AC = window.AudioContext || window.webkitAudioContext; let ctx; try { ctx = new AC({ sampleRate: 8000 }); } catch (e) { ctx = new AC(); }
+    const bytes = await blob.arrayBuffer();
+    let buf; try { buf = await new Promise((res, rej) => { const p = ctx.decodeAudioData(bytes, res, rej); if (p && p.catch) p.catch(rej); }); } finally { try { ctx.close(); } catch (e) {} }
+    const n = 1200, len = buf.length, block = Math.max(1, Math.floor(len / n)), chans = []; for (let c = 0; c < buf.numberOfChannels; c++) chans.push(buf.getChannelData(c));
+    const peaks = new Array(n).fill(0);
+    for (let i = 0; i < n; i++) { let m = 0; const st = i * block, en = Math.min(len, st + block); for (const ch of chans) for (let j = st; j < en; j++) { const v = ch[j] < 0 ? -ch[j] : ch[j]; if (v > m) m = v; } peaks[i] = m; }
+    const max = Math.max(...peaks, 1e-4);
+    peaksCache[id] = peaks.map(p => Math.pow(p / max, 0.7));   // gentle compression so quiet speech stays visible
   } catch (e) { peaksCache[id] = null; }
   return peaksCache[id];
 }
-function drawWaveform(canvas, peaks, progressRatio) {
-  const dpr = window.devicePixelRatio || 1;
-  const cssW = canvas.clientWidth || 300;
-  canvas.width = cssW * dpr; canvas.height = 60 * dpr;
-  const ctx = canvas.getContext('2d');
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-  const accent = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#D6A13A';
-  const border = getComputedStyle(document.documentElement).getPropertyValue('--border').trim() || '#46372A';
-  const barW = canvas.width / peaks.length;
-  peaks.forEach((p,i) => {
-    const barH = Math.max(2*dpr, p*canvas.height*0.9);
-    ctx.fillStyle = (i/peaks.length) < progressRatio ? accent : border;
-    ctx.fillRect(i*barW, (canvas.height-barH)/2, Math.max(1,barW-1), barH);
-  });
+let waveColorCache = null;
+function waveColors() {
+  if (!waveColorCache) { const cs = getComputedStyle(document.documentElement); waveColorCache = { played: cs.getPropertyValue('--accent').trim() || '#C99A32', hi: cs.getPropertyValue('--accent-strong').trim() || '#D8AD55', muted: cs.getPropertyValue('--wave-muted').trim() || 'rgba(226,204,174,0.28)' }; }
+  return waveColorCache;
+}
+function drawWaveform(canvas, peaks, progressRatio, active) {
+  const dpr = Math.min(window.devicePixelRatio || 1, 2), cssW = canvas.clientWidth || 300, cssH = canvas.clientHeight || 130, W = Math.round(cssW * dpr), H = Math.round(cssH * dpr);
+  if (canvas.width !== W) canvas.width = W; if (canvas.height !== H) canvas.height = H;
+  const ctx = canvas.getContext('2d'), col = waveColors(); ctx.clearRect(0, 0, W, H);
+  const bw = Math.max(1, Math.round(2 * dpr)), gap = Math.max(1, Math.round(2 * dpr)), step = bw + gap, n = Math.max(8, Math.floor(W / step)), per = peaks.length / n, mid = H / 2, px = Math.max(0, Math.min(1, progressRatio || 0)) * W;
+  for (let i = 0; i < n; i++) {
+    let p = 0; const a = Math.floor(i * per), b = Math.max(a + 1, Math.floor((i + 1) * per)); for (let j = a; j < b; j++) if (peaks[j] > p) p = peaks[j];
+    const h = Math.max(2 * dpr, p * H * 0.84), x = i * step;
+    ctx.fillStyle = x + bw / 2 <= px ? col.played : col.muted; ctx.fillRect(x, mid - h / 2, bw, h);
+  }
+  if (progressRatio > 0) {   // thin playhead with a restrained glow while it is the active element
+    ctx.save(); if (active) { ctx.shadowColor = 'rgba(216,173,85,0.55)'; ctx.shadowBlur = 9 * dpr; }
+    ctx.fillStyle = col.hi; ctx.fillRect(Math.round(px) - Math.floor(dpr / 2), 0, Math.max(1, Math.round(dpr)), H); ctx.restore();
+  }
 }
 
 /* ======================= SOURCE DETAIL PAGE ======================= */
@@ -1868,6 +2076,7 @@ let posSaveTimer = null;
 async function openSource(id, startAt) {
   const s = SOURCES.find(s => s.id === id);
   if (!s) return;
+  stopMediaSync();
   state.currentSourceId = id; state.selectedSegIdx = new Set();
   const body = document.getElementById('detailBody');
   body.innerHTML = `<div class="skeleton" style="height:60px;margin-bottom:16px;"></div><div class="skeleton" style="height:200px;margin-bottom:16px;"></div><div class="skeleton" style="height:300px;"></div>`;
@@ -1902,23 +2111,19 @@ async function openSource(id, startAt) {
     if (status === 'ready') {
       transcriptBlock = `<div class="tsearch-row"><div class="search-mini" style="max-width:240px;">${ICONS.search}<input type="text" id="transcriptSearchInput" placeholder="Search transcript…" /></div><div class="tsearch-nav"><button id="tsearchPrev">‹</button><span id="tsearchCount"></span><button id="tsearchNext">›</button></div></div>
         <div id="segToolbarSlot"></div>
-        <div id="transcriptLines">${segments.map((sg,i) => `<div class="transcript-line" data-t="${sg.start}" data-i="${i}"><input type="checkbox" class="seg-check" data-i="${i}" /><span class="t-time mono">${formatSeconds(sg.start)}</span><span class="t-text">${escapeHtml(sg.text)}</span><button class="save-star ${isKeyMoment(s.id, sg.start)?'saved':''}" data-i="${i}" title="Save as Key Moment">${ICONS.star}</button></div>`).join('')}</div>`;
+        <div id="transcriptLines">${segments.map((sg,i) => transcriptLineHtml(s, sg, i, txDisplayText(s, sg))).join('')}</div>`;
     } else if (status === 'no_speech') {
-      transcriptBlock = `<div class="transcript-empty">No recognizable speech was detected in this audio. If this seems wrong, it may be an instrumental/music track, very quiet audio, or a language issue.<br/><button class="rec-btn" id="retryTranscribeBtn" style="margin-top:10px;">Try again</button></div>`;
+      transcriptBlock = txStateBlock('NO SPEECH', 'VoiceVault found an audio track, but couldn\u2019t detect meaningful speech.', s, { retry: true });
     } else if (status === 'no_audio_track') {
-      transcriptBlock = `<div class="transcript-empty">NO AUDIO TRACK<br/>This video doesn't contain an audio track, so there's nothing for VoiceVault to transcribe.</div>`;
+      transcriptBlock = txStateBlock('NO AUDIO TRACK', 'This video doesn\u2019t contain an audio track, so there\u2019s nothing for VoiceVault to transcribe.', s, {});
     } else if (status === 'invalid_media') {
-      transcriptBlock = `<div class="transcript-empty" style="border:1px solid var(--danger);">INVALID MEDIA<br/>This file couldn't be read as audio or video. It may be empty, corrupted, or in a format this browser can't open. Try exporting it again or choosing a different file.${s.transcriptError ? '<br/><span style="color:var(--text-tertiary);">Details: ' + escapeHtml(s.transcriptError) + '</span>' : ''}</div>`;
-    } else if (status === 'uploading') {
-      transcriptBlock = `<div class="transcript-empty">UPLOADING&hellip; ${escapeHtml(s.transcriptError || "sending this recording to storage before transcription can start.")}</div>`;
-    } else if (status === 'transcribing') {
-      transcriptBlock = `<div class="transcript-empty">TRANSCRIBING&hellip; ${escapeHtml(s.transcriptError || "uploaded successfully; Groq's Whisper endpoint is generating a real timestamped transcript now. This can take a moment for longer recordings.")}</div>`;
-    } else if (status === 'upload_failed') {
-      transcriptBlock = `<div class="transcript-empty" style="border:1px solid var(--danger);">UPLOAD FAILED<br/>Reason: ${escapeHtml(s.transcriptError||'Unknown error')}<br/><button class="rec-btn" id="retryTranscribeBtn" style="margin-top:10px;">Retry upload</button></div>`;
-    } else if (status === 'transcription_failed' || status === 'failed') {
-      transcriptBlock = `<div class="transcript-empty" style="border:1px solid var(--danger);">TRANSCRIPTION FAILED<br/>Reason: ${escapeHtml(s.transcriptError||'Unknown error')}<br/><button class="rec-btn" id="retryTranscribeBtn" style="margin-top:10px;">Retry</button></div>`;
+      transcriptBlock = txStateBlock('UNREADABLE FILE', 'VoiceVault couldn\u2019t read this media file.', s, { detail: s.transcriptError, danger: true });
+    } else if (TX_TRANSIENT.includes(status)) {
+      transcriptBlock = txProgressBlock(s);
+    } else if (status === 'transcription_failed' || status === 'upload_failed' || status === 'failed') {
+      transcriptBlock = txStateBlock('TRANSCRIPTION FAILED', 'Something went wrong while processing this audio/video.', s, { detail: s.transcriptError, retry: true, danger: true });
     } else {
-      transcriptBlock = `<div class="transcript-empty">No transcript yet.<br/><button class="rec-btn" id="retryTranscribeBtn" style="margin-top:10px;">Transcribe now</button></div>`;
+      transcriptBlock = txStateBlock('NO TRANSCRIPT YET', '', s, { retry: true, retryLabel: 'Transcribe now' });
     }
   }
 
@@ -1962,7 +2167,7 @@ async function openSource(id, startAt) {
         ${(s.type==='text'||s.type==='web') ? `<div class="panel-card"><h4>${s.type==='web'?'Extracted content':'Content'}</h4>${contentBlock}</div>` : ''}
 
         ${(s.type==='audio'||s.type==='video') ? `<div class="panel-card">
-          <h4>Transcript${segments.length ? `<div class="export-menu"><button class="ghost-btn" id="exportTranscriptBtn" style="padding:5px 11px;font-size:11.5px;">Export ▾</button><div class="export-dropdown" id="exportTranscriptMenu"><button data-f="txt">as TXT</button><button data-f="srt">as SRT</button><button data-f="vtt">as VTT</button></div></div>` : ''}</h4>
+          <h4 style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;"><span>Transcript</span>${segments.length ? `<span style="display:flex;align-items:center;gap:10px;"><div class="tx-viewtabs" role="tablist" aria-label="Transcript view"><button class="tx-viewtab ${(s.transcriptViewMode||'clean')==='clean'?'active':''}" data-mode="clean" type="button" role="tab">Clean</button><button class="tx-viewtab ${s.transcriptViewMode==='original'?'active':''}" data-mode="original" type="button" role="tab">Original</button></div><div class="export-menu"><button class="ghost-btn" id="exportTranscriptBtn" style="padding:5px 11px;font-size:11.5px;">Export &#9662;</button><div class="export-dropdown" id="exportTranscriptMenu"><button data-f="txt">as TXT</button><button data-f="srt">as SRT</button><button data-f="vtt">as VTT</button></div></div></span>` : ''}</h4>
           ${transcriptBlock}
         </div>` : ''}
 
@@ -2034,74 +2239,94 @@ async function openSource(id, startAt) {
   if (resumeBtn) resumeBtn.addEventListener('click', () => { media.currentTime = s.lastPositionSec; media.play(); });
   if (startAt != null && media) { media.addEventListener('loadedmetadata', () => { media.currentTime = startAt; media.play(); }, { once:true }); }
 
+  // ---- ONE timeline: media.currentTime drives the waveform, the timestamp and the transcript ----
+  let redrawWave = () => {};
+  const linesEl = document.getElementById('transcriptLines');
+  let lineEls = linesEl ? Array.from(linesEl.querySelectorAll('.transcript-line')) : [];
+  let lastActive = -2, userScrollUntil = 0, syncRaf = 0;
+  if (linesEl) ['wheel', 'touchmove', 'pointerdown'].forEach(ev => linesEl.addEventListener(ev, () => { userScrollUntil = performance.now() + 2500; }, { passive: true }));
+  const activeIndexAt = (t) => { let lo = 0, hi = segments.length - 1, ans = -1; while (lo <= hi) { const mid = (lo + hi) >> 1; if (segments[mid].start <= t + 0.001) { ans = mid; lo = mid + 1; } else hi = mid - 1; } return ans; };
+  function syncUI(follow) {
+    if (!media) return;
+    redrawWave();
+    const i = segments.length ? activeIndexAt(media.currentTime) : -1;
+    if (i !== lastActive) {
+      lastActive = i; lineEls.forEach((el, k) => el.classList.toggle('playing', k === i));
+      if (i >= 0 && follow && linesEl && performance.now() > userScrollUntil) linesEl.scrollTo({ top: Math.max(0, lineEls[i].offsetTop - linesEl.clientHeight / 2 + lineEls[i].offsetHeight / 2), behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+    }
+  }
+  if (media) {
+    const loopSync = () => { syncUI(true); syncRaf = (!media.paused && !media.ended) ? requestAnimationFrame(loopSync) : 0; };
+    const start = () => { cancelAnimationFrame(syncRaf); syncRaf = requestAnimationFrame(loopSync); };
+    media.addEventListener('play', start); media.addEventListener('playing', start);
+    ['pause', 'ended'].forEach(ev => media.addEventListener(ev, () => { cancelAnimationFrame(syncRaf); syncRaf = 0; syncUI(false); }));   // paused: everything holds still
+    ['seeking', 'seeked', 'timeupdate', 'loadedmetadata', 'durationchange'].forEach(ev => media.addEventListener(ev, () => { if (media.paused) syncUI(false); }));
+    mediaSyncStop = () => { cancelAnimationFrame(syncRaf); syncRaf = 0; };
+    media.addEventListener('timeupdate', () => { clearTimeout(posSaveTimer); posSaveTimer = setTimeout(() => { s.lastPositionSec = media.currentTime; saveSources(); }, 1200); });
+    media.addEventListener('ended', () => { s.lastPositionSec = 0; saveSources(); });
+  }
   if (mediaBlobCache[s.id]) {
     getOrComputePeaks(s.id, mediaBlobCache[s.id]).then(peaks => {
       if (!peaks) return;
       const canvas = document.getElementById('waveCanvas');
+      if (!canvas) return;
       const tsRow = document.getElementById('waveTimestamp');
       const hoverTip = document.getElementById('waveHoverTip');
       canvas.style.display = 'block'; if (tsRow) tsRow.style.display = 'flex';
-      const redraw = () => {
-        drawWaveform(canvas, peaks, media.duration ? media.currentTime/media.duration : 0);
-        const nowEl = document.getElementById('waveNowTime'); const durEl = document.getElementById('waveDurTime');
-        if (nowEl) nowEl.textContent = formatSeconds(media.currentTime);
-        if (durEl) durEl.textContent = formatSeconds(media.duration || s.durationSec || 0);
+      const dur = () => (media.duration && isFinite(media.duration)) ? media.duration : (s.durationSec || 0);
+      redrawWave = () => {
+        const d = dur();
+        drawWaveform(canvas, peaks, d ? media.currentTime / d : 0, !media.paused);
+        const nowEl = document.getElementById('waveNowTime'), durEl = document.getElementById('waveDurTime');
+        if (nowEl) nowEl.textContent = formatClock(media.currentTime);
+        if (durEl) durEl.textContent = formatClock(d);
         drawMomentMarkers();
       };
+      let markersFor = '';
       function drawMomentMarkers() {
         const wrap = document.getElementById('waveMoments'); if (!wrap) return;
-        const dur = media.duration || s.durationSec || 0; if (!dur) { wrap.innerHTML=''; return; }
-        const myMoments = KEYMOMENTS.filter(k => k.sourceId === s.id);
-        wrap.innerHTML = myMoments.map(k => `<span class="wave-moment-marker" data-t="${k.start}" title="${escapeHtml(formatSeconds(k.start) + ' — ' + k.label)}" style="left:${(k.start/dur*100)}%;"></span>`).join('');
+        const d = dur(); if (!d) { wrap.innerHTML = ''; return; }
+        const mine = KEYMOMENTS.filter(k => k.sourceId === s.id), sig = d + '|' + mine.map(k => k.start + k.label).join(',');
+        if (sig === markersFor) return; markersFor = sig;   // markers only change when the moments or duration do, not every frame
+        wrap.innerHTML = mine.map(k => `<span class="wave-moment-marker" data-t="${k.start}" title="${escapeHtml(formatClock(k.start) + ' — ' + k.label)}" style="left:${(k.start / d * 100)}%;"></span>`).join('');
         wrap.querySelectorAll('.wave-moment-marker').forEach(m => m.addEventListener('click', (e) => { e.stopPropagation(); media.currentTime = parseFloat(m.dataset.t); media.play(); }));
       }
-      redraw();
-      media.addEventListener('timeupdate', redraw);
-      media.addEventListener('loadedmetadata', redraw);
-      window.addEventListener('resize', redraw);
-      canvas.addEventListener('click', (e) => { const rect = canvas.getBoundingClientRect(); const ratio = (e.clientX-rect.left)/rect.width; if (media.duration) media.currentTime = ratio*media.duration; });
+      redrawWave(); syncUI(false);
+      window.addEventListener('resize', redrawWave);
+      canvas.addEventListener('click', (e) => { const rect = canvas.getBoundingClientRect(), d = dur(); if (d) media.currentTime = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width)) * d; });   // seeks the real media
       canvas.addEventListener('mousemove', (e) => {
-        if (!hoverTip || !media.duration) return;
-        const rect = canvas.getBoundingClientRect();
-        const ratio = Math.min(1, Math.max(0, (e.clientX-rect.left)/rect.width));
-        hoverTip.textContent = formatSeconds(ratio * media.duration);
-        hoverTip.style.left = (ratio*100) + '%';
-        hoverTip.style.display = 'block';
+        const d = dur(); if (!hoverTip || !d) return;
+        const rect = canvas.getBoundingClientRect(), ratio = Math.min(1, Math.max(0, (e.clientX - rect.left) / rect.width));
+        hoverTip.textContent = formatClock(ratio * d); hoverTip.style.left = (ratio * 100) + '%'; hoverTip.style.display = 'block';
       });
       canvas.addEventListener('mouseleave', () => { if (hoverTip) hoverTip.style.display = 'none'; });
     });
   }
-  if (media) {
-    media.addEventListener('timeupdate', () => {
-      if (segments.length) {
-        let active = null;
-        segments.forEach(sg => { if (sg.start <= media.currentTime) active = sg.start; });
-        document.querySelectorAll('.transcript-line').forEach(line => line.classList.toggle('playing', parseFloat(line.dataset.t) === active));
-      }
-      clearTimeout(posSaveTimer);
-      posSaveTimer = setTimeout(() => { s.lastPositionSec = media.currentTime; saveSources(); }, 1200);
-    });
-    media.addEventListener('ended', () => { s.lastPositionSec = 0; saveSources(); });
-  }
 
   // ---- transcript search / seek / key-moment star / multi-select ----
+  function wireTranscriptLineEvents() {
+    lineEls = linesEl ? Array.from(linesEl.querySelectorAll('.transcript-line')) : [];
+    lineEls.forEach(line => line.addEventListener('click', (e) => { if (e.target.closest('.seg-check') || e.target.closest('.save-star')) return; if (!media) return; media.currentTime = parseFloat(line.dataset.t); media.play(); }));
+    linesEl && linesEl.querySelectorAll('.save-star').forEach(btn => btn.addEventListener('click', (e) => { e.stopPropagation(); toggleKeyMoment(s, segments[+btn.dataset.i], btn); }));
+    linesEl && linesEl.querySelectorAll('.seg-check').forEach(cb => cb.addEventListener('change', () => { if (cb.checked) state.selectedSegIdx.add(+cb.dataset.i); else state.selectedSegIdx.delete(+cb.dataset.i); renderSegToolbar(s, segments); }));
+  }
   if (segments.length) {
-    document.querySelectorAll('#transcriptLines .transcript-line').forEach(line => {
-      line.addEventListener('click', (e) => { if (e.target.closest('.seg-check') || e.target.closest('.save-star')) return; media.currentTime = parseFloat(line.dataset.t); media.play(); });
-    });
-    document.querySelectorAll('#transcriptLines .save-star').forEach(btn => btn.addEventListener('click', (e) => { e.stopPropagation(); toggleKeyMoment(s, segments[+btn.dataset.i], btn); }));
-    document.querySelectorAll('#transcriptLines .seg-check').forEach(cb => cb.addEventListener('change', () => { if (cb.checked) state.selectedSegIdx.add(+cb.dataset.i); else state.selectedSegIdx.delete(+cb.dataset.i); renderSegToolbar(s, segments); }));
-    wireTranscriptSearch(segments);
+    wireTranscriptLineEvents();
+    wireTranscriptSearch(segments, () => s.transcriptViewMode || 'clean');
+    document.querySelectorAll('.tx-viewtab').forEach(btn => btn.addEventListener('click', () => {
+      if (btn.classList.contains('active')) return;
+      s.transcriptViewMode = btn.dataset.mode; saveSources();
+      document.querySelectorAll('.tx-viewtab').forEach(b => b.classList.toggle('active', b === btn));
+      linesEl.innerHTML = segments.map((sg, i) => transcriptLineHtml(s, sg, i, txDisplayText(s, sg))).join('');
+      wireTranscriptLineEvents();
+      lastActive = -2; syncUI(false);   // timestamps, segment ids and playback position are untouched: only the text changed
+      const q = document.getElementById('transcriptSearchInput'); if (q && q.value) q.dispatchEvent(new Event('input'));
+    }));
   }
 
   // ---- retry transcription ----
   const retryBtn = document.getElementById('retryTranscribeBtn');
-  if (retryBtn) retryBtn.addEventListener('click', async () => {
-    const blob = await idbGet('blobs', s.id);
-    if (!blob) { toast('Could not find the stored audio to retry.'); return; }
-    const mime = blob.type || 'audio/webm';
-    transcribeSource(s.id, blob, s.title.replace(/[^a-z0-9]+/gi,'-') + '.' + extensionForType(mime), baseContentType(mime));
-  });
+  if (retryBtn) retryBtn.addEventListener('click', () => { const sel = document.getElementById('retryLang'); retryTranscription(s.id, sel ? sel.value : undefined); });
 
   // ---- export whole transcript ----
   const exportBtn = document.getElementById('exportTranscriptBtn');
@@ -2122,7 +2347,7 @@ document.addEventListener('click', (e) => { if (!e.target.closest('.export-menu'
 document.getElementById('detailBack').addEventListener('click', () => { const active = document.querySelector('.side-link.active'); showScreen(active ? active.dataset.nav : 'dashboard'); });
 
 /* ---- transcript search with match count + prev/next ---- */
-function wireTranscriptSearch(segments) {
+function wireTranscriptSearch(segments, getMode) {
   const input = document.getElementById('transcriptSearchInput');
   const countEl = document.getElementById('tsearchCount');
   let matches = [], idx = -1;
@@ -2130,7 +2355,7 @@ function wireTranscriptSearch(segments) {
     const q = input.value.toLowerCase().trim();
     matches = [];
     document.querySelectorAll('#transcriptLines .transcript-line').forEach((line,i) => {
-      const textEl = line.querySelector('.t-text'); const raw = segments[i].text;
+      const textEl = line.querySelector('.t-text'); const raw = getMode && getMode() === 'original' ? segments[i].text : cleanSegmentText(segments[i].text);
       if (q && raw.toLowerCase().includes(q)) {
         const re = new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','ig');
         textEl.innerHTML = escapeHtml(raw).replace(re,'<mark>$1</mark>'); line.style.display=''; matches.push(i);
@@ -2442,6 +2667,7 @@ function enterAddTab(tab) {
   document.querySelectorAll('.add-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
   document.querySelectorAll('.add-panel').forEach(p => p.style.display = 'none');
   document.getElementById('panel-' + tab).style.display = 'block';
+  document.getElementById('txOptions').style.display = tab === 'link' ? 'none' : 'flex';
 }
 document.querySelectorAll('.add-tab').forEach(tab => tab.addEventListener('click', () => enterAddTab(tab.dataset.tab)));
 
@@ -2596,100 +2822,307 @@ function showRecordingPreview() {
     const durationSec = await getMediaDuration(url).catch(() => recSeconds);
     const mime = recBlob.type || recChosenMime;
     const filename = 'recording.' + extensionForType(mime);
-    SOURCES.unshift({ id, type:'audio', title, dateAdded: new Date().toISOString(), durationSec: durationSec || recSeconds, transcriptStatus: 'uploading', tags: [], collectionIds: [], favorite: false, lastPositionSec: 0, chapters: [] });
+    SOURCES.unshift({ id, type:'audio', title, dateAdded: new Date().toISOString(), durationSec: durationSec || recSeconds, transcriptStatus: 'queued', language: document.getElementById('txLang').value, context: document.getElementById('txContext').value.trim(), tags: [], collectionIds: [], favorite: false, lastPositionSec: 0, chapters: [] });
     saveSources();
     resetRecordUI(); renderDashboard(); state.libMode='sources'; showScreen('library');
-    transcribeSource(id, recBlob, filename, baseContentType(mime));
+    enqueueTranscription({ id, blob: recBlob, filename, contentType: baseContentType(mime), lang: document.getElementById('txLang').value, prompt: document.getElementById('txContext').value.trim() });
   });
 }
 function getMediaDuration(url) {
   return new Promise((resolve, reject) => {
-    const a = document.createElement('audio'); a.src = url;
-    a.addEventListener('loadedmetadata', () => resolve(isFinite(a.duration) ? a.duration : null));
-    a.addEventListener('error', reject);
+    const a = document.createElement('audio'); a.preload = 'metadata'; a.src = url;
+    const t = setTimeout(() => { reject(new Error('timeout')); a.removeAttribute('src'); }, 4000);   // some codecs never fire either event
+    a.addEventListener('loadedmetadata', () => { clearTimeout(t); resolve(isFinite(a.duration) ? a.duration : null); });
+    a.addEventListener('error', () => { clearTimeout(t); reject(new Error('unreadable')); });
   });
 }
 
-/* ---- Real WAV re-encoding for chunked long-audio transcription ---- */
-function resampleTo16k(float32Data, sourceSampleRate) {
-  const targetRate = 16000;
-  if (Math.round(sourceSampleRate) === targetRate) return float32Data;
-  const ratio = sourceSampleRate / targetRate;
-  const newLength = Math.max(1, Math.round(float32Data.length / ratio));
-  const result = new Float32Array(newLength);
-  for (let i = 0; i < newLength; i++) {
-    const srcIndex = i * ratio;
-    const i0 = Math.floor(srcIndex);
-    const i1 = Math.min(i0 + 1, float32Data.length - 1);
-    const frac = srcIndex - i0;
-    result[i] = float32Data[i0] * (1 - frac) + float32Data[i1] * frac;
-  }
-  return result;
-}
+/* ======================= TRANSCRIPTION PIPELINE =======================
+   media -> detect audio track -> decode -> mono 16 kHz -> gentle level normalisation
+         -> overlapping 5-minute WAV chunks -> upload each to Blob -> Groq Whisper -> merge on the ORIGINAL timeline.
+   Only prepared audio is ever uploaded, never the video, so file size, container and codec no longer decide what works. */
+const TX = {
+  SAMPLE_RATE: 16000,
+  CHUNK_SEC: 300,            // 5 minutes of 16 kHz mono WAV is ~9.6 MB, comfortably under Groq's 25 MB limit
+  OVERLAP_SEC: 5,            // consecutive chunks share 5 s so words at a boundary are never lost
+  DIRECT_MAX_BYTES: 24 * 1024 * 1024,
+  SILENT_PEAK: 0.0005,       // below this the audio is effectively digital silence
+};
+const TX_LANGS = [['auto', 'Auto'], ['en', 'English'], ['hi', 'Hindi'], ['mr', 'Marathi']];
+const GROQ_NATIVE_EXTENSIONS = ['flac', 'm4a', 'mp3', 'mp4', 'mpeg', 'mpga', 'oga', 'ogg', 'wav', 'webm'];
+const EXT_TO_MIME = { flac: 'audio/flac', m4a: 'audio/mp4', mp3: 'audio/mpeg', mp4: 'video/mp4', mpeg: 'audio/mpeg', mpga: 'audio/mpeg', oga: 'audio/ogg', ogg: 'audio/ogg', wav: 'audio/wav', webm: 'video/webm' };
+function fileExtension(name) { const m = /\.([a-z0-9]+)$/i.exec(name || ''); return m ? m[1].toLowerCase() : ''; }
+const txSleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+class TxError extends Error { constructor(kind, message, extra) { super(message); this.kind = kind; Object.assign(this, extra || {}); } }
+
+/* ---- audio preparation ---- */
 function mixToMono(audioBuffer) {
   if (audioBuffer.numberOfChannels === 1) return audioBuffer.getChannelData(0);
-  const len = audioBuffer.length;
-  const out = new Float32Array(len);
-  for (let ch = 0; ch < audioBuffer.numberOfChannels; ch++) {
-    const data = audioBuffer.getChannelData(ch);
-    for (let i = 0; i < len; i++) out[i] += data[i] / audioBuffer.numberOfChannels;
+  const len = audioBuffer.length, out = new Float32Array(len), n = audioBuffer.numberOfChannels;
+  for (let ch = 0; ch < n; ch++) { const d = audioBuffer.getChannelData(ch); for (let i = 0; i < len; i++) out[i] += d[i] / n; }
+  return out;
+}
+async function resampleTo16k(samples, fromRate) {
+  if (Math.round(fromRate) === TX.SAMPLE_RATE) return samples;
+  if (window.OfflineAudioContext) {   // browser resampler: proper low-pass filtering, unlike linear interpolation
+    const len = Math.max(1, Math.ceil(samples.length * TX.SAMPLE_RATE / fromRate));
+    const oc = new OfflineAudioContext(1, len, TX.SAMPLE_RATE), buf = oc.createBuffer(1, samples.length, fromRate);
+    buf.copyToChannel(samples, 0);
+    const src = oc.createBufferSource(); src.buffer = buf; src.connect(oc.destination); src.start();
+    return (await oc.startRendering()).getChannelData(0);
+  }
+  const ratio = fromRate / TX.SAMPLE_RATE, n = Math.max(1, Math.round(samples.length / ratio)), out = new Float32Array(n);
+  for (let i = 0; i < n; i++) { const p = i * ratio, i0 = Math.floor(p), i1 = Math.min(i0 + 1, samples.length - 1), f = p - i0; out[i] = samples[i0] * (1 - f) + samples[i1] * f; }
+  return out;
+}
+// Decodes the file's real audio (including the audio track of a video) at 16 kHz and mixes it to mono.
+async function decodeMediaToMono16k(file) {
+  const AC = window.AudioContext || window.webkitAudioContext;
+  if (!AC) throw new TxError('decode', 'This browser cannot decode audio.');
+  const bytes = await file.arrayBuffer();
+  let ctx; try { ctx = new AC({ sampleRate: TX.SAMPLE_RATE }); } catch (e) { ctx = new AC(); }   // decodeAudioData resamples to the context rate
+  let decoded;
+  try { decoded = await new Promise((res, rej) => { const p = ctx.decodeAudioData(bytes, res, rej); if (p && p.catch) p.catch(rej); }); }
+  catch (e) { throw new TxError('decode', (e && e.message) ? e.message : 'The browser could not decode this audio.'); }
+  finally { try { ctx.close(); } catch (e) {} }
+  const mono = await resampleTo16k(mixToMono(decoded), decoded.sampleRate);
+  return { samples: mono, seconds: mono.length / TX.SAMPLE_RATE, nativeRate: decoded.sampleRate, channels: decoded.numberOfChannels };
+}
+function peakOf(a, from, to) { let p = 0; for (let i = from || 0, e = to == null ? a.length : to; i < e; i++) { const v = a[i] < 0 ? -a[i] : a[i]; if (v > p) p = v; } return p; }
+// Quiet recordings get a gentle, capped boost (never past 0.9 full scale) so Whisper can hear them; loud ones are untouched.
+function levelForSpeech(samples) {
+  const peak = peakOf(samples);
+  if (peak < TX.SILENT_PEAK) return { peak, gain: 1, silent: true };
+  let gain = 1; if (peak < 0.3) gain = Math.min(8, 0.9 / peak);
+  if (gain > 1.05) for (let i = 0; i < samples.length; i++) samples[i] *= gain;
+  return { peak, gain, silent: false };
+}
+function encodeWavMono16k(samples16k) {
+  const buffer = new ArrayBuffer(44 + samples16k.length * 2), view = new DataView(buffer);
+  const w = (o, s) => { for (let i = 0; i < s.length; i++) view.setUint8(o + i, s.charCodeAt(i)); };
+  w(0, 'RIFF'); view.setUint32(4, 36 + samples16k.length * 2, true); w(8, 'WAVE'); w(12, 'fmt '); view.setUint32(16, 16, true); view.setUint16(20, 1, true); view.setUint16(22, 1, true);
+  view.setUint32(24, TX.SAMPLE_RATE, true); view.setUint32(28, TX.SAMPLE_RATE * 2, true); view.setUint16(32, 2, true); view.setUint16(34, 16, true); w(36, 'data'); view.setUint32(40, samples16k.length * 2, true);
+  let o = 44; for (let i = 0; i < samples16k.length; i++, o += 2) { const s = Math.max(-1, Math.min(1, samples16k[i])); view.setInt16(o, s < 0 ? s * 0x8000 : s * 0x7FFF, true); }
+  return new Blob([buffer], { type: 'audio/wav' });
+}
+
+/* ---- chunk planning: overlapping windows on the original timeline ---- */
+function planChunks(totalSec, chunkSec = TX.CHUNK_SEC, overlapSec = TX.OVERLAP_SEC) {
+  const out = []; let start = 0;
+  for (;;) {
+    const end = Math.min(start + chunkSec, totalSec);
+    out.push({ index: out.length, start, end });
+    if (end >= totalSec - 1e-6) break;
+    start = end - overlapSec;
   }
   return out;
 }
-function encodeWavMono16k(samples16k) {
-  const sampleRate = 16000;
-  const buffer = new ArrayBuffer(44 + samples16k.length * 2);
-  const view = new DataView(buffer);
-  const writeString = (offset, str) => { for (let i=0;i<str.length;i++) view.setUint8(offset+i, str.charCodeAt(i)); };
-  writeString(0,'RIFF'); view.setUint32(4, 36 + samples16k.length*2, true); writeString(8,'WAVE');
-  writeString(12,'fmt '); view.setUint32(16,16,true); view.setUint16(20,1,true); view.setUint16(22,1,true);
-  view.setUint32(24, sampleRate, true); view.setUint32(28, sampleRate*2, true); view.setUint16(32,2,true); view.setUint16(34,16,true);
-  writeString(36,'data'); view.setUint32(40, samples16k.length*2, true);
-  let offset = 44;
-  for (let i=0;i<samples16k.length;i++,offset+=2) { const s = Math.max(-1, Math.min(1, samples16k[i])); view.setInt16(offset, s<0? s*0x8000 : s*0x7FFF, true); }
-  return new Blob([buffer], { type: 'audio/wav' });
-}
-// Splits long audio into ~10-minute WAV chunks resampled to 16kHz mono
-// (well under Groq's 25MB-per-request limit even at that length), each
-// tagged with its real start-time offset so segment timestamps can be
-// shifted back into the full recording's timeline after transcription.
-async function splitIntoWavChunks(blobOrFile, chunkSeconds) {
-  const arrayBuffer = await blobOrFile.arrayBuffer();
-  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
-  const mono = mixToMono(audioBuffer);
-  const sampleRate = audioBuffer.sampleRate;
-  const chunkSamples = Math.floor(chunkSeconds * sampleRate);
-  const chunks = [];
-  for (let start = 0; start < mono.length; start += chunkSamples) {
-    const end = Math.min(start + chunkSamples, mono.length);
-    const slice = mono.subarray(start, end);
-    const resampled = resampleTo16k(slice, sampleRate);
-    chunks.push({ blob: encodeWavMono16k(resampled), offset: start / sampleRate });
+
+/* ---- merging: chunk-relative segments -> one transcript on the original timeline, overlap de-duplicated ---- */
+const txNorm = (w) => w.toLowerCase().replace(/[^\p{L}\p{M}\p{N}]+/gu, '');
+function txTokens(text) { return text.split(/\s+/).map((raw) => ({ raw, norm: txNorm(raw) })).filter((t) => t.norm); }
+// Longest suffix(tail) == prefix(head) match, tolerating a cut/garbled word at each edge and (for longer runs) an occasional
+// different word, because Whisper does not always transcribe the same audio identically.
+function txFindOverlap(tail, head) {
+  for (let m = Math.min(tail.length, head.length, 60); m >= 2; m--) {
+    let best = null;
+    for (let a = 0; a <= 2; a++) for (let b = 0; b <= 2; b++) {
+      const tEnd = tail.length - a; if (tEnd < m || head.length - b < m) continue;
+      let eq = 0, chars = 0;
+      for (let i = 0; i < m; i++) if (tail[tEnd - m + i].norm === head[b + i].norm) { eq++; chars += tail[tEnd - m + i].norm.length; }
+      const ok = m < 5 ? (eq === m && chars >= 6) : eq >= m - Math.floor(m / 5);
+      if (ok && (!best || a + b < best.a + best.b)) best = { a, b, m };
+    }
+    if (best) return best;
   }
-  try { audioCtx.close(); } catch(e) {}
-  return chunks;
+  return null;
+}
+function mergeChunkSegments(results) {
+  const merged = [];
+  results.forEach((r, ci) => {
+    const segs = (r.segments || []).map((s) => ({ start: s.start + r.start, end: s.end + r.start, text: String(s.text || '').trim() })).filter((s) => s.text);
+    if (ci === 0 || !merged.length) { merged.push(...segs); return; }
+    const ovStart = r.start, ovEnd = results[ci - 1].end;
+    const tail = []; for (let i = merged.length - 1; i >= 0 && merged[i].end > ovStart - 1.5; i--) tail.unshift(merged[i]);
+    const head = []; for (let i = 0; i < segs.length && segs[i].start < ovEnd + 1.5; i++) head.push(segs[i]);
+    if (tail.length && head.length) {
+      tail.forEach((s) => { s.tok = txTokens(s.text); }); head.forEach((s) => { s.tok = txTokens(s.text); });
+      const tailTok = tail.flatMap((s) => s.tok), headTok = head.flatMap((s) => s.tok);
+      const ov = txFindOverlap(tailTok, headTok);
+      if (ov) {
+        // drop the (possibly cut) last `a` tokens of the tail, and the first b+m tokens of the head
+        let drop = ov.a; for (let i = tail.length - 1; i >= 0 && drop > 0; i--) { const n = Math.min(drop, tail[i].tok.length); if (n) { const frac = n / tail[i].tok.length; tail[i].tok.splice(tail[i].tok.length - n, n); tail[i].end -= (tail[i].end - tail[i].start) * frac; tail[i].dirty = true; drop -= n; } }
+        drop = ov.b + ov.m; for (let i = 0; i < head.length && drop > 0; i++) { const n = Math.min(drop, head[i].tok.length); if (n) { const frac = n / head[i].tok.length; head[i].tok.splice(0, n); head[i].start += (head[i].end - head[i].start) * frac; head[i].dirty = true; drop -= n; } }
+        [...tail, ...head].forEach((s) => { if (s.dirty) s.text = s.tok.map((t) => t.raw).join(' '); });
+      } else {
+        // no textual match (the two chunks worded the overlap differently): keep the earlier chunk's version and drop only
+        // the new segments that lie entirely inside time it already covers. This can rarely leave a repeated phrase, but it never loses speech.
+        const covered = tail[tail.length - 1].end;
+        head.forEach((s) => { if (s.end <= covered + 0.25) s.drop = true; });
+      }
+      for (let i = merged.length - 1; i >= 0; i--) if (merged[i].drop || !merged[i].text) merged.splice(i, 1);
+      for (let i = segs.length - 1; i >= 0; i--) if (segs[i].drop || !segs[i].text) segs.splice(i, 1);
+    }
+    merged.push(...segs);
+  });
+  merged.forEach((s) => { delete s.tok; delete s.dirty; delete s.drop; });
+  return merged.sort((a, b) => a.start - b.start);
 }
 
-const CHUNK_THRESHOLD_SEC = 600; // ~10 minutes — above this, split client-side before sending to Groq
-
-// Groq's Whisper endpoint (OpenAI-compatible) only accepts these file
-// extensions natively. Anything else — most commonly .mov/.mkv, which this
-// app's own upload UI advertises as supported — would otherwise reach Groq
-// and fail with an honest but avoidable "unsupported format" error. Rather
-// than let that happen, such files are decoded client-side via the same
-// Web Audio pipeline used for long-recording chunking (see
-// splitIntoWavChunks) and re-encoded as a Groq-native WAV before upload.
-// This is real transcoding of the real audio track, not a workaround that
-// only pretends to support the format.
-const GROQ_NATIVE_EXTENSIONS = ['flac','m4a','mp3','mp4','mpeg','mpga','oga','ogg','wav','webm'];
-function fileExtension(name) {
-  const m = /\.([a-z0-9]+)$/i.exec(name || '');
-  return m ? m[1].toLowerCase() : '';
+/* ---- remote calls (Blob upload + /api/transcribe) with retries ---- */
+async function txUploadChunk(blob, name) {
+  if (!window.__vercelBlobUpload) throw new TxError('upload', 'The upload library did not load. Check your connection and reload the page.');
+  let last;
+  for (let i = 0; i < 3; i++) {
+    try { const r = await window.__vercelBlobUpload(name, blob, { access: 'public', handleUploadUrl: apiBase() + '/api/blob-upload', contentType: blob.type || 'audio/wav' }); return r.url; }
+    catch (e) { last = e; await txSleep(700 * (i + 1)); }
+  }
+  throw new TxError('upload', 'Upload failed: ' + ((last && last.message) || 'unknown error'));
 }
-function needsClientTranscode(filename) {
-  const ext = fileExtension(filename);
-  return !GROQ_NATIVE_EXTENSIONS.includes(ext);
+async function txTranscribeRemote({ url, name, contentType, lang, prompt, onWait }) {
+  for (let attempt = 0; attempt < 4; attempt++) {
+    let res, data;
+    try {
+      res = await fetch(apiBase() + '/api/transcribe', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ blobUrl: url, filename: name, contentType, language: lang && lang !== 'auto' ? lang : undefined, prompt: prompt || undefined }) });
+      data = await res.json().catch(() => ({}));
+    } catch (e) { if (attempt < 3) { await txSleep(1000 * (attempt + 1)); continue; } throw new TxError('transcribe', 'Could not reach the transcription service.'); }
+    if (res.ok) return data;
+    if (res.status === 429 && typeof data.retryAfter === 'number') {
+      if (data.retryAfter <= 90 && attempt < 3) { onWait && onWait(Math.ceil(data.retryAfter)); await txSleep(data.retryAfter * 1000 + 250); continue; }
+      throw new TxError('transcribe', `Groq's rate limit was reached. Try again in about ${Math.max(1, Math.ceil(data.retryAfter / 60))} min.`);
+    }
+    if ([500, 502, 503, 504].includes(res.status) && attempt < 2) { await txSleep(1200 * (attempt + 1)); continue; }
+    throw new TxError('transcribe', data.error || ('The server responded with ' + res.status + '.'));
+  }
+  throw new TxError('transcribe', 'The transcription service did not respond.');
+}
+
+/* ---- status helpers ---- */
+const TX_TRANSIENT = ['queued', 'preparing', 'uploading', 'transcribing'];
+function setTxStatus(s, status, msg, pct) {
+  const changed = s.transcriptStatus !== status;
+  s.transcriptStatus = status; s.transcriptProgress = msg || ''; s.txPct = pct == null ? (s.txPct || 0) : pct;
+  if (changed) { saveSources(); refreshIfVisible(s.id); } else updateProgressUI(s);
+}
+function updateProgressUI(s) {
+  if (state.screen === 'detail' && state.currentSourceId === s.id) {
+    const m = document.getElementById('txMsg'), b = document.getElementById('txBar'); if (m) m.textContent = s.transcriptProgress || ''; if (b) b.style.width = Math.round((s.txPct || 0) * 100) + '%';
+  }
+  const badge = document.querySelector(`.source-card[data-id="${s.id}"] [data-tx]`); if (badge) badge.textContent = txBadgeText(s);
+}
+function txBadgeText(s) { return ({ queued: 'Waiting', preparing: 'Processing…', uploading: 'Uploading…', transcribing: 'Transcribing…' })[s.transcriptStatus] || ''; }
+async function txFinishEmpty(s, status, detail) {
+  try { await idbPut('transcripts', s.id, []); await idbPut('content', s.id, ''); } catch (e) {}
+  transcriptCache[s.id] = []; contentCache[s.id] = '';
+  s.transcriptStatus = status; s.transcriptError = detail || null; s.transcriptProgress = ''; s.transcriptWordCount = 0; s.transcriptReadyAt = new Date().toISOString();
+  saveSources(); refreshIfVisible(s.id);
+}
+async function txFinishFailed(s, message) { s.transcriptStatus = 'transcription_failed'; s.transcriptError = message; s.transcriptProgress = ''; saveSources(); refreshIfVisible(s.id); }
+async function txFinishReady(s, segments, extra) {
+  const text = segments.map((x) => x.text).join(' ');
+  try { await idbPut('transcripts', s.id, segments); await idbPut('content', s.id, text); } catch (e) {}
+  transcriptCache[s.id] = segments; contentCache[s.id] = text;
+  Object.assign(s, extra || {});
+  s.transcriptStatus = 'ready'; s.transcriptError = null; s.transcriptProgress = ''; s.transcriptReadyAt = new Date().toISOString(); s.transcriptWordCount = wordCount(text);
+  saveSources(); refreshIfVisible(s.id);
+}
+
+/* ---- one file, start to finish. Never throws; every outcome is one of the honest, separate states. ---- */
+async function transcribeSource(id, media, filename, contentType, opts) {
+  opts = opts || {};
+  const s = SOURCES.find((x) => x.id === id); if (!s) return;
+  const alive = () => SOURCES.includes(s);
+  const lang = opts.lang != null ? opts.lang : (s.language || 'auto'), prompt = String(opts.prompt != null ? opts.prompt : (s.context || '')).trim();
+  s.language = lang; s.context = prompt; s.transcriptError = null;
+  try {
+    setTxStatus(s, 'preparing', 'Reading the file…', 0);
+    const probe = await probeMediaTracks(media);                           // what the container really contains
+    if (probe.empty) return await txFinishEmpty(s, 'invalid_media', 'The file is empty.');
+    if (probe.hasAudio === false) return await txFinishEmpty(s, 'no_audio_track');
+
+    let audio;
+    try { setTxStatus(s, 'preparing', 'Extracting the audio…', 0.02); audio = await decodeMediaToMono16k(media); }
+    catch (e) { return await txDecodeFailed(s, media, filename, contentType, probe, e, lang, prompt, alive); }
+    if (!alive()) return;
+    if (!(audio.seconds > 0.1)) return await txFinishEmpty(s, 'invalid_media', 'No audio could be decoded from this file.');
+    if (!s.durationSec) s.durationSec = audio.seconds;
+
+    setTxStatus(s, 'preparing', 'Preparing the audio…', 0.04);
+    if (levelForSpeech(audio.samples).silent) return await txFinishEmpty(s, 'no_speech');   // an audio track exists, but it is silent
+
+    const chunks = planChunks(audio.seconds), N = chunks.length, results = []; let detected = null;
+    for (const c of chunks) {
+      if (!alive()) return;
+      const a = Math.floor(c.start * TX.SAMPLE_RATE), b = Math.min(audio.samples.length, Math.ceil(c.end * TX.SAMPLE_RATE)), base = 0.05 + 0.95 * (c.index / N), span = 0.95 / N;
+      const label = N > 1 ? ` part ${c.index + 1} of ${N}` : '';
+      if (peakOf(audio.samples, a, b) < TX.SILENT_PEAK) { results.push({ start: c.start, end: c.end, segments: [] }); continue; }
+      let wav = encodeWavMono16k(audio.samples.subarray(a, b));
+      setTxStatus(s, 'uploading', 'Uploading' + label + '…', base);
+      const url = await txUploadChunk(wav, `chunk-${id}-${c.index + 1}.wav`); wav = null;
+      if (!alive()) return;
+      setTxStatus(s, 'transcribing', 'Transcribing' + label + '…', base + span * 0.45);
+      const data = await txTranscribeRemote({ url, name: `chunk-${c.index + 1}.wav`, contentType: 'audio/wav', lang, prompt, onWait: (sec) => setTxStatus(s, 'transcribing', `Waiting ${sec}s for the transcription service' rate limit…`, base + span * 0.45) });
+      if (!detected && data.language) detected = data.language;
+      results.push({ start: c.start, end: c.end, segments: data.segments || [] });
+      setTxStatus(s, 'transcribing', N > 1 ? `Transcribed part ${c.index + 1} of ${N}` : 'Finishing…', base + span);
+    }
+    audio.samples = null;
+    const merged = mergeChunkSegments(results);
+    if (!merged.length) return await txFinishEmpty(s, 'no_speech');   // audio track present, no meaningful speech found
+    await txFinishReady(s, merged, { detectedLanguage: detected, transcribedWith: lang });
+    setStatus('captured');
+  } catch (err) {
+    if (!SOURCES.includes(s)) return;
+    await txFinishFailed(s, (err && err.message) ? err.message : 'Unknown error.');
+  }
+}
+// The browser could not decode the audio. Decide honestly which state that is.
+async function txDecodeFailed(s, media, filename, contentType, probe, err, lang, prompt, alive) {
+  const ext = fileExtension(filename || media.name);
+  if (probe.hasAudio === true && media.size <= TX.DIRECT_MAX_BYTES && GROQ_NATIVE_EXTENSIONS.includes(ext)) {
+    // The container has a real audio track and Groq reads this format natively: send the original file (small enough for one request).
+    setTxStatus(s, 'uploading', 'Uploading the original file…', 0.1);
+    const mime = EXT_TO_MIME[ext] || contentType || 'audio/mpeg';
+    const file = media.type === mime ? media : new File([media], filename || ('media.' + ext), { type: mime });
+    const url = await txUploadChunk(file, `direct-${s.id}.${ext}`);
+    setTxStatus(s, 'transcribing', 'Transcribing…', 0.5);
+    const data = await txTranscribeRemote({ url, name: `media.${ext}`, contentType: mime, lang, prompt });
+    if (!alive()) return;
+    if (!(data.segments || []).length) return txFinishEmpty(s, 'no_speech');
+    return txFinishReady(s, data.segments, { detectedLanguage: data.language || null, transcribedWith: lang });
+  }
+  if (probe.hasAudio === true) return txFinishFailed(s, "This browser couldn't decode the audio track (" + (err.message || 'unsupported codec') + '). Try another browser, or convert the file to MP3, WAV or M4A.');
+  return txFinishEmpty(s, 'invalid_media', err.message || 'The audio could not be decoded.');
+}
+
+/* ---- queue: files are processed one at a time, each with its own honest status ---- */
+const TQ = { jobs: [], running: false };
+function enqueueTranscription(job) {
+  const s = SOURCES.find((x) => x.id === job.id); if (!s) return;
+  s.language = job.lang != null ? job.lang : (s.language || 'auto'); s.context = job.prompt != null ? job.prompt : (s.context || '');
+  s.transcriptError = null; s.transcriptStatus = 'queued'; s.transcriptProgress = 'Waiting for its turn'; s.txPct = 0;
+  saveSources(); TQ.jobs.push(job); runQueue();
+}
+async function runQueue() {
+  if (TQ.running) return; TQ.running = true; setStatus('processing');
+  while (TQ.jobs.length) {
+    const job = TQ.jobs.shift(); if (!SOURCES.some((x) => x.id === job.id)) continue;   // deleted while waiting
+    try { await transcribeSource(job.id, job.blob, job.filename, job.contentType, job); } catch (e) { /* transcribeSource reports its own failures */ }
+  }
+  TQ.running = false; if (!document.querySelector('.status-dot.captured')) setStatus('ready');
+}
+async function retryTranscription(id, lang) {
+  const s = SOURCES.find((x) => x.id === id); if (!s) return;
+  const blob = await idbGet('blobs', id); if (!blob) { toast('Could not find the stored file to retry.'); return; }
+  const ext = fileExtension(blob.name || '') || extensionForType(blob.type || 'audio/webm');
+  enqueueTranscription({ id, blob, filename: (s.title || 'media').replace(/[^a-z0-9]+/gi, '-') + '.' + ext, contentType: baseContentType(blob.type || 'audio/webm'), lang: lang != null ? lang : (s.language || 'auto'), prompt: s.context || '' });
+}
+// A page reload or closed tab interrupts any job in flight. Say so instead of showing "Transcribing…" forever.
+function markInterruptedJobs() {
+  let changed = false;
+  SOURCES.forEach((s) => { if (TX_TRANSIENT.includes(s.transcriptStatus)) { s.transcriptStatus = 'transcription_failed'; s.transcriptError = 'Processing was interrupted because the page was closed or reloaded. Retry to continue.'; s.transcriptProgress = ''; changed = true; } });
+  if (changed) saveSources();
 }
 
 /* ---- Media probe: does this file actually contain an audio track? ----
@@ -2760,130 +3193,101 @@ async function probeMatroska(file) {
   return res;
 }
 
-/* ---- Real transcription pipeline: Upload -> Transcribe -> Ready/No speech, each a distinct real state ---- */
-async function transcribeSource(id, blobOrFile, filename, contentType) {
-  const s = SOURCES.find(x => x.id === id);
-  if (!s) return;
-  contentType = contentType || baseContentType(blobOrFile.type || 'audio/webm');
-  let phase = 'upload'; let probe = null;
-  s.transcriptStatus = 'uploading'; s.transcriptError = null;
-  saveSources(); refreshIfVisible(id);
-  setStatus('processing');
-
-  try {
-    // Distinguish NO AUDIO TRACK / INVALID MEDIA from NO SPEECH first: it needs no network and no upload.
-    probe = await probeMediaTracks(blobOrFile);
-    if (probe.empty || probe.hasAudio === false) {
-      try { await idbPut('transcripts', id, []); } catch(e) {}
-      try { await idbPut('content', id, ''); } catch(e) {}
-      transcriptCache[id] = []; contentCache[id] = '';
-      s.transcriptStatus = probe.empty ? 'invalid_media' : 'no_audio_track';
-      s.transcriptError = probe.empty ? 'The file is empty.' : null; s.transcriptWordCount = 0;
-      setStatus('ready'); saveSources(); refreshIfVisible(id);
-      return;
-    }
-
-    if (!window.__vercelBlobUpload) throw new Error('Upload library failed to load.');
-
-    let allSegments = [], combinedText = '', anySpeech = false;
-    const tooLong = s.durationSec && s.durationSec > CHUNK_THRESHOLD_SEC;
-    const unsupportedFormat = needsClientTranscode(filename);
-    const useChunking = tooLong || unsupportedFormat;
-
-    if (useChunking) {
-      const chunks = await splitIntoWavChunks(blobOrFile, CHUNK_THRESHOLD_SEC);
-      const multi = chunks.length > 1;
-      for (let i = 0; i < chunks.length; i++) {
-        const chunkName = multi ? `chunk-${i+1}-of-${chunks.length}.wav` : 'audio.wav';
-        const partLabel = multi ? ` part ${i+1} of ${chunks.length}` : '';
-        phase = 'upload';
-        s.transcriptStatus = 'uploading'; s.transcriptError = `Uploading${partLabel}${unsupportedFormat && !multi ? ' (converted for transcription)' : ''}…`; saveSources(); refreshIfVisible(id);
-        const blobResult = await window.__vercelBlobUpload(chunkName, chunks[i].blob, { access: 'public', handleUploadUrl: apiBase() + '/api/blob-upload', contentType: 'audio/wav' });
-        phase = 'transcribe';
-        s.transcriptStatus = 'transcribing'; s.transcriptError = `Transcribing${partLabel}…`; saveSources(); refreshIfVisible(id);
-        const res = await fetch(apiBase() + '/api/transcribe', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ blobUrl: blobResult.url, filename: chunkName, contentType: 'audio/wav' }) });
-        const data = await res.json().catch(() => ({}));
-        if (!res.ok) throw new Error(data.error || ('Server responded with ' + res.status));
-        if (data.hasSpeech) {
-          anySpeech = true;
-          allSegments = allSegments.concat((data.segments||[]).map(sg => ({ start: sg.start + chunks[i].offset, end: sg.end + chunks[i].offset, text: sg.text })));
-          combinedText += (combinedText ? ' ' : '') + (data.text || '');
-        }
-      }
-    } else {
-      phase = 'upload';
-      const blobResult = await window.__vercelBlobUpload(filename || 'recording.webm', blobOrFile, { access: 'public', handleUploadUrl: apiBase() + '/api/blob-upload', contentType });
-      phase = 'transcribe';
-      s.transcriptStatus = 'transcribing'; s.transcriptError = null; saveSources(); refreshIfVisible(id);
-      const res = await fetch(apiBase() + '/api/transcribe', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ blobUrl: blobResult.url, filename: filename || 'recording.webm', contentType }) });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error || ('Server responded with ' + res.status));
-      anySpeech = !!data.hasSpeech;
-      allSegments = data.segments || [];
-      combinedText = data.text || '';
-    }
-
-    if (!anySpeech) {
-      try { await idbPut('transcripts', id, []); } catch(e) {}
-      try { await idbPut('content', id, ''); } catch(e) {}
-      transcriptCache[id] = []; contentCache[id] = '';
-      s.transcriptStatus = 'no_speech'; s.transcriptError = null; s.transcriptReadyAt = new Date().toISOString(); s.transcriptWordCount = 0;
-      setStatus('ready');
-    } else {
-      try { await idbPut('transcripts', id, allSegments); } catch(e) {}
-      try { await idbPut('content', id, combinedText); } catch(e) {}
-      transcriptCache[id] = allSegments; contentCache[id] = combinedText;
-      s.transcriptStatus = 'ready'; s.transcriptError = null; s.transcriptReadyAt = new Date().toISOString(); s.transcriptWordCount = wordCount(combinedText);
-      setStatus('captured');
-    }
-  } catch (err) {
-    const emsg = (err && err.message) ? err.message : '';
-    const looksInvalid = /unable to decode audio data|EncodingError|valid media file|invalid file format|could not process file|file is empty/i.test(emsg) && !(probe && probe.hasAudio === true);
-    s.transcriptStatus = looksInvalid ? 'invalid_media' : (phase === 'upload' ? 'upload_failed' : 'transcription_failed');
-    s.transcriptError = (err && err.message) ? err.message : 'Something went wrong.';
-    setStatus('ready');
-  }
-  saveSources(); refreshIfVisible(id);
+// ---- Transcript cleaning: deterministic, rule-based text normalisation. No AI call, no invented words -----
+// only whitespace/filler/punctuation cleanup and casing, so Original and Clean always describe the same speech.
+function cleanSegmentText(text) {
+  if (!text) return text;
+  let x = text.trim().replace(/\s+/g, ' ');
+  x = x.replace(/\b(um+|uh+|erm+|hm+)\b[,]?\s*/gi, ' ').replace(/\s+/g, ' ').trim();   // isolated filler words only
+  x = x.replace(/([!?])\1+/g, '$1').replace(/,{2,}/g, ',');                                // repeated punctuation
+  x = x.replace(/^[a-z]/, (c) => c.toUpperCase()).replace(/\bi\b/g, 'I');                   // sentence case, the pronoun "I"
+  if (x && !/[.!?]$/.test(x) && /\s/.test(x)) x += '.';                                     // a missing final stop, never new words
+  return x;
+}
+function txDisplayText(s, sg) { return (s.transcriptViewMode === 'original') ? sg.text : cleanSegmentText(sg.text); }
+function transcriptLineHtml(s, sg, i, text) {
+  return `<div class="transcript-line" data-t="${sg.start}" data-i="${i}"><input type="checkbox" class="seg-check" data-i="${i}" /><span class="t-time">${formatClock(sg.start)}</span><span class="t-text">${escapeHtml(text)}</span><button class="save-star ${isKeyMoment(s.id, sg.start) ? 'saved' : ''}" data-i="${i}" title="Save as Key Moment">${ICONS.star}</button></div>`;
 }
 function refreshIfVisible(id) {
   if (state.screen === 'detail' && state.currentSourceId === id) openSource(id);
   if (state.screen === 'library') renderLibrary();
   if (state.screen === 'dashboard') renderDashboard();
 }
+const TX_STATE_LABEL = { danger: 'var(--danger)', plain: 'var(--accent)' };
+function txLangSelect(id, current) {
+  return `<select class="tx-select" id="${id}" aria-label="Transcription language">${TX_LANGS.map(([v, l]) => `<option value="${v}" ${(current || 'auto') === v ? 'selected' : ''}>${l}</option>`).join('')}</select>`;
+}
+// One consistent block for every non-ready, non-running state. The wording is fixed per state; nothing is inferred from another state.
+function txStateBlock(label, message, s, o) {
+  o = o || {};
+  return `<div class="tx-state ${o.danger ? 'is-danger' : ''}">
+    <div class="tx-state-label">${label}</div>
+    ${message ? `<p class="tx-state-msg">${message}</p>` : ''}
+    ${o.detail ? `<p class="tx-state-detail">${escapeHtml(o.detail)}</p>` : ''}
+    ${o.retry ? `<div class="tx-state-actions">${txLangSelect('retryLang', s.language)}<button class="rec-btn" id="retryTranscribeBtn">${o.retryLabel || 'Try again'}</button></div>` : ''}
+  </div>`;
+}
+function txProgressBlock(s) {
+  const label = { queued: 'WAITING', preparing: 'PROCESSING', uploading: 'UPLOADING', transcribing: 'TRANSCRIBING' }[s.transcriptStatus] || 'WORKING';
+  return `<div class="tx-state is-working"><div class="tx-state-label"><span class="tx-pulse"></span>${label}</div><p class="tx-state-msg" id="txMsg">${escapeHtml(s.transcriptProgress || '')}</p><div class="tx-bar"><span id="txBar" style="width:${Math.round((s.txPct || 0) * 100)}%"></span></div></div>`;
+}
+function formatClock(sec) {
+  sec = Math.max(0, Math.floor(sec || 0)); const h = Math.floor(sec / 3600), m = Math.floor((sec % 3600) / 60), r = sec % 60, p = (n) => String(n).padStart(2, '0');
+  return h ? `${h}:${p(m)}:${p(r)}` : `${p(m)}:${p(r)}`;
+}
 
-/* ---- Upload ---- */
+/* ---- Upload: one or many files at once, each becomes its own library entry ---- */
 const dropzone = document.getElementById('dropzone'); const fileInput = document.getElementById('fileInput');
 dropzone.addEventListener('click', () => fileInput.click());
-dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.style.borderColor='var(--accent)'; });
-dropzone.addEventListener('dragleave', () => dropzone.style.borderColor='var(--border)');
-dropzone.addEventListener('drop', e => { e.preventDefault(); dropzone.style.borderColor='var(--border)'; if (e.dataTransfer.files.length) handleUploadFile(e.dataTransfer.files[0]); });
-fileInput.addEventListener('change', e => { if (e.target.files.length) handleUploadFile(e.target.files[0]); });
+dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('drag'); });
+dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag'));
+dropzone.addEventListener('drop', e => { e.preventDefault(); dropzone.classList.remove('drag'); if (e.dataTransfer.files.length) addPickedFiles(e.dataTransfer.files); });
+fileInput.addEventListener('change', e => { if (e.target.files.length) addPickedFiles(e.target.files); fileInput.value = ''; });
 function formatBytes(n) { if (n<1024) return n+' B'; if (n<1024*1024) return (n/1024).toFixed(1)+' KB'; return (n/1024/1024).toFixed(1)+' MB'; }
-let pickedFile = null;
-async function handleUploadFile(file) {
-  pickedFile = file;
-  const isVideo = file.type.startsWith('video') || /\.(mp4|mov|mkv|webm)$/i.test(file.name);
-  const url = URL.createObjectURL(file);
-  const duration = await getMediaDuration(url).catch(() => null);
-  document.getElementById('pickedFileBox').innerHTML = `<div style="display:flex;align-items:center;gap:12px;margin-top:14px;padding:11px 13px;border:1px solid var(--border);border-radius:var(--radius-m);background:var(--surface);">${isVideo?ICONS.video:ICONS.audio}<div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(file.name)}</div><div style="font-size:11.5px;color:var(--text-tertiary);">${formatBytes(file.size)}${duration?' · '+formatSeconds(duration):''}</div></div><button type="button" id="removeFile" style="background:none;border:none;color:var(--text-tertiary);font-size:12px;">Remove</button></div>
-  <label class="field-label" style="margin-top:14px;">Title</label>
-  <input class="field-input" id="uploadTitleInput" value="${escapeHtml(file.name.replace(/\.[a-z0-9]+$/i,''))}" />
-  <div class="empty-note">This file will be uploaded and sent to Groq's Whisper endpoint for real transcription after saving.</div>`;
-  document.getElementById('uploadSubmit').disabled = false;
-  document.getElementById('removeFile').addEventListener('click', () => { pickedFile=null; document.getElementById('pickedFileBox').innerHTML=''; document.getElementById('uploadSubmit').disabled=true; fileInput.value=''; });
+let pickedFiles = [];   // [{ file, title }]
+const looksLikeMedia = (f) => /^(audio|video)\//.test(f.type) || /\.(mp3|wav|m4a|aac|ogg|oga|opus|flac|webm|mp4|mov|mkv|mpeg|mpga)$/i.test(f.name);
+function addPickedFiles(list) {
+  let skipped = 0;
+  Array.from(list).forEach(f => {
+    if (!looksLikeMedia(f)) { skipped++; return; }
+    if (pickedFiles.some(p => p.file.name === f.name && p.file.size === f.size && p.file.lastModified === f.lastModified)) return;
+    pickedFiles.push({ file: f, title: f.name.replace(/\.[a-z0-9]+$/i, '') });
+  });
+  if (skipped) toast(skipped + (skipped === 1 ? ' file was' : ' files were') + " skipped because it isn't audio or video.");
+  renderPicked();
+}
+function renderPicked() {
+  const box = document.getElementById('pickedFileBox'), btn = document.getElementById('uploadSubmit');
+  box.innerHTML = pickedFiles.length ? `<div class="picked-list">${pickedFiles.map((p, i) => `<div class="picked-row">
+      <span class="picked-ico">${/^video\//.test(p.file.type) ? ICONS.video : ICONS.audio}</span>
+      <input class="picked-title" data-i="${i}" value="${escapeHtml(p.title)}" aria-label="Title for ${escapeHtml(p.file.name)}" />
+      <span class="picked-meta">${formatBytes(p.file.size)}</span>
+      <button class="icon-mini-btn picked-rm" data-i="${i}" aria-label="Remove ${escapeHtml(p.file.name)}">&times;</button></div>`).join('')}</div>` : '';
+  box.querySelectorAll('.picked-title').forEach(inp => inp.addEventListener('input', () => { pickedFiles[+inp.dataset.i].title = inp.value; }));
+  box.querySelectorAll('.picked-rm').forEach(b => b.addEventListener('click', () => { pickedFiles.splice(+b.dataset.i, 1); renderPicked(); }));
+  btn.disabled = !pickedFiles.length;
+  btn.textContent = pickedFiles.length > 1 ? `Add ${pickedFiles.length} files to library` : 'Add to library';
 }
 document.getElementById('uploadSubmit').addEventListener('click', async () => {
-  if (!pickedFile) return;
-  const file = pickedFile;
-  const isVideo = file.type.startsWith('video') || /\.(mp4|mov|mkv|webm)$/i.test(file.name);
-  const duration = await getMediaDuration(URL.createObjectURL(file)).catch(()=>0);
-  const title = (document.getElementById('uploadTitleInput')?.value.trim()) || file.name;
-  const id = uid();
-  try { await idbPut('blobs', id, file); } catch (e) { alert('Could not store this file: ' + e.message); return; }
-  SOURCES.unshift({ id, type: isVideo ? 'video' : 'audio', title, dateAdded: new Date().toISOString(), durationSec: duration || 0, transcriptStatus: 'uploading', tags: [], collectionIds: [], favorite: false, lastPositionSec: 0, chapters: [] });
-  saveSources(); pickedFile=null; document.getElementById('pickedFileBox').innerHTML=''; document.getElementById('uploadSubmit').disabled=true; fileInput.value='';
-  renderDashboard(); state.libMode='sources'; showScreen('library');
-  transcribeSource(id, file, file.name, baseContentType(file.type || 'audio/webm'));
+  const files = pickedFiles.slice(); if (!files.length) return;
+  pickedFiles = []; renderPicked();
+  const lang = document.getElementById('txLang').value, prompt = document.getElementById('txContext').value.trim();
+  const entries = [], jobs = [];
+  for (const p of files) {                                   // each file is handled independently; one failing never stops the rest
+    const id = uid(), file = p.file;
+    const probe = await probeMediaTracks(file).catch(() => ({ hasVideo: null }));
+    const isVideo = probe.hasVideo === true || (probe.hasVideo == null && /^video\//.test(file.type));
+    const objUrl = URL.createObjectURL(file);
+    const duration = await getMediaDuration(objUrl).catch(() => 0); URL.revokeObjectURL(objUrl);
+    const entry = { id, type: isVideo ? 'video' : 'audio', title: p.title.trim() || file.name, dateAdded: new Date().toISOString(), durationSec: duration || 0, transcriptStatus: 'queued', language: lang, context: prompt, tags: [], collectionIds: [], favorite: false, lastPositionSec: 0, chapters: [] };
+    try { await idbPut('blobs', id, file); }
+    catch (e) { entry.transcriptStatus = 'transcription_failed'; entry.transcriptError = 'Could not store this file in the browser: ' + (e && e.message ? e.message : 'storage is full'); entries.push(entry); continue; }
+    entries.push(entry);
+    jobs.push({ id, blob: file, filename: file.name, contentType: baseContentType(file.type || 'audio/webm'), lang, prompt });
+  }
+  SOURCES.unshift(...entries); saveSources();
+  renderDashboard(); state.libMode = 'sources'; showScreen('library');
+  jobs.forEach(enqueueTranscription);                        // processed one after another, each with its own status
 });
 
 /* ---- URL import (real server-side extraction) ---- */
@@ -3082,6 +3486,8 @@ preloadTextContent().then(() => { if (document.getElementById('stage-app').style
   const tr = { scrollT: 42, hover: null, manual: null, q: '', idx: -1 };
   const linesEl = $('#lpLines'), box = $('#lpBox'), nowEl = $('#lpNow'), cnt = $('#lpCount');
   const trShown = () => tr.hover != null ? tr.hover : (tr.manual != null ? tr.manual : tr.scrollT);
+  let trJumpHold = 0;
+  function trJumpTo(t, scroll) { tr.manual = t; trJumpHold = performance.now() + 1200; trPaint(); if (scroll) $('#lpDemo').scrollIntoView({ behavior: reduced() ? 'auto' : 'smooth', block: 'center' }); }
   function lineHtml(l) {
     let h = esc(l.text);
     if (tr.q) h = h.replace(new RegExp('(' + esc(tr.q).replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'ig'), '<mark>$1</mark>');
@@ -3090,18 +3496,20 @@ preloadTextContent().then(() => { if (document.getElementById('stage-app').style
   }
   function renderLines() {
     let n = 0; const q = tr.q.toLowerCase();
-    linesEl.innerHTML = LINES.map((l, i) => { const hit = q && l.text.toLowerCase().includes(q); if (hit) n += l.text.toLowerCase().split(q).length - 1;
+    const hits = [];
+    linesEl.innerHTML = LINES.map((l, i) => { const hit = q && l.text.toLowerCase().includes(q); if (hit) { n += l.text.toLowerCase().split(q).length - 1; hits.push(l); }
       return `<li><button type="button" class="lp-line${q && !hit ? ' is-dim' : ''}" data-i="${i}"><time>${mmss(l.t)}</time><span>${lineHtml(l)}</span></button></li>`; }).join('');
     cnt.textContent = q ? (n ? n + (n === 1 ? ' match' : ' matches') : 'No matches') : '';
+    const srBody = $('#lpSrBody');
+    srBody.innerHTML = !q ? '<p class="lp-sr-empty">Try searching &ldquo;attention&rdquo; or &ldquo;design&rdquo;.</p>'
+      : hits.length ? hits.map((l) => `<button type="button" class="lp-sr-item" data-t="${l.t}"><time>${mmss(l.t)}</time><p>${lineHtml(l)}</p></button>`).join('')
+      : '<p class="lp-sr-empty">No matches.</p>';
+    srBody.querySelectorAll('.lp-sr-item').forEach((b) => b.addEventListener('click', () => trJumpTo(+b.dataset.t, false)));
     tr.idx = -2; trPaint();
   }
-  const trWave = Wave($('#lpWave'), {
-    onHover: (t) => { tr.hover = t; trPaint(); },
-    onSeek: (t) => { tr.manual = t; trPaint(); },
-  });
   function trPaint() {
     const t = trShown(), i = lineAt(t);
-    nowEl.textContent = mmss(t); trWave.setTime(t);
+    nowEl.textContent = mmss(t);
     if (i !== tr.idx) {
       tr.idx = i; $$('.lp-line', linesEl).forEach((b, k) => b.classList.toggle('is-now', k === i));
       const li = linesEl.children[i]; if (li) box.scrollTo({ top: li.offsetTop - box.clientHeight / 2 + li.offsetHeight / 2, behavior: reduced() ? 'auto' : 'smooth' });
@@ -3117,7 +3525,7 @@ preloadTextContent().then(() => { if (document.getElementById('stage-app').style
       queued = false; if (!landingOn) return;
       const r = $('#lpDemo').getBoundingClientRect(), vh = window.innerHeight;
       const t = 30 + clamp((vh * .5 - r.top) / (r.height + vh * .1), 0, 1) * (DUR - 60);
-      if (Math.abs(t - tr.scrollT) > .5) { tr.scrollT = t; tr.manual = null; trPaint(); }
+      if (Math.abs(t - tr.scrollT) > .5) { tr.scrollT = t; if (performance.now() > trJumpHold) tr.manual = null; trPaint(); }
     });
   }
   window.addEventListener('scroll', onScroll, { passive: true });
@@ -3130,8 +3538,19 @@ preloadTextContent().then(() => { if (document.getElementById('stage-app').style
     $$('.lp-dot', tl).forEach((d, k) => { d.classList.toggle('is-active', k === i); d.setAttribute('aria-selected', String(k === i)); });
     momEl.innerHTML = `<p class="lp-moment-t lp-swap">${mmss(m.t)} &nbsp;${m.title}</p><p class="lp-moment-q lp-swap">&ldquo;${esc(line.text)}&rdquo;</p>`;
   }
-  tl.addEventListener('click', (e) => { const d = e.target.closest('.lp-dot'); if (d) pick(+d.dataset.i); });
+  tl.addEventListener('click', (e) => { const d = e.target.closest('.lp-dot'); if (d) { pick(+d.dataset.i); ordPos = ORDER.indexOf(+d.dataset.i); pauseAuto(); } });
   pick(1);
+
+  /* automatic cycling: the timestamp advances on its own, no click required (a manual pick pauses it briefly) */
+  const ORDER = [1, 3, 0, 2]; let ordPos = 0, momAccum = 0, momHot = true, resumeTimer = 0;
+  function pauseAuto() { momHot = false; clearTimeout(resumeTimer); resumeTimer = setTimeout(() => { momHot = true; kick(); }, 5000); }
+  const momSection = $('#lpMoments');
+  let momVisible = false; watch(momSection, (v) => { momVisible = v; if (v) kick(); }, '-10% 0px');
+  [tl, momEl].forEach((el) => { el.addEventListener('pointerenter', () => { momHot = false; }); el.addEventListener('pointerleave', () => { clearTimeout(resumeTimer); momHot = true; kick(); }); });
+  if (!reduced()) comps.push({
+    needs: () => momVisible && momHot,
+    tick: (dt) => { momAccum += dt; if (momAccum > 2.6) { momAccum = 0; ordPos = (ordPos + 1) % ORDER.length; pick(ORDER[ordPos]); } },
+  });
 
   /* ---- floating text: float in, settle, stay ----
      One IntersectionObserver reveals each element once (delays set in the markup: heading first,
@@ -3185,11 +3604,40 @@ preloadTextContent().then(() => { if (document.getElementById('stage-app').style
     window.__vvFloat = true;
   })();
 
-  /* ---- glue ---- */
+  /* ---- ask voicevault: a small set of real questions, with a jumpable citation and follow-ups ---- */
+  (function initAsk() {
+    const qEl = $('#lpQ'), aEl = $('#lpA'), citeEl = $('#lpCite'), card = $('#lpAnswer');
+    if (!qEl) return;
+    const ASK = [
+      { q: 'What did the speaker say about attention?', a: ['Attention, not information, is the scarce resource.', 'Once information is abundant, focus is what runs out.'], t: 161 },
+      { q: 'What was the main problem?', a: ['The systems deciding what deserves your attention are built to maximize engagement, not understanding.'], t: 198 },
+      { q: 'Find related moments', a: ['A newsroom that moves from counting page views to measuring reading time shows the same pattern elsewhere.'], t: 465 },
+    ];
+    function pickAsk(i) {
+      const x = ASK[i];
+      qEl.textContent = x.q;
+      aEl.innerHTML = x.a.map((s, k) => `<span class="lp-s"${k ? '' : ''}>${esc(s)}</span>`).join(' ');
+      citeEl.textContent = mmss(x.t); citeEl.title = 'Jump to ' + mmss(x.t); citeEl.dataset.t = x.t;
+      $$('.lp-fu', card.parentElement).forEach((b, k) => { const idx = (i + 1 + k) % ASK.length; b.textContent = ASK[idx].q; b.dataset.i = idx; });
+    }
+    card.parentElement.addEventListener('click', (e) => { const b = e.target.closest('.lp-fu'); if (b) pickAsk(+b.dataset.i); });
+    citeEl.addEventListener('click', () => trJumpTo(+citeEl.dataset.t, true));
+    pickAsk(0);
+  })();
+
+  /* ---- search the way you remember it: jump to the resolved moment in the transcript above ---- */
+  const semJump = $('.lp-sem-jump');
+  if (semJump) semJump.addEventListener('click', () => trJumpTo(198, true));
+
+  /* ---- resume strip: a real entry point into the app ---- */
+  const resumeBtn = $('#lpResumeBtn');
+  if (resumeBtn) resumeBtn.addEventListener('click', () => lpOpenWorkspace());
+
+    /* ---- glue ---- */
   const on = (id, fn) => { const el = document.getElementById(id); if (el) el.addEventListener('click', fn); };
   on('lpFinalOpen', () => lpOpenWorkspace());
   $$('[data-lp-top]', stage).forEach((a) => a.addEventListener('click', (e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: reduced() ? 'auto' : 'smooth' }); }));
-  new MutationObserver(() => { const now = stage.style.display !== 'none'; if (now !== landingOn) { landingOn = now; if (now) { heroWave.redraw(); trWave.redraw(); kick(); onScroll(); } } }).observe(stage, { attributes: true, attributeFilter: ['style'] });
+  new MutationObserver(() => { const now = stage.style.display !== 'none'; if (now !== landingOn) { landingOn = now; if (now) { heroWave.redraw(); kick(); onScroll(); } } }).observe(stage, { attributes: true, attributeFilter: ['style'] });
 
   /* ---- login: honest guest state (no accounts configured) ---- */
   const authStage = $('#stage-auth');

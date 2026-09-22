@@ -265,3 +265,131 @@ These are presentation changes in `index.html`; no `/api/*` file changed.
   empty or unreadable file as **INVALID MEDIA**, and a real audio track with no speech still as **No speech detected**.
   Detection reads only the MP4/MOV or WebM/Matroska header (`probeMediaTracks`) and fails open: if it cannot be sure, the
   file goes through the normal pipeline exactly as before.
+
+
+## Transcription reliability, Original/Clean, vertical library, and VOICE -> AUDIO -> WORDS -> KNOWLEDGE
+
+**Transcription (`api/transcribe.js`, `api/blob-upload.js`, `api/health.js`, and the client pipeline in `index.html`):**
+- Default model is `whisper-large-v3` (accuracy over speed), overridable with `GROQ_WHISPER_MODEL`. `temperature: 0`,
+  `response_format: "verbose_json"`, segment timestamps, optional word-level timestamps.
+- Audio is decoded in the browser (mono, 16 kHz WAV) for every format the browser can play, including a video's own
+  audio track; only that small WAV chunk is ever uploaded and sent to Groq, never the video file itself. A handful of
+  formats this browser can't decode (e.g. some `.m4a`/`.mp4` AAC) fall back to uploading the original file directly, if
+  it's small enough and Groq accepts that container natively.
+- Long media is split into 5-minute chunks with 5-second overlaps; the overlap is textually matched and de-duplicated
+  on merge, and timestamps stay on the *original* timeline (never reset per chunk) — verified against synthetic
+  ground-truth audio with word-for-word accuracy and ~0.02s timestamp error.
+- Language: Auto / English / Hindi / Marathi, sent as the correct ISO-639-1 code; Auto sends no `language` parameter
+  so Whisper detects it. Optional context/terminology prompt is forwarded verbatim (capped at 700 chars), never invented.
+- Multiple files process independently in a queue (one at a time), each with its own honest status; one failing never
+  blocks the others.
+- Four separate, honest states — NO AUDIO TRACK, NO SPEECH, TRANSCRIPTION FAILED, couldn't-read-file — verified against
+  real ffmpeg-generated silent / speechless / audio-track-less / corrupt media, never inferred from one another.
+- `BLOB_1_READ_WRITE_TOKEN` is read explicitly (with `BLOB_READ_WRITE_TOKEN` as a fallback), since the SDK's default only
+  reads the latter. `GROQ_API_KEY` never appears in a response or a log line, even inside an error message.
+
+**Original / Clean transcript toggle:** Clean is a deterministic, rule-based cleanup (filler-word removal, spacing,
+punctuation, capitalisation) — no AI call, no invented words, so Original and Clean always share identical timestamps,
+segment ids, and playback position. The choice is remembered per source. Search, Key Moments, and seeking all work
+in both modes.
+
+**Vertical library (real app):** the Library screen's Sources view is a single vertical list with thin dividers
+instead of a 2-column card grid, with hover micro-interactions (subtle surface change, a tiny waveform reveal, 1-2px
+lift). This was a CSS-only change; every existing handler (select, favorite, delete, filter, search, open) is untouched.
+
+**Landing page:** the transcript ("Every word, searchable.") section's duplicate waveform was removed, so the hero's
+waveform is the only one on the page. The hero now closes its reveal sequence with a small
+"SEARCHABLE · TIMESTAMPED · ORGANIZED" line, completing a VOICE -> AUDIO -> WORDS -> KNOWLEDGE arc using the page's
+existing elements (headline, waveform, live caption) rather than a new animation subsystem. A very subtle
+architectural grid background (the exact rgba(226,204,174,0.035), 48px pattern) sits behind the hero and transcript
+sections, and three small decorative 2x2/3x3 grid fragments (not buttons, not cards) pop in once near the hero, Key
+Moments, and final CTA sections. Both the grid and the fragments are quieter on mobile (fragments hidden below 700px,
+grid opacity roughly halved), and everything respects `prefers-reduced-motion`.
+
+**Two pre-existing bugs found and fixed while working in this code**, confirmed present in the original,
+unmodified project before any of this session's changes:
+- A CSS specificity bug that silently prevented a hover effect from ever applying.
+- `.shell` (the sidebar + main-content flex row) never switched to a column layout at the mobile breakpoint, so on
+  narrow screens the sidebar and main content fought for space in the same row, causing real horizontal page overflow.
+
+
+## Richer landing page, real Ask/search interactions, and Supabase schema
+
+**Page rhythm expanded from 6 to 9 sections**, per the latest brief's explicit "fix the negative
+space, add more premium content" direction (a reversal of an earlier "curate down" instruction --
+the most recent brief wins): Hero, Every Word Searchable (now with a live search-results panel),
+From Speech to Signal, Search the way you remember it, Find What Matters (now auto-cycling, no
+click required) + Moments Not Minutes, Ask VoiceVault (now a real multi-question interaction with
+follow-ups and a jumpable citation), Your Recordings (+ Resume Where You Left Off, + Recently
+Found, richer hover-reveal rows), Everything Connected (a real flow diagram), and the final CTA
+(renamed, two real entry-point buttons).
+
+**Two real bugs found and fixed while building this:**
+- A "KNOWLEDGE" resolution line and, later, a section heading were each nested inside another
+  `.fl` (floating-reveal) element, so their independent scroll-parallax transform compounded with
+  their parent's and visually detached them from their container, or in the heading's case, kept
+  it at permanent zero opacity. Fixed both, then wrote an automated page-wide audit (checks every
+  `.fl` element for a `.fl` ancestor, and every `.fl-h` for a missing base `.fl` class) that now
+  passes clean -- kept as a regression guard.
+- Clicking a citation or a semantic-search result set the transcript's manual timestamp, then
+  called `scrollIntoView()` -- which fired the page's own scroll handler, which immediately reset
+  that same manual override back to `null`, undoing the jump it had just made. Fixed with a short
+  "jump hold" grace period (`trJumpTo()`) so a deliberate jump survives the scroll it triggers.
+
+**Timestamp normalization:** the auto-cycling Find What Matters timeline reuses the same `mmss()`
+formatter already used everywhere else on the page (floor-divide + pad), so 751 seconds always
+renders as `12:31`, never `12:71` or similar -- verified by scanning every displayed timestamp on
+the page, not just the new ones.
+
+**Supabase:** `supabase/schema.sql` adds an optional Postgres schema (`profiles`, `recordings`,
+`transcript_segments`, `key_moments`, `notes`) with Row Level Security restricting every table to
+`auth.uid() = user_id`. **This SQL has been reviewed but not run against a live Supabase project**
+-- there is no live project or credentials in this environment, so it is static verification only.
+The app's actual data layer (IndexedDB + Blob) was deliberately left as-is rather than blind-wired
+to this schema, since that would touch most of the app's existing, heavily-tested functionality
+with no way to test the result for real; see the note at the end of `schema.sql` for the reasoning
+and the recommended next step. Supabase **Auth** itself (sign up, log in, log out, forgot password,
+persistent session) was already real in this project before this session and was re-verified, not
+rebuilt: `getSession`, `onAuthStateChange`, `signUp`, `resetPasswordForEmail` are genuine Supabase
+client calls with honest success/error messaging.
+
+**Environment variables:** this project has no build step (no Vite, no bundler), so there is no
+`import.meta.env` and therefore no `VITE_SUPABASE_URL`-style client-side variable to set. Instead,
+`SUPABASE_URL` and `SUPABASE_ANON_KEY` are set as ordinary server-side Vercel environment variables
+and handed to the browser at runtime through `GET /api/config`, which is the correct pattern for a
+static-HTML-plus-serverless-functions app like this one -- the anon key is not a secret (it is
+meant to be public; Row Level Security is what actually protects the data), but it still never
+appears in the HTML/JS source, only in a response the page fetches after loading.
+
+
+## Removed repetition, tightened spacing, added micro-interactions, dramatic final CTA
+
+**Sections removed** (repeated the same "recordings become knowledge" idea): "From Speech to
+Signal", the standalone "Search the way you remember it" section (its example now lives compactly
+inside the Every Word Searchable results panel instead), "Moments, Not Minutes", and the "Your
+recordings become knowledge" / Record-Transcribe-Find-Understand-Return list. The "Everything, in
+one place" flow diagram was kept but its explanatory framing was dropped. Page went from 9 sections
+/ 487 words to 7 sections / 397 words. "Your recordings" is a plain title again.
+
+**A real bug found while removing content:** deleting the Moments-not-minutes markup left behind
+JS that still tried to populate the now-missing element, throwing `Cannot set properties of null`
+on every single page load. Caught by testing, not just by reading the diff, and fixed.
+
+**Micro-interactions added:** buttons lift ~1.5px on hover and scale down on press; text links draw
+an underline left-to-right on hover with a paired arrow shift; transcript timestamps brighten
+distinctly on hover (separate from the line's own color change); the active transcript line now
+gets a warm background tint and a mustard left-edge indicator bar, not just a text-color change.
+
+**Spacing tightened** across Every Word Searchable, Find What Matters, Ask VoiceVault, Your
+Recordings and Everything In One Place (reduced `padding-block` clamps).
+
+**Final section rebuilt as a true ending:** "Your voice is worth remembering." at up to ~144px,
+weight 600, centered and full-bleed, with just two real buttons and one small closing waveform
+glyph (reused from the removed Speech-to-Signal section rather than adding a new visual). Confirmed
+nothing follows it in the DOM.
+
+**Testing:** 281+ tests across 13 suites, all passing after updating the handful with stale
+expectations (section/word/element counts) left over from the removals -- those were mechanical
+fixes, not behavioral ones. This remains static/mocked verification only: real client and server
+code, with Groq/Blob/network calls mocked, and no live Supabase or Groq credentials in this
+environment.
